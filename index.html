@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+ <meta name="http-equiv" content="Content-type: text/html; charset=windows-1251">
+<style>
+		html,
+		body {
+		margin: 0;
+		padding: 0;
+		height: 100%;
+	}
+	
+	body {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: rgba(64,64,64,1);;
+		flex-direction: column
+	}
+	
+  
+  #m_progress {
+	  background: rgba(11,255,255,0.1);
+	  justify-content: flex-start;
+	  border-radius: 100px;
+	  align-items: center;
+	  position: relative;
+	  padding: 0 5px;
+	  display: flex;
+	  height: 50px;
+	  width: 70%;
+	}
+
+	#m_bar {
+	  box-shadow: 0 10px 40px -10px #fff;
+	  border-radius: 100px;
+	  background: #fff;
+	  height: 70%;
+	  width: 0%;
+	}
+	
+</style>
+
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script src="pixi_scale.js" ></script>
+<script src="pixi-sound.js"></script>
+<script src="pokersolver.js"></script>
+<script src="index.js" charset="utf-8"></script>
+<script src="load_list.txt" ></script>
+
+<div id="m_progress">
+  <div id="m_bar"></div>
+</div>
+
+
+
+ 
+<body onload="init_game_env(1)">
+
+</body>
+
+</html>
