@@ -824,32 +824,41 @@ sound = {
 	
 }
 
-message =  {
+var message =  {
 	
 	promise_resolve :0,
 	
-	add : async function(text) {
+	add : async function(text, timeout) {
 		
 		if (this.promise_resolve!==0)
 			this.promise_resolve("forced");
+		
+		if (timeout === undefined) timeout = 3000;
 		
 		//воспроизводим звук
 		sound.play('message');
 
 		objects.message_text.text=text;
 
-		await anim2.add(objects.message_cont,{x:[-200,objects.message_cont.sx]}, true, 0.5,'easeOutBack');
+		await anim2.add(objects.message_cont,{alpha:[0,1]}, true, 0.25,'linear');
 
 		let res = await new Promise((resolve, reject) => {
 				message.promise_resolve = resolve;
-				setTimeout(resolve, 3000)
+				setTimeout(resolve, timeout)
 			}
 		);
 		
 		if (res === "forced")
 			return;
 
-		anim2.add(objects.message_cont,{x:[objects.message_cont.sx, -200]}, false, 0.5,'easeInBack');			
+		anim2.add(objects.message_cont,{alpha:[1, 0]}, false, 0.25,'linear');			
+	},
+	
+	clicked : function() {
+		
+		
+		message.promise_resolve();
+		
 	}
 
 }
@@ -881,9 +890,16 @@ big_message = {
 			return;			
 		}
 
+
 		anim2.add(objects.big_message_cont,{y:[objects.big_message_cont.sy,450]}, false, 0.4,'easeInBack');	
 		
-		await feedback.show(opp_data.uid);
+		//пишем отзыв и отправляем его		
+		let fb = await feedback.show(opp_data.uid);		
+		if (fb[0] === 'sent') {
+			let fb_id = irnd(0,50);			
+			await firebase.database().ref("fb/"+opp_data.uid+"/"+fb_id).set([fb[1], firebase.database.ServerValue.TIMESTAMP, my_data.name]);
+		
+		}
 		
 		this.p_resolve("close");
 				
@@ -928,12 +944,28 @@ mp_game = {
 		
 		opponent = this;
 		
+		
+		anim2.add(objects.chat_button_cont,{y:[500,objects.chat_button_cont.sy ]}, true, 0.2,'linear');	
+		
 		//фиксируем врему начала игры для статистики
 		this.start_time = Date.now();
 				
 		//устанавливаем локальный и удаленный статус
 		set_state({state : 'p'});
 				
+	},
+		
+	send_message : async function() {
+		
+		let msg_data = await feedback.show();
+		
+		if (msg_data[0] === 'sent') {			
+			firebase.database().ref("inbox/"+opp_data.uid).set({sender:my_data.uid,message:"CHAT",tm:Date.now(),data:msg_data[1]});	
+
+		} else {			
+			message.add('Сообщение не отправлено');
+		}
+		
 	},
 		
 	process_bet : function() {
@@ -963,8 +995,15 @@ mp_game = {
 		
 	},
 	
+	chat : function(data) {
+		
+		message.add(data, 10000);
+		
+	},
+	
 	close : function() {
 		
+		anim2.add(objects.chat_button_cont,{y:[objects.chat_button_cont.y,500 ]}, false, 0.2,'linear');	
 
 	}
 	
@@ -1108,10 +1147,7 @@ sp_game = {
 		
 	close : async function() {
 		
-		
-		anim2.add(objects.my_card_cont,{x:[objects.my_card_cont.x, -100]}, false, 0.6,'easeInBack');	
-		anim2.add(objects.opp_card_cont,{x:[objects.opp_card_cont.x,-100]}, false, 0.6,'easeInBack');	
-		objects.timer_cont.visible = false;
+	
 		
 	},
 	
@@ -1514,7 +1550,7 @@ round_finish_dialog = {
 			this.p_resole('ok');
 			
 		}
-		
+		sound.play('click');
 		this.close();
 
 		
@@ -1522,6 +1558,7 @@ round_finish_dialog = {
 	
 	exit_down : function() {
 		
+		sound.play('click');
 		firebase.database().ref("inbox/"+opp_data.uid).set({sender:my_data.uid,message:"NO_RESUME",tm:Date.now()});
 		this.p_resole('exit');
 		this.close();
@@ -1726,6 +1763,7 @@ bet_dialog = {
 	
 	ok_down : function () {
 		
+		sound.play('click');	
 		this.p_resolve({action:objects.call_title.text, value:this.bet_amount})		
 		this.close();
 	},
@@ -1744,6 +1782,7 @@ bet_dialog = {
 
 	fold_down : function () {
 		
+		sound.play('click');	
 		this.p_resolve({action:'FOLD', value:0})				
 		this.close();
 	},
@@ -1755,13 +1794,19 @@ bet_dialog = {
 		//если ниже биг блайнда то сразу в ноль
 		if (BIG_BLIND > this.bet_amount) this.bet_amount = 0;
 		
-		if (this.bet_amount < this.min_max_vals[0])
-			this.bet_amount = this.min_max_vals[0]
+		if (this.bet_amount < this.min_max_vals[0]) {
+			
+			this.bet_amount = this.min_max_vals[0]			
+			sound.play('locked');			
+		} else {
+			
+			sound.play('plus_minus_bet');			
+		}
+
 			
 		objects.bet_title1.text = this.bet_amount;
-		
-		if (this.bet_amount === this.min_max_vals[0])
-			objects.call_title.text = this.min_max_opts[0];		
+		objects.call_title.text = this.min_max_opts[0];				
+
 		
 	},
 	
@@ -1774,11 +1819,18 @@ bet_dialog = {
 		//если увеличили 0 то сразу на биг блайнд
 		if (this.bet_amount === 1) this.bet_amount = Math.min(BIG_BLIND,my_data.rating);
 		
-		if (this.bet_amount > this.min_max_vals[1])
-			this.bet_amount = this.min_max_vals[1]
+		if (this.bet_amount > this.min_max_vals[1]) {			
+			this.bet_amount = this.min_max_vals[1]		
+			sound.play('locked');			
+		} else {
+			sound.play('plus_minus_bet');
+		}
+
 		
 		objects.call_title.text = this.min_max_opts[1];
 		objects.bet_title1.text = this.bet_amount;
+		
+
 			
 	},
 			
@@ -2018,6 +2070,9 @@ game = {
 		anim2.add(objects.my_card_cont,{x:[objects.my_card_cont.sx,-100]}, false, 0.4,'easeInBack');	
 		anim2.add(objects.opp_card_cont,{x:[objects.opp_card_cont.sx,-100]}, false, 0.4,'easeInBack');	
 		
+		objects.timer_cont.visible = false;
+		
+		opponent.close();
 		
 		//show_ad();
 		
@@ -2433,6 +2488,10 @@ process_new_message=function(msg) {
 			if (msg.message==="CN" )
 				wait_confirm_from_opponent.opp_confirm_flag = 1;
 			
+			//получение сообщение с ходом игорка
+			if (msg.message==="CHAT")
+				mp_game.chat(msg.data);
+			
 			//получение сообщение с сдаче
 			if (msg.message==="NO_RESUME" )
 				wait_confirm_from_opponent.opp_confirm_flag = 2;
@@ -2614,21 +2673,59 @@ feedback = {
 		return gres.hl_key0.texture;
 	},
 	
-	pointerdown : function(e) {
+	key_down : function(key) {
 		
-		let mx = e.data.global.x/app.stage.scale.x - objects.feedback_cont.x;
-		let my = e.data.global.y/app.stage.scale.y- objects.feedback_cont.y;;
+		
+		if (objects.feedback_cont.visible === false || objects.feedback_cont.ready === false) return;
+		
+		key = key.toUpperCase();
+		
+		if (key === 'ESCAPE') key = 'ЗАКРЫТЬ';			
+		if (key === 'ENTER') key = 'ОТПРАВИТЬ';
+		if (key === 'BACKSPACE') key = '<';
+		if (key === ' ') key = '_';
+			
+		var result = this.keys_data.find(k => {
+			return k[4] === key
+		})
+		
+		if (result === undefined) return;
+		this.pointerdown(null,result)
+		
+
+		
+	},
+	
+	pointerdown : function(e, inp_key) {
+		
 		let key = -1;
 		let key_x = 0;
-		let key_y = 0;
-		for (let k of this.keys_data) {			
-			if (mx > k[0] && mx <k[2] && my > k[1] && my < k[3]) {
-				key = k[4];
-				key_x = k[0];
-				key_y = k[1];
-				break;
-			}
+		let key_y = 0;		
+		
+		if (e !== null) {
+			
+			let mx = e.data.global.x/app.stage.scale.x - objects.feedback_cont.x;
+			let my = e.data.global.y/app.stage.scale.y- objects.feedback_cont.y;;
+
+			let margin = 5;
+			for (let k of this.keys_data) {			
+				if (mx > k[0] - margin && mx <k[2] + margin  && my > k[1] - margin && my < k[3] + margin) {
+					key = k[4];
+					key_x = k[0];
+					key_y = k[1];
+					break;
+				}
+			}			
+			
+		} else {
+			
+			key = inp_key[4];
+			key_x = inp_key[0];
+			key_y = inp_key[1];
+			
 		}
+		
+		
 		
 		//не нажата кнопка
 		if (key === -1) return;			
@@ -2644,6 +2741,36 @@ feedback = {
 			key ='';
 		}			
 		
+		if (key === 'ЗАКРЫТЬ') {
+			this.close();
+			this.p_resolve(['close','']);	
+			key ='';
+			sound.play('keypress');
+			return;	
+		}	
+		
+		if (key === 'ОТПРАВИТЬ') {
+			
+			if (objects.feedback_msg.text === '') return;
+			
+			//если нашли ненормативную лексику то закрываем
+			let mats = /(?<=^|[^а-я])(([уyu]|[нзnz3][аa]|(хитро|не)?[вvwb][зz3]?[ыьъi]|[сsc][ьъ']|(и|[рpr][аa4])[зсzs]ъ?|([оo0][тбtb6]|[пp][оo0][дd9])[ьъ']?|(.\B)+?[оаеиeo])?-?([еёe][бb6](?!о[рй])|и[пб][ае][тц]).*?|([нn][иеаaie]|([дпdp]|[вv][еe3][рpr][тt])[оo0]|[рpr][аa][зсzc3]|[з3z]?[аa]|с(ме)?|[оo0]([тt]|дно)?|апч)?-?[хxh][уuy]([яйиеёюuie]|ли(?!ган)).*?|([вvw][зы3z]|(три|два|четыре)жды|(н|[сc][уuy][кk])[аa])?-?[бb6][лl]([яy](?!(х|ш[кн]|мб)[ауеыио]).*?|[еэe][дтdt][ь']?)|([рp][аa][сзc3z]|[знzn][аa]|[соsc]|[вv][ыi]?|[пp]([еe][рpr][еe]|[рrp][оиioеe]|[оo0][дd])|и[зс]ъ?|[аоao][тt])?[пpn][иеёieu][зz3][дd9].*?|([зz3][аa])?[пp][иеieu][дd][аоеaoe]?[рrp](ну.*?|[оаoa][мm]|([аa][сcs])?([иiu]([лl][иiu])?[нщктлtlsn]ь?)?|([оo](ч[еиei])?|[аa][сcs])?[кk]([оo]й)?|[юu][гg])[ауеыauyei]?|[мm][аa][нnh][дd]([ауеыayueiи]([лl]([иi][сзc3щ])?[ауеыauyei])?|[оo][йi]|[аоao][вvwb][оo](ш|sh)[ь']?([e]?[кk][ауеayue])?|юк(ов|[ауи])?)|[мm][уuy][дd6]([яyаиоaiuo0].*?|[еe]?[нhn]([ьюия'uiya]|ей))|мля([тд]ь)?|лять|([нз]а|по)х|м[ао]л[ао]фь([яию]|[её]й))(?=($|[^а-я]))/i;
+			if (objects.feedback_msg.text.match(mats)) {
+				this.close();
+				this.p_resolve(['close','']);	
+				key ='';
+				return;
+			}
+			
+			this.close();
+			this.p_resolve(['sent',objects.feedback_msg.text]);	
+			key ='';
+			sound.play('keypress');
+			return;	
+		}	
+		
+		
+		
 		if (objects.feedback_msg.text.length >= this.MAX_SYMBOLS)  {
 			sound.play('locked');
 			return;			
@@ -2653,23 +2780,6 @@ feedback = {
 			objects.feedback_msg.text += ' ';	
 			key ='';
 		}			
-		
-		if (key === 'ЗАКРЫТЬ') {
-			this.close();
-			this.p_resolve(['close','']);	
-			key ='';
-		}	
-		
-		if (key === 'ОТПРАВИТЬ') {
-			
-			if (objects.feedback_msg.text === '') return;
-			
-			let fb_id = irnd(0,50);			
-			firebase.database().ref("fb/"+this.uid+"/"+fb_id).set([objects.feedback_msg.text, firebase.database.ServerValue.TIMESTAMP, my_data.name]);
-			this.close();
-			this.p_resolve(['sent',objects.feedback_msg.text]);	
-			key ='';
-		}	
 		
 
 		sound.play('keypress');
@@ -3672,8 +3782,11 @@ cards_menu={
 		let fb = await feedback.show(this._opp_data.uid);
 		
 		//перезагружаем отзывы если добавили один
-		if (fb[0] === 'sent')
-			this.show_feedbacks(this._opp_data.uid);
+		if (fb[0] === 'sent') {
+			let fb_id = irnd(0,50);			
+			await firebase.database().ref("fb/"+this._opp_data.uid+"/"+fb_id).set([fb[1], firebase.database.ServerValue.TIMESTAMP, my_data.name]);
+			this.show_feedbacks(this._opp_data.uid);			
+		}
 		
 	},
 
@@ -4475,6 +4588,11 @@ async function init_game_env(l) {
 	//событие ролика мыши в карточном меню
 	window.addEventListener("wheel", event => cards_menu.wheel_event(Math.sign(event.deltaY)));
 	
+	window.addEventListener('keydown', function(event) {
+	  feedback.key_down(event.key)
+	});
+
+	
 	//загружаем остальные данные
 	let _other_data = await firebase.database().ref("players/"+my_data.uid).once('value');
 	let other_data = _other_data.val();
@@ -4561,8 +4679,8 @@ async function load_resources() {
 	return;*/
 
 
-	//let git_src="https://akukamil.github.io/durak/"
-	git_src=""
+	let git_src="https://akukamil.github.io/poker/"
+	//git_src=""
 
 	game_res=new PIXI.Loader();
 	
@@ -4587,6 +4705,8 @@ async function load_resources() {
 	game_res.add('inc_card',git_src+'sounds/inc_card.mp3');
 	game_res.add('take',git_src+'sounds/take.mp3');
 	game_res.add('dialog',git_src+'sounds/dialog.mp3');
+	game_res.add('plus_minus_bet',git_src+'sounds/plus_minus_bet.mp3');
+	game_res.add('keypress',git_src+'sounds/keypress.mp3');
 	
     //добавляем из листа загрузки
     for (var i = 0; i < load_list.length; i++) {
