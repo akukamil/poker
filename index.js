@@ -4680,7 +4680,7 @@ async function load_resources() {
 
 
 	let git_src="https://akukamil.github.io/poker/"
-	//git_src=""
+	///git_src=""
 
 	game_res=new PIXI.Loader();
 	
