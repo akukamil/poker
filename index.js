@@ -4067,7 +4067,7 @@ auth = function() {
 
 			get_random_name : function(e_str) {
 				
-				let rnd_names = ['Gamma','Жираф','Зебра','Тигр','Ослик','Мамонт','Волк','Лиса','Мышь','Сова','Hot','Енот','Пони','Бизон','Super','ZigZag','Magik','Alpha','Beta','Foxy','Fazer','King','Kid','Rock'];
+				let rnd_names = ['Gamma','Chime','Dron','Perl','Onyx','Asti','Wolf','Roll','Lime','Cosy','Hot','Kent','Pony','Бизон','Super','ZigZag','Magik','Alpha','Beta','Foxy','Fazer','King','Kid','Rock'];
 				let chars = '+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 				if (e_str !== undefined) {
 					
@@ -4284,7 +4284,6 @@ auth = function() {
 				//здесь создаем нового игрока в локальном хранилище
 				if (local_uid===undefined || local_uid===null) {
 
-
 					//получаем код страны так как это может быть международный проект
 					let country_code = '';
 					try {		
@@ -4447,6 +4446,110 @@ auth = function() {
 	
 }
 
+auth2 = {
+	
+	get_random_char : function() {		
+		
+		const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		return chars[irnd(0,chars.length-1)];
+		
+	},
+	
+	get_random_uid : function(prefix) {
+		
+		let uid = prefix;
+		for ( let c = 0 ; c < 12 ; c++ )
+			uid += this.get_random_char();
+		return uid;
+		
+	},
+	
+	get_random_name : function(uid) {
+		
+		const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		const rnd_names = ['Gamma','Chime','Dron','Perl','Onyx','Asti','Wolf','Roll','Lime','Cosy','Hot','Kent','Pony','Baker','Super','ZigZag','Magik','Alpha','Beta','Foxy','Fazer','King','Kid','Rock'];
+		
+		if (uid !== undefined) {
+			
+			let e_num1 = chars.indexOf(uid[4]) + chars.indexOf(uid[5]) + chars.indexOf(uid[6]) + chars.indexOf(uid[7]);
+			e_num1 = Math.abs(e_num1) % (rnd_names.length - 1);				
+			let name_postfix = chars.indexOf(uid[8]).toString() + chars.indexOf(uid[9]).toString() + chars.indexOf(uid[10]).toString() ;	
+			return rnd_names[e_num1] + name_postfix;					
+			
+		} else {
+
+			let rnd_num = irnd(0, rnd_names.length - 1);
+			let rand_uid = irnd(0, 999999)+ 100;
+			let name_postfix = rand_uid.toString().substring(0, 3);
+			let name =	rnd_names[rnd_num] + name_postfix;				
+			return name;
+		}	
+	},	
+	
+	init : async function() {	
+		
+		let s = window.location.href;
+		
+		if (s.includes("yandex")) {
+			
+			game_platform = 'YANDEX';
+			
+			try {await this.loadScript('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
+					
+			window.ysdk = await YaGames.init({});			
+			let _player = await window.ysdk.getPlayer();
+					
+			my_data.uid = _player.getUniqueID().replace(/\//g, "Z");
+			my_data.name = get_name();
+			my_data.photo_url = get_photo();
+			
+			if (my_data.photo_url === DEFAULT)
+				my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';
+			
+			if (my_data.name === undefined)
+				my_data.name = this.get_random_name(my_data.uid);
+			
+		}
+		
+		if (s.includes("vk.com")) {
+			
+			game_platform = 'VK';
+			
+			try {await this.loadScript('https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js')} catch (e) {alert(e)};
+			
+			await vkBridge.send('VKWebAppInit');
+			let _player = await vkBridge.send('VKWebAppGetUserInfo');
+			
+			my_data.name 	= _player.first_name + ' ' + _player.last_name;
+			my_data.uid 	= "vk"+_player.id;
+			my_data.pic_url = _player.photo_100;
+			
+		}
+		
+		if (s.includes("google_play")) {	
+
+			game_platform = 'GOOGLE_PLAY';	
+			my_data.uid = search_in_local_storage() || this.get_random_uid('GP');
+			my_data.name = this.get_random_name(my_data.uid);
+			my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';				
+		}
+		
+		if (s.includes("192.168")) {		
+
+			game_platform = 'DEBUG';
+			my_data.name = my_data.uid = 'debug' + prompt('Отладка. Введите ID', 100);
+			my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';			
+		}
+		
+		console.log(game_platform);
+		console.log(my_data);
+
+	}
+
+	
+}
+
+
 function resize() {
 	
     const vpw = window.innerWidth;  // Width of the viewport
@@ -4524,6 +4627,9 @@ async function check_daily_reward (last_seen_ts) {
 
 async function init_game_env(l) {
 
+
+	auth2.init();
+	return;
 	//if (l===1) LANG = 1;
 	
 	let cards=[	{value_num:12, suit_txt: 's'},
