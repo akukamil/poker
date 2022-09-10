@@ -4518,7 +4518,7 @@ auth2 = {
 			if (my_data.photo_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
 				my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';
 			
-			if (my_data.name === undefined)
+			if (my_data.name === '')
 				my_data.name = this.get_random_name(my_data.uid);
 			
 		}
