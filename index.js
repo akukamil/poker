@@ -4448,6 +4448,18 @@ auth = function() {
 
 auth2 = {
 	
+	
+	load_script : function(src) {
+	  return new Promise((resolve, reject) => {
+		const script = document.createElement('script')
+		script.type = 'text/javascript'
+		script.onload = resolve
+		script.onerror = reject
+		script.src = src
+		document.head.appendChild(script)
+	  })
+	},
+			
 	get_random_char : function() {		
 		
 		const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -4494,7 +4506,7 @@ auth2 = {
 			
 			game_platform = 'YANDEX';
 			
-			try {await this.loadScript('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
+			try {await this.load_script('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
 					
 			window.ysdk = await YaGames.init({});			
 			let _player = await window.ysdk.getPlayer();
@@ -4515,7 +4527,7 @@ auth2 = {
 			
 			game_platform = 'VK';
 			
-			try {await this.loadScript('https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js')} catch (e) {alert(e)};
+			try {await this.load_script('https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js')} catch (e) {alert(e)};
 			
 			await vkBridge.send('VKWebAppInit');
 			let _player = await vkBridge.send('VKWebAppGetUserInfo');
