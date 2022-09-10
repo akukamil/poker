@@ -4289,14 +4289,12 @@ auth = function() {
 				//здесь создаем нового игрока в локальном хранилище
 				if (local_uid===undefined || local_uid===null) {
 
-					//console.log("Создаем нового локального пользователя");
-					let rnd_names=["GP"];
 					
 					//console.log("Создаем нового локального пользователя");
 					let rand_uid=Math.floor(Math.random() * 9999999);
 					my_data.rating 		= 	1400;
-					my_data.uid			=	"cg"+rand_uid;
-					my_data.name 		=	 help_obj.get_random_name2(my_data.uid)+' (' + my_data.country_code +')';					
+					my_data.uid			=	"gp"+rand_uid;
+					my_data.name 		=	 my_data.uid;					
 					my_data.pic_url		=	'https://avatars.dicebear.com/v2/male/'+irnd(10,10000)+'.svg';
 
 
