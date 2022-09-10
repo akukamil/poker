@@ -4043,6 +4043,24 @@ auth = function() {
 				}
 
 
+				//-----------GOOGLE_PLAY------------------------------------
+				if (s.includes("google_play")) {
+					game_platform="google_play";
+					
+					try {
+						await this.loadScript('https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js')				
+					} catch (e) {
+						alert(e);
+					}
+					help_obj.vk()					
+					return;
+				}
+
+
+
+
+
+
 				//-----------ЛОКАЛЬНЫЙ СЕРВЕР--------------------------------
 				if (s.includes("192.168")) {
 					game_platform="debug";
@@ -4258,6 +4276,76 @@ auth = function() {
 				}			
 	
 			},
+
+			google_play : async function() {
+				
+				//переключаем язык на английский
+				//LANG = 1;
+				
+								
+				//ищем в локальном хранилище
+				let local_uid = null;
+				try {
+					local_uid = localStorage.getItem('uid');
+				} catch (e) {
+					console.log(e);
+				}
+
+				//здесь создаем нового игрока в локальном хранилище
+				if (local_uid===undefined || local_uid===null) {
+
+					//console.log("Создаем нового локального пользователя");
+					let rnd_names=["GP"];
+					
+					//console.log("Создаем нового локального пользователя");
+					let rand_uid=Math.floor(Math.random() * 9999999);
+					my_data.rating 		= 	1400;
+					my_data.uid			=	"cg"+rand_uid;
+					my_data.name 		=	 help_obj.get_random_name2(my_data.uid)+' (' + my_data.country_code +')';					
+					my_data.pic_url		=	'https://avatars.dicebear.com/v2/male/'+irnd(10,10000)+'.svg';
+
+
+					try {
+						localStorage.setItem('uid',my_data.uid);
+					} catch (e) {
+						console.log(e);
+					}
+					
+					help_obj.process_results();
+				}
+				else
+				{
+					//console.log(`Нашли айди в ЛХ (${local_uid}). Загружаем остальное из ФБ...`);
+					
+					my_data.uid = local_uid;	
+					
+					//запрашиваем мою информацию из бд или заносим в бд новые данные если игрока нет в бд
+					firebase.database().ref("players/"+my_data.uid).once('value').then((snapshot) => {		
+									
+						var data=snapshot.val();
+						
+						//если на сервере нет таких данных
+						if (data === null) {		
+							//айди есть но данных нет, тогда заново их заносим
+							my_data.rating 		= 	1400;
+							my_data.name 		=	 help_obj.get_random_name2(my_data.uid)+' (' + my_data.country_code +')';					
+							my_data.pic_url		=	'https://avatars.dicebear.com/v2/male/'+irnd(10,10000)+'.svg';
+							
+						} else {					
+							
+							my_data.pic_url = data.pic_url;
+							my_data.name = data.name;							
+						}
+						
+						help_obj.process_results();
+
+					})	
+
+				}			
+	
+			},
+
+
 
 			debug: function() {
 
