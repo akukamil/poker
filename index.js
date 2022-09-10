@@ -4046,13 +4046,8 @@ auth = function() {
 				//-----------GOOGLE_PLAY------------------------------------
 				if (s.includes("google_play")) {
 					game_platform="google_play";
-					
-					try {
-						await this.loadScript('https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js')				
-					} catch (e) {
-						alert(e);
-					}
-					help_obj.vk()					
+
+					help_obj.google_play()					
 					return;
 				}
 
