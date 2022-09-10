@@ -4515,7 +4515,7 @@ auth2 = {
 			my_data.name = _player.getName();
 			my_data.photo_url = _player.getPhoto('medium');
 			
-			if (my_data.photo_url === DEFAULT)
+			if (my_data.photo_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
 				my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';
 			
 			if (my_data.name === undefined)
