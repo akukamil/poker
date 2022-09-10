@@ -4363,6 +4363,7 @@ auth = function() {
 						let res = await fetch('https://geolocation-db.com/json/');		
 						let res2 = await res.json();	
 						country_code = res2.country_code;
+						country_code = country_code || '';
 					} catch (e) {};
 					
 
