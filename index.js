@@ -4046,14 +4046,9 @@ auth = function() {
 				//-----------GOOGLE_PLAY------------------------------------
 				if (s.includes("google_play")) {
 					game_platform="google_play";
-
 					help_obj.google_play()					
 					return;
 				}
-
-
-
-
 
 
 				//-----------ЛОКАЛЬНЫЙ СЕРВЕР--------------------------------
@@ -4289,12 +4284,22 @@ auth = function() {
 				//здесь создаем нового игрока в локальном хранилище
 				if (local_uid===undefined || local_uid===null) {
 
+
+					//получаем код страны так как это может быть международный проект
+					let country_code = '';
+					try {		
+						let res = await fetch('https://geolocation-db.com/json/');		
+						let res2 = await res.json();	
+						country_code = res2.country_code;
+						country_code = country_code || '';
+					} catch (e) {};
+
 					
 					//console.log("Создаем нового локального пользователя");
 					let rand_uid=Math.floor(Math.random() * 9999999);
 					my_data.rating 		= 	1400;
 					my_data.uid			=	"gp"+rand_uid;
-					my_data.name 		=	 my_data.uid;					
+					my_data.name 		=	 help_obj.get_random_name(my_data.uid) + '(' + country_code + ')';					
 					my_data.pic_url		=	'https://avatars.dicebear.com/v2/male/'+irnd(10,10000)+'.svg';
 
 
@@ -4356,22 +4361,13 @@ auth = function() {
 
 				//здесь создаем нового игрока в локальном хранилище если не нашли уже
 				if (local_uid===undefined || local_uid===null) {
-
-					//получаем код страны так как это может быть международный проект
-					let country_code = '';
-					try {		
-						let res = await fetch('https://geolocation-db.com/json/');		
-						let res2 = await res.json();	
-						country_code = res2.country_code;
-						country_code = country_code || '';
-					} catch (e) {};
 					
 
 					//console.log("Создаем нового локального пользователя");
 					let rand_uid=Math.floor(Math.random() * 9999999);
 					my_data.rating 		= 	1400;
 					my_data.uid			=	"ls"+rand_uid;
-					my_data.name 		=	 help_obj.get_random_name(my_data.uid) + '(' + country_code + ')';					
+					my_data.name 		=	 help_obj.get_random_name(my_data.uid);					
 					my_data.pic_url		=	'https://avatars.dicebear.com/api/adventurer/'+my_data.uid+'.svg';
 
 					try {
