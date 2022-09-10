@@ -4072,7 +4072,7 @@ auth = function() {
 
 			get_random_name : function(e_str) {
 				
-				let rnd_names = ['Gamma','Жираф','Зебра','Тигр','Ослик','Мамонт','Волк','Лиса','Мышь','Сова','Hot','Енот','Кролик','Бизон','Super','ZigZag','Magik','Alpha','Beta','Foxy','Fazer','King','Kid','Rock'];
+				let rnd_names = ['Gamma','Жираф','Зебра','Тигр','Ослик','Мамонт','Волк','Лиса','Мышь','Сова','Hot','Енот','Пони','Бизон','Super','ZigZag','Magik','Alpha','Beta','Foxy','Fazer','King','Kid','Rock'];
 				let chars = '+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 				if (e_str !== undefined) {
 					
@@ -4338,8 +4338,6 @@ auth = function() {
 	
 			},
 
-
-
 			debug: function() {
 
 				let uid = prompt('Отладка. Введите ID', 100);
@@ -4351,19 +4349,28 @@ auth = function() {
 
 			},
 
-			local: function(repeat = 0) {
+			local: async function(repeat = 0) {
 
-				//ищем в локальном хранилище
+				//ищем в локальном хранилище може уже есть
 				let local_uid = localStorage.getItem('uid');
 
-				//здесь создаем нового игрока в локальном хранилище
+				//здесь создаем нового игрока в локальном хранилище если не нашли уже
 				if (local_uid===undefined || local_uid===null) {
+
+					//получаем код страны так как это может быть международный проект
+					let country_code = '';
+					try {		
+						let res = await fetch('https://geolocation-db.com/json/');		
+						let res2 = await res.json();	
+						country_code = res2.country_code;
+					} catch (e) {};
+					
 
 					//console.log("Создаем нового локального пользователя");
 					let rand_uid=Math.floor(Math.random() * 9999999);
 					my_data.rating 		= 	1400;
 					my_data.uid			=	"ls"+rand_uid;
-					my_data.name 		=	 help_obj.get_random_name(my_data.uid);					
+					my_data.name 		=	 help_obj.get_random_name(my_data.uid) + '(' + country_code + ')';					
 					my_data.pic_url		=	'https://avatars.dicebear.com/api/adventurer/'+my_data.uid+'.svg';
 
 					try {
@@ -4393,7 +4400,6 @@ auth = function() {
 								alert('Какая-то ошибка');
 							
 							//console.log(`Нашли данные в ЛХ но не нашли в ФБ, повторный локальный запрос...`);	
-
 							
 							//повторно запускаем локальный поиск						
 							localStorage.clear();
