@@ -4512,8 +4512,8 @@ auth2 = {
 			let _player = await window.ysdk.getPlayer();
 					
 			my_data.uid = _player.getUniqueID().replace(/\//g, "Z");
-			my_data.name = get_name();
-			my_data.photo_url = get_photo();
+			my_data.name = _player.getName();
+			my_data.photo_url = _player.getPhoto('medium');
 			
 			if (my_data.photo_url === DEFAULT)
 				my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';
