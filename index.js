@@ -1,7 +1,7 @@
 var M_WIDTH=800, M_HEIGHT=450;
 var app, game_res, game, objects = {}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, h_state = 0, game_platform = "",
 hidden_state_start = 0,room_name = 'states2', pending_player = '', opponent = {}, my_data={opp_id : ''},
-opp_data={}, some_process = {}, git_src = '', ME = 0, OPP = 1, WIN = 1, DRAW = 0, LOSE = -1, NOSYNC = 2, turn = 0, BET = 0, RAISE = 1, FOLD = 2, CALL = 3, CHECK = 4, BIG_BLIND = 2;
+opp_data={}, some_process = {}, git_src = '', ME = 0, OPP = 1, WIN = 1, DRAW = 0, LOSE = -1, NOSYNC = 2, turn = 0, BET = 0, BIG_BLIND = 2;
 
 const suit_num_to_txt = ['h','d','s','c'], MIN_CHIPS = 20;
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
@@ -1022,7 +1022,7 @@ sp_game = {
 		opponent = this;
 		
 		opp_data.uid = 'BOT';
-		opp_data.rating = 999;
+		opp_data.rating = 50;
 		
 		objects.desktop.texture = gres.desktop.texture;
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');				
@@ -1060,9 +1060,9 @@ sp_game = {
 		if (action === 'CALL_RAISE') {
 			
 			if (Math.random() > 0.5)
-				bet_making.online_waiting_resolve({action:'CALL', value:min_bet})	
+				bet_making.online_waiting_resolve({action:'CALL', value:Math.min(opp_data.rating, min_bet)})	
 			else
-				bet_making.online_waiting_resolve({action:'RAISE', value:min_bet + irnd(1,10)})		
+				bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,10))})		
 			
 		}
 		
@@ -1070,15 +1070,15 @@ sp_game = {
 		if (action === 'CHECK_RAISE') {	
 			
 			if (Math.random() > 0.5)
-				bet_making.online_waiting_resolve({action:'CHECK', value:min_bet})	
+				bet_making.online_waiting_resolve({action:'CHECK', value:Math.min(opp_data.rating, min_bet)})	
 			else
-				bet_making.online_waiting_resolve({action:'RAISE', value:min_bet + irnd(1,10)})		
+				bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,10))})		
 			
 		}
 		
 		if (action === 'CHECK_BET') {
 			
-			bet_making.online_waiting_resolve({action:'CHECK', value:min_bet})	
+			bet_making.online_waiting_resolve({action:'CHECK', value:Math.min(opp_data.rating, min_bet)})	
 			
 		}
 				
@@ -3580,7 +3580,7 @@ cards_menu={
 		objects.mini_cards[0].uid="BOT";
 		objects.mini_cards[0].name='Joker (BOT)';
 		objects.mini_cards[0].name_text.text=['Дурак (бот)', 'Chapaev (bot)'][LANG];
-		objects.mini_cards[0].rating=999;		
+		objects.mini_cards[0].rating=50;		
 		objects.mini_cards[0].rating_text.text = objects.mini_cards[0].rating;
 		objects.mini_cards[0].avatar.texture=game_res.resources.pc_icon.texture;
 	},
