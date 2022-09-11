@@ -4041,7 +4041,7 @@ auth2 = {
 			let resp1 = await fetch("https://ipinfo.io/json");
 			let resp2 = await resp1.json();			
 			country_code = resp2.country;			
-		} catch(){}
+		} catch(e){}
 
 		return country_code;
 		
