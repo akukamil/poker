@@ -4532,10 +4532,10 @@ auth2 = {
 			
 			my_data.uid = _player.getUniqueID().replace(/\//g, "Z");
 			my_data.name = _player.getName();
-			my_data.photo_url = _player.getPhoto('medium');
+			my_data.pic_url = _player.getPhoto('medium');
 			
-			if (my_data.photo_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
-				my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';
+			if (my_data.pic_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
+				my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';
 			
 			if (my_data.name === '')
 				my_data.name = this.get_random_name(my_data.uid);
@@ -4567,14 +4567,14 @@ auth2 = {
 			game_platform = 'GOOGLE_PLAY';	
 			my_data.uid = search_in_local_storage() || this.get_random_uid('GP');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';				
+			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';				
 		}
 		
 		if (s.includes("192.168")) {		
 
 			game_platform = 'DEBUG';
 			my_data.name = my_data.uid = 'debug' + prompt('Отладка. Введите ID', 100);
-			my_data.photo_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';			
+			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';			
 		}
 		
 		console.log(game_platform);
