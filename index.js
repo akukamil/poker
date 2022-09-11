@@ -4043,7 +4043,7 @@ auth2 = {
 		} catch (e) {alert(e)}
 		
 		
-		if (local_uid.length > 2) return local_uid;
+		if (local_uid === null) return local_uid;
 		
 		return undefined;	
 		
