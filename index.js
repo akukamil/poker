@@ -4660,37 +4660,81 @@ async function check_daily_reward (last_seen_ts) {
 
 }
 
-async function init_game_env(l) {
+async function load_resources() {
+
+	//это нужно удалить потом
+	/*document.body.innerHTML = "Привет!\nДобавляем в игру некоторые улучшения))\nЗайдите через 40 минут.";
+	document.body.style.fontSize="24px";
+	document.body.style.color = "red";
+	return;*/
 
 
-	auth2.init();
-	return;
-	//if (l===1) LANG = 1;
+	let git_src="https://akukamil.github.io/poker/"
+	///git_src=""
+
+	game_res=new PIXI.Loader();
 	
-	let cards=[	{value_num:12, suit_txt: 's'},
-				{value_num:11, suit_txt: 'c'},
-				{value_num:11, suit_txt: 's'},
-				{value_num:7, suit_txt: 'c'},
-				{value_num:8, suit_txt: 'h'},
-				{value_num:13, suit_txt: 'h'},
-				{value_num:12, suit_txt: 'd'}];
 	
-	var res = hand_check.check(cards)
-	console.log(res)
-	//return
+	game_res.add("m2_font", git_src+"fonts/MS_Comic_Sans/font.fnt");
 
-	//return;
+	game_res.add('receive_sticker',git_src+'sounds/receive_sticker.mp3');
+	game_res.add('message',git_src+'sounds/message.mp3');
+	game_res.add('lose',git_src+'sounds/lose.mp3');
+	game_res.add('win',git_src+'sounds/win.mp3');
+	game_res.add('click',git_src+'sounds/click.mp3');
+	game_res.add('close',git_src+'sounds/close.mp3');
+	game_res.add('locked',git_src+'sounds/locked.mp3');
+	game_res.add('clock',git_src+'sounds/clock.mp3');
+	game_res.add('card',git_src+'sounds/card2.mp3');
+	game_res.add('card_take',git_src+'sounds/card.mp3');
+	game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
+	game_res.add('move',git_src+'sounds/move.mp3');
+	game_res.add('done',git_src+'sounds/done.mp3');
+	game_res.add('razdacha',git_src+'sounds/razdacha.mp3');
+	game_res.add('card_open',git_src+'sounds/card_open.mp3');
+	game_res.add('inc_card',git_src+'sounds/inc_card.mp3');
+	game_res.add('take',git_src+'sounds/take.mp3');
+	game_res.add('dialog',git_src+'sounds/dialog.mp3');
+	game_res.add('plus_minus_bet',git_src+'sounds/plus_minus_bet.mp3');
+	game_res.add('keypress',git_src+'sounds/keypress.mp3');
 	
+    //добавляем из листа загрузки
+    for (var i = 0; i < load_list.length; i++) {
+        if (load_list[i].class === "sprite" || load_list[i].class === "image" )
+            game_res.add(load_list[i].name, git_src+"res/" + load_list[i].name + "." +  load_list[i].image_format);
+        if (load_list[i].class === "asprite" )
+            game_res.add(load_list[i].name, git_src+"gifs/" + load_list[i].res_name);
+	}
 
-	await load_resources();
-		
+	//добавляем текстуры стикеров
+	for (var i=0;i<16;i++)
+		game_res.add("sticker_texture_"+i, git_src+"stickers/"+i+".png");
+
+	game_res.onProgress.add(progress);
+	function progress(loader, resource) {
+		document.getElementById("m_bar").style.width =  Math.round(loader.progress)+"%";
+	}
+	
+	await new Promise((resolve, reject)=> game_res.load(resolve))
+	
 	//убираем загрузочные данные
 	document.getElementById("m_bar").outerHTML = "";
-	document.getElementById("m_progress").outerHTML = "";
+	document.getElementById("m_progress").outerHTML = "";	
 
 	//короткое обращение к ресурсам
 	gres=game_res.resources;
 
+}
+
+async function init_game_env(l) {
+
+
+
+	
+	await load_resources();
+	
+	await auth2.init();
+	
 	//инициируем файербейс
 	if (firebase.apps.length===0) {
 		firebase.initializeApp({			
@@ -4780,19 +4824,10 @@ async function init_game_env(l) {
 	//запускаем главный цикл
 	main_loop();
 
-
 	//анимация лупы
 	some_process.loup_anim=function() {
 		objects.id_loup.x=20*Math.sin(game_tick*8)+90;
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
-	}
-
-
-	//получаем данные авторизации игрока
-	try {
-		await auth();		
-	} catch(e) {
-		alert('Ошибка авторизации ' + e)		
 	}
 
 
@@ -4811,12 +4846,8 @@ async function init_game_env(l) {
 	make_text(objects.my_card_name,my_data.name,150);
 	
 	//событие ролика мыши в карточном меню
-	window.addEventListener("wheel", event => cards_menu.wheel_event(Math.sign(event.deltaY)));
-	
-	window.addEventListener('keydown', function(event) {
-	  feedback.key_down(event.key)
-	});
-
+	window.addEventListener("wheel", event => cards_menu.wheel_event(Math.sign(event.deltaY)));	
+	window.addEventListener('keydown', function(event) { feedback.key_down(event.key)});
 	
 	//загружаем остальные данные
 	let _other_data = await firebase.database().ref("players/"+my_data.uid).once('value');
@@ -4830,11 +4861,7 @@ async function init_game_env(l) {
 	other_data===null ?
 		my_data.games = 0 :
 		my_data.games = other_data.games || 0;
-		
-	other_data===null ?
-		my_data.level = 0 :
-		my_data.level = other_data.level || 0;
-		
+			
 			
 	//номер комнаты
 	if (my_data.rating >= 1500)
@@ -4890,69 +4917,9 @@ async function init_game_env(l) {
 
 	//показыаем основное меню
 	main_menu.activate();
-
-
 	
 }
 
-async function load_resources() {
-
-	//это нужно удалить потом
-	/*document.body.innerHTML = "Привет!\nДобавляем в игру некоторые улучшения))\nЗайдите через 40 минут.";
-	document.body.style.fontSize="24px";
-	document.body.style.color = "red";
-	return;*/
-
-
-	let git_src="https://akukamil.github.io/poker/"
-	///git_src=""
-
-	game_res=new PIXI.Loader();
-	
-	
-	game_res.add("m2_font", git_src+"fonts/MS_Comic_Sans/font.fnt");
-
-	game_res.add('receive_sticker',git_src+'sounds/receive_sticker.mp3');
-	game_res.add('message',git_src+'sounds/message.mp3');
-	game_res.add('lose',git_src+'sounds/lose.mp3');
-	game_res.add('win',git_src+'sounds/win.mp3');
-	game_res.add('click',git_src+'sounds/click.mp3');
-	game_res.add('close',git_src+'sounds/close.mp3');
-	game_res.add('locked',git_src+'sounds/locked.mp3');
-	game_res.add('clock',git_src+'sounds/clock.mp3');
-	game_res.add('card',git_src+'sounds/card2.mp3');
-	game_res.add('card_take',git_src+'sounds/card.mp3');
-	game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
-	game_res.add('move',git_src+'sounds/move.mp3');
-	game_res.add('done',git_src+'sounds/done.mp3');
-	game_res.add('razdacha',git_src+'sounds/razdacha.mp3');
-	game_res.add('card_open',git_src+'sounds/card_open.mp3');
-	game_res.add('inc_card',git_src+'sounds/inc_card.mp3');
-	game_res.add('take',git_src+'sounds/take.mp3');
-	game_res.add('dialog',git_src+'sounds/dialog.mp3');
-	game_res.add('plus_minus_bet',git_src+'sounds/plus_minus_bet.mp3');
-	game_res.add('keypress',git_src+'sounds/keypress.mp3');
-	
-    //добавляем из листа загрузки
-    for (var i = 0; i < load_list.length; i++) {
-        if (load_list[i].class === "sprite" || load_list[i].class === "image" )
-            game_res.add(load_list[i].name, git_src+"res/" + load_list[i].name + "." +  load_list[i].image_format);
-        if (load_list[i].class === "asprite" )
-            game_res.add(load_list[i].name, git_src+"gifs/" + load_list[i].res_name);
-	}
-
-	//добавляем текстуры стикеров
-	for (var i=0;i<16;i++)
-		game_res.add("sticker_texture_"+i, git_src+"stickers/"+i+".png");
-
-	game_res.onProgress.add(progress);
-	function progress(loader, resource) {
-		document.getElementById("m_bar").style.width =  Math.round(loader.progress)+"%";
-	}
-	
-	await new Promise((resolve, reject)=> game_res.load(resolve))
-
-}
 
 function main_loop() {
 
