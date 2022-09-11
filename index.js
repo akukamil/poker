@@ -4034,6 +4034,19 @@ auth2 = {
 		}	
 	},	
 	
+	get_country_code : async function() {
+		
+		let country_code = ''
+		try {
+			let resp1 = await fetch("https://ipinfo.io/json");
+			let resp2 = await resp1.json();			
+			country_code = resp2.country;			
+		} catch(){}
+
+		return country_code;
+		
+	},
+	
 	search_in_local_storage : function() {
 		
 		//ищем в локальном хранилище
@@ -4103,9 +4116,10 @@ auth2 = {
 		
 		if (s.includes("google_play")) {	
 
+			let country_code = await this.get_country_code();
 			game_platform = 'GOOGLE_PLAY';	
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GP_');
-			my_data.name = this.get_random_name(my_data.uid);
+			my_data.name = this.get_random_name(my_data.uid) + ' ('+country_code+')';
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			return;
 		}
