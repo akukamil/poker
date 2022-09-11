@@ -4498,6 +4498,21 @@ auth2 = {
 		}	
 	},	
 	
+	search_in_local_storage : function() {
+		
+		//ищем в локальном хранилище
+		let local_uid = null;
+		try {
+			local_uid = localStorage.getItem('uid');
+		} catch (e) {alert(e)}
+		
+		
+		if (local_uid.length > 2) return local_uid;
+		
+		return undefined;	
+		
+	},
+	
 	init : async function() {	
 		
 		let s = window.location.href;
@@ -4508,9 +4523,13 @@ auth2 = {
 			
 			try {await this.load_script('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
 					
-			window.ysdk = await YaGames.init({});			
-			let _player = await window.ysdk.getPlayer();
-					
+			let _player;
+			
+			try {
+				window.ysdk = await YaGames.init({});			
+				_player = await window.ysdk.getPlayer();
+			} catch (e) { alert(e)};
+			
 			my_data.uid = _player.getUniqueID().replace(/\//g, "Z");
 			my_data.name = _player.getName();
 			my_data.photo_url = _player.getPhoto('medium');
@@ -4529,8 +4548,13 @@ auth2 = {
 			
 			try {await this.load_script('https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js')} catch (e) {alert(e)};
 			
-			await vkBridge.send('VKWebAppInit');
-			let _player = await vkBridge.send('VKWebAppGetUserInfo');
+			let _player;
+			
+			try {
+				await vkBridge.send('VKWebAppInit');
+				_player = await vkBridge.send('VKWebAppGetUserInfo');				
+			} catch (e) {alert(e)};
+
 			
 			my_data.name 	= _player.first_name + ' ' + _player.last_name;
 			my_data.uid 	= "vk"+_player.id;
@@ -4560,7 +4584,6 @@ auth2 = {
 
 	
 }
-
 
 function resize() {
 	
