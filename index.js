@@ -4028,7 +4028,7 @@ auth2 = {
 			let e_num1 = chars.indexOf(uid[3]) + chars.indexOf(uid[4]) + chars.indexOf(uid[5]) + chars.indexOf(uid[6]);
 			e_num1 = Math.abs(e_num1) % (rnd_names.length - 1);				
 			let name_postfix = chars.indexOf(uid[7]).toString() + chars.indexOf(uid[8]).toString() + chars.indexOf(uid[9]).toString() ;	
-			return rnd_names[e_num1] + name_postfix;					
+			return rnd_names[e_num1] + name_postfix.substring(0, 3);					
 			
 		} else {
 
