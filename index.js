@@ -4003,11 +4003,17 @@ auth2 = {
 		
 	},
 	
-	get_random_uid : function(prefix) {
+	get_random_uid_for_local : function(prefix) {
 		
 		let uid = prefix;
 		for ( let c = 0 ; c < 12 ; c++ )
 			uid += this.get_random_char();
+		
+		//сохраняем этот uid в локальном хранилище
+		try {
+			localStorage.setItem('uid', uid);
+		} catch (e) {alert(e)}
+					
 		return uid;
 		
 	},
@@ -4019,9 +4025,9 @@ auth2 = {
 		
 		if (uid !== undefined) {
 			
-			let e_num1 = chars.indexOf(uid[4]) + chars.indexOf(uid[5]) + chars.indexOf(uid[6]) + chars.indexOf(uid[7]);
+			let e_num1 = chars.indexOf(uid[3]) + chars.indexOf(uid[4]) + chars.indexOf(uid[5]) + chars.indexOf(uid[6]);
 			e_num1 = Math.abs(e_num1) % (rnd_names.length - 1);				
-			let name_postfix = chars.indexOf(uid[8]).toString() + chars.indexOf(uid[9]).toString() + chars.indexOf(uid[10]).toString() ;	
+			let name_postfix = chars.indexOf(uid[7]).toString() + chars.indexOf(uid[8]).toString() + chars.indexOf(uid[9]).toString() ;	
 			return rnd_names[e_num1] + name_postfix;					
 			
 		} else {
@@ -4104,7 +4110,7 @@ auth2 = {
 		if (s.includes("google_play")) {	
 
 			game_platform = 'GOOGLE_PLAY';	
-			my_data.uid = this.search_in_local_storage() || this.get_random_uid('GP');
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GP_');
 			my_data.name = this.get_random_name(my_data.uid);
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			return;
@@ -4122,7 +4128,7 @@ auth2 = {
 		//если не нашли платформу
 		alert('Неизвестная платформа. Кто Вы?')
 		game_platform = 'UNKNOWN';
-		my_data.uid = this.search_in_local_storage() || this.get_random_uid('LS');
+		my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('LS_');
 		my_data.name = this.get_random_name(my_data.uid);
 		my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 
