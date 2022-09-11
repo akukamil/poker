@@ -4104,7 +4104,7 @@ auth2 = {
 		if (s.includes("google_play")) {	
 
 			game_platform = 'GOOGLE_PLAY';	
-			my_data.uid = search_in_local_storage() || this.get_random_uid('GP');
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid('GP');
 			my_data.name = this.get_random_name(my_data.uid);
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			return;
@@ -4122,7 +4122,7 @@ auth2 = {
 		//если не нашли платформу
 		alert('Неизвестная платформа. Кто Вы?')
 		game_platform = 'UNKNOWN';
-		my_data.uid = search_in_local_storage() || this.get_random_uid('LS');
+		my_data.uid = this.search_in_local_storage() || this.get_random_uid('LS');
 		my_data.name = this.get_random_name(my_data.uid);
 		my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 
