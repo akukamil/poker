@@ -4091,6 +4091,11 @@ auth2 = {
 	},
 	
 	init : async function() {	
+	
+		//смотрим что есть в локальном хранилище
+		for (var key in localStorage){
+			console.log(key + ': ' + localStorage.getItem( key ))
+		}
 		
 		let s = window.location.href;
 		
