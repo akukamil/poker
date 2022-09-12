@@ -2065,7 +2065,7 @@ game = {
 		
 		opponent.close();
 		
-		//show_ad();
+		ad.show();
 		
 		set_state({state : 'o'});	
 		
@@ -2344,40 +2344,66 @@ social_dialog = {
 	
 }
 
-show_ad = async function(){
+var	ad = {
 		
-	if (game_platform==="YANDEX") {			
-		try {
-			await new Promise((resolve, reject) => {			
-				window.ysdk.adv.showFullscreenAdv({  callbacks: {onClose: function() {resolve()}, onError: function() {resolve()}}});			
-			});				
-			
-		} catch (e) {
-			
-			console.error(e);
+		
+	show : function() {
+		
+		if (game_platform==="YANDEX") {			
+			//показываем рекламу
+			window.ysdk.adv.showFullscreenAdv({
+			  callbacks: {
+				onClose: function() {}, 
+				onError: function() {}
+						}
+			})
 		}
-	}
+		
+		if (game_platform==="VK") {
+					 
+			vkBridge.send("VKWebAppShowNativeAds", {ad_format:"interstitial"})
+			.then(data => console.log(data.result))
+			.catch(error => console.log(error));	
+		}			
+		
+	},
 	
-	if (game_platform==="VK") {
-				 
-		try {
-			await vkBridge.send("VKWebAppShowNativeAds", {ad_format:"interstitial"});			
-		} catch (e) {			
-			console.error(e);
-		}		
-	}		
-
-	if (game_platform==="CRAZYGAMES") {
-				 
-		try {
-			const crazysdk = window.CrazyGames.CrazySDK.getInstance();
-			crazysdk.init();
-			crazysdk.requestAd('midgame');		
-		} catch (e) {			
-			console.error(e);
+	show2 : async function() {
+		
+		
+		if (game_platform ==="YANDEX") {
+			
+			let res = await new Promise(function(resolve, reject){				
+				window.ysdk.adv.showRewardedVideo({
+						callbacks: {
+						  onOpen: () => {},
+						  onRewarded: () => {resolve('ok')},
+						  onClose: () => {resolve('err')}, 
+						  onError: (e) => {resolve('err')}
+					}
+				})
+			
+			})
+			return res;
 		}
-	}		
+		
+		if (game_platform === "VK") {	
 
+			let res = '';
+			try {
+				res = await vkBridge.send("VKWebAppShowNativeAds", { ad_format: "reward" })
+			}
+			catch(error) {
+				res ='err';
+			}
+			
+			return res;				
+			
+		}	
+		
+		return 'err';
+		
+	}
 }
 
 confirm_dialog = {
@@ -2861,7 +2887,9 @@ main_menu= {
 		let res = await confirm_dialog.show('Получить 100 фишек за просмотр рекламы?');
 		if (res = 'ok') {
 			
-			table.update_balance(ME,100);
+			let res2 = await ad.show2();
+			if (res2 !== 'err')
+				table.update_balance(ME,100);
 		}
 		
 	},
@@ -4079,7 +4107,6 @@ auth2 = {
 				_player = await window.ysdk.getPlayer();
 			} catch (e) { alert(e)};
 			
-			let ud = _player.getUniqueID();
 			my_data.uid = _player.getUniqueID().replace(/[\/+=]/g, '');
 			my_data.name = _player.getName();
 			my_data.pic_url = _player.getPhoto('medium');
