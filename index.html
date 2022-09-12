@@ -19,6 +19,23 @@
 		flex-direction: column
 	}
 	
+	.two_buttons_area {
+	  width: 70%;
+	  height: 50%;
+	  margin: 20px 20px 0px 20px;
+	  display: flex;
+	  flex-direction: row;
+	}
+	
+	.button {
+		margin: 5px 5px 5px 5px;
+		width: 50%;
+		height: 100%;
+		display: block;
+		color:green;
+		font-size: 10vw;
+		padding: 0px;
+	}
   
   #m_progress {
 	  background: rgba(11,255,255,0.1);
@@ -27,7 +44,7 @@
 	  align-items: center;
 	  position: relative;
 	  padding: 0 5px;
-	  display: flex;
+	  display: none;
 	  height: 50px;
 	  width: 70%;
 	}
@@ -42,13 +59,19 @@
 	
 </style>
 
+<div id ="two_buttons" class="two_buttons_area">
+
+	<button class="button" id ="but_ref1" onclick="init_game_env(0)">RUS</button>
+	<button class="button" id ="but_ref2"  onclick="init_game_env(1)">ENG</button>
+
+</div>
+
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script src="pixi_scale.js" ></script>
 <script src="pixi-sound.js"></script>
-<script src="pokersolver.js"></script>
 <script src="index.js" charset="utf-8"></script>
 <script src="load_list.txt" ></script>
 
@@ -58,9 +81,5 @@
 
 
 
- 
-<body onload="init_game_env(1)">
-
-</body>
 
 </html>

@@ -1423,20 +1423,20 @@ round_finish_dialog = {
 				
 				
 		let res_array = [
-			['my_win',WIN , 'Вы выиграли!\nВаша комбинация лучще!'],		
-			['opp_win',LOSE, 'Вы проиграли!\nКомбинация соперника лучше!'],
-			['my_fold',DRAW, 'Вы скинули карты!'],
-			['opp_fold',DRAW, 'Соперник скинул карты!'],
-			['my_notime',LOSE, 'У Вас закончилось время на ход! Банк достался сопернику.'],
-			['opp_notime',WIN, 'У соперника закончилось время на ход! Банк достался Вам.'],
-			['no_conn',LOSE, 'Потеряна связь!'],
-			['draw' ,DRAW, 'Ничья!\nКомбинации одинаковой силы!']
+			['my_win',WIN , ['Вы выиграли!\nВаша комбинация лучще!','You win! You have the best hand!']],		
+			['opp_win',LOSE, ['Вы проиграли!\nКомбинация соперника лучше!','You lose! Opponent have the best hand!']],
+			['my_fold',LOSE, ['Вы скинули карты!','You lose!']],
+			['opp_fold',WIN, ['Соперник скинул карты!','You win! Opponent fold!']],
+			['my_notime',LOSE, ['У Вас закончилось время на ход! Банк достался сопернику.','You lose! Out of time.']],
+			['opp_notime',WIN, ['У соперника закончилось время на ход! Банк достался Вам.','You win! Opponent out of time.']],
+			['no_conn',LOSE, ['Потеряна связь!','No connection']],
+			['draw' ,DRAW, ['Ничья!\nКомбинации одинаковой силы!','Draw! Both hands are the same.']]
 		];
 		
 		let result_row = res_array.find( p => p[0] === table.round_result);
 		let result_str = result_row[0];		
 		let result_number = result_row[1];
-		objects.rfd_title.text = result_row[2];	
+		objects.rfd_title.text = result_row[2][LANG];	
 		
 
 		//воспроизводим звук
@@ -1454,7 +1454,7 @@ round_finish_dialog = {
 			
 		} else {
 			
-			objects.rfd_ok_title.text = 'Выйти';
+			objects.rfd_ok_title.text = ['Выйти','Exit'][LANG];
 			this.end_flag = 1;
 			
 		}
@@ -1480,7 +1480,7 @@ round_finish_dialog = {
 		
 			if (this.visible === false) return;
 			
-			objects.rfd_ok_title.text = 'Дальше ' + i + 'сек';		
+			objects.rfd_ok_title.text = ['Дальше ','Resume '][LANG] + i + ['сек','sec'][LANG];		
 			await new Promise(resolve => setTimeout(resolve, 1000));				
 		}
 		
@@ -1540,7 +1540,7 @@ wait_confirm_from_opponent = {
 		objects.wait_confirm_title.visible = true;
 		for (let i = WAITING_TIME_SEC ; i > 0; i--) {
 						
-			objects.wait_confirm_title.text = 'Ждем соперника...' + i;
+			objects.wait_confirm_title.text = ['Ждем соперника...','Waiting opponent...'] + i;
 			//провряем получение поддтверждения о продолжении игры
 			if (this.opp_confirm_flag === 1) {
 				this.opp_confirm_flag = 0;
@@ -1661,19 +1661,19 @@ bet_dialog = {
 								
 		//можно колировать или поднять (мин-макс)	
 		if (opp_action === 'INIT_BET')
-			objects.bet_title0.text = 'Сделайте первую ставку (CALL) размером большого блайнда или больше (RAISE)';
+			objects.bet_title0.text = ['Сделайте первую ставку (CALL) размером большого блайнда или больше (RAISE)','Make a first bet (CALL) size of big blind or more (RAISE)'][LANG];
 		if (opp_action === 'RAISE')
-			objects.bet_title0.text = 'Соперник поднял ставку (RAISE), нужно ответить (CALL), поднять (RAISE) или сдаться (FOLD)';
+			objects.bet_title0.text = ['Соперник поднял ставку (RAISE), нужно ответить (CALL), поднять (RAISE) или сдаться (FOLD)','Opponent raised bet, you can CALL, RAISE or FOLD'][LANG];
 		if (opp_action === 'BET')
-			objects.bet_title0.text = 'Соперник сделал ставку (BET), нужно ответить (CALL), поднять (RAISE) или сдаться (FOLD)';
+			objects.bet_title0.text = ['Соперник сделал ставку (BET), нужно ответить (CALL), поднять (RAISE) или сдаться (FOLD)','Opponent made a BET, you can CALL, RAISE or FOLD'][LANG];
 		if (opp_action === 'CHECK')
-			objects.bet_title0.text = 'Соперник не сделал ставку (CHECK), можно тоже пропустить (CHECK) или сделать ее (BET)';					
+			objects.bet_title0.text = ['Соперник не сделал ставку (CHECK), можно тоже пропустить (CHECK) или сделать ее (BET)','Opponent CHECK, you can also CHECK or make a BET'][LANG];					
 		if (opp_action === 'INIT_CHECK')
-			objects.bet_title0.text = 'Делайте ставку (BET), но можно и пропустить (CHECK)';	
+			objects.bet_title0.text = ['Делайте ставку (BET), но можно и пропустить (CHECK)','You can make a BET or CHECK'][LANG];	
 		if (opp_action === 'CALL')
-			objects.bet_title0.text = 'Соперник сделал ставку, можно пропустить (CHECK), поднять (RAISE) или сдаться (FOLD)';
+			objects.bet_title0.text = ['Соперник сделал ставку, можно пропустить (CHECK), поднять (RAISE) или сдаться (FOLD)','Opponent made a bet, you can CHECK, RAISE or FOLD'][LANG];
 		if (no_rasing === true)
-			objects.bet_title0.text = 'Соперник поднял ставку (RAISE), можно только ответить (CALL), поднять нельзя';	
+			objects.bet_title0.text = ['Соперник поднял ставку (RAISE), можно только ответить (CALL), поднять нельзя','Opponent raised a bet, you can CALL or FOLD'][LANG];	
 		
 		
 		if (action === 'CALL_RAISE') {
@@ -1968,7 +1968,7 @@ game = {
 			
 			//показыаем результаты
 			let m_res = await round_finish_dialog.show()
-			if (m_res === 'exit') return 'Игра закончена';
+			if (m_res === 'exit') return ['Игра закончена','Game is over'][LANG];
 			
 			table.close();
 			
@@ -2251,7 +2251,7 @@ table = {
 		let winner = hand_check.check_winner(my_res, opp_res);
 		
 		if (winner[0] === 0) {
-			my_winner =  ' (победитель)';			
+			my_winner =  [' (победитель)',' (winner)'][LANG];			
 			this.round_result = 'my_win';
 			this.update_balance(ME, this.total_pot);	
 		}
@@ -2273,8 +2273,8 @@ table = {
 		objects.my_result.visible = true;
 		objects.opp_result.visible = true;
 		
-		objects.my_result.text = my_res.name + my_winner+'\nкикеры: '+winner[1];				
-		objects.opp_result.text = opp_res.name + opp_winner+'\nкикеры: '+winner[2] ;
+		objects.my_result.text = my_res.name + my_winner+['\nкикеры: ','\nkickers: '][LANG]+winner[1];				
+		objects.opp_result.text = opp_res.name + opp_winner+['\nкикеры: ','\nkickers: '][LANG]+winner[2] ;
 		
 		
 	},
@@ -2884,7 +2884,7 @@ main_menu= {
 	chips_button_down : async function() {
 		
 		
-		let res = await confirm_dialog.show('Получить 100 фишек за просмотр рекламы?');
+		let res = await confirm_dialog.show(['Получить 100 фишек за просмотр рекламы?','Get 100 chips (reward video)'][LANG]);
 		if (res = 'ok') {
 			
 			let res2 = await ad.show2();
@@ -3034,7 +3034,7 @@ rules = {
 		anim2.add(objects.rules_back_button,{x:[800, objects.rules_back_button.sx]}, true, 0.5,'easeOutCubic');
 		anim2.add(objects.rules_text,{alpha:[0, 1]}, true, 1,'linear');
 				
-		objects.rules_text.text = ['Добро пожаловать в карточную игру Покер (онлайн дуэль)!\n\nВ игре участвуют 2 игрока. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк (pot). Также можно выиграть банк если соперник откажется продолжать партию (скинет карты). Выиграть можно также вводя соперника в заблуждение величиной ставок (блеф) и тем самым заставляя его скидывать карты.\n\nУдачной игры!',''][LANG];
+		objects.rules_text.text = ['Добро пожаловать в карточную игру Покер (онлайн дуэль)!\n\nВ игре участвуют 2 игрока. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк (pot). Также можно выиграть банк если соперник откажется продолжать партию (скинет карты). Выиграть можно также вводя соперника в заблуждение величиной ставок (блеф) и тем самым заставляя его скидывать карты.\n\nУдачной игры!','Welcome to the Poker card game (online duel)!\n\n The game involves 2 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\Have a good game!'][LANG];
 	},
 	
 	back_button_down : async function() {
@@ -4261,6 +4261,7 @@ async function load_resources() {
 	document.body.style.color = "red";
 	return;*/
 
+	document.getElementById("m_progress").style.display = 'flex';
 
 	let git_src="https://akukamil.github.io/poker/"
 	///git_src=""
@@ -4310,8 +4311,7 @@ async function load_resources() {
 	
 	await new Promise((resolve, reject)=> game_res.load(resolve))
 	
-	//убираем загрузочные данные
-	document.getElementById("m_bar").outerHTML = "";
+	//убираем элементы загрузки
 	document.getElementById("m_progress").outerHTML = "";	
 
 	//короткое обращение к ресурсам
@@ -4319,8 +4319,14 @@ async function load_resources() {
 
 }
 
-async function init_game_env(l) {
+async function init_game_env(lang) {
 		
+	//устанаваем язык
+	LANG = lang;
+	
+	//убираем элементы выбора языка
+	document.getElementById("two_buttons").outerHTML = "";	
+	
 	await load_resources();
 	
 	await auth2.init();
