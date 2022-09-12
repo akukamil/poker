@@ -4079,7 +4079,8 @@ auth2 = {
 				_player = await window.ysdk.getPlayer();
 			} catch (e) { alert(e)};
 			
-			my_data.uid = _player.getUniqueID().replace(/[\+]/g, '');
+			let ud = _player.getUniqueID();
+			my_data.uid = _player.getUniqueID().replace(/[\+=]/g, '');
 			my_data.name = _player.getName();
 			my_data.pic_url = _player.getPhoto('medium');
 			
