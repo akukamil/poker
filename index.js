@@ -4080,7 +4080,7 @@ auth2 = {
 			} catch (e) { alert(e)};
 			
 			let ud = _player.getUniqueID();
-			my_data.uid = _player.getUniqueID().replace(/[\+=]/g, '');
+			my_data.uid = _player.getUniqueID().replace(/[\/+=]/g, '');
 			my_data.name = _player.getName();
 			my_data.pic_url = _player.getPhoto('medium');
 			
