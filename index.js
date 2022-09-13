@@ -4331,10 +4331,8 @@ async function init_game_env(lang) {
 			return;			
 		}
 
-	} else {
-		
-		lang = 0;
-		
+	} else {		
+		lang = 0;		
 	}
 		
 		
