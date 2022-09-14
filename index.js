@@ -2919,6 +2919,10 @@ main_menu= {
 
 	chips_button_down : async function() {
 		
+		if (my_data.rating > 50) {
+			sound.play('locked');
+			return;
+		}
 		
 		let res = await confirm_dialog.show(['Получить 100 фишек за просмотр рекламы?','Get 100 chips (reward video)'][LANG]);
 		if (res = 'ok') {
