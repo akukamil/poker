@@ -932,7 +932,7 @@ mp_game = {
 	me_conf_play : 0,
 	opp_conf_play : 0,
 	made_moves: 0,
-	my_role : "",
+	my_role : '',
 	
 	send_move :  function(move_data) {
 				
@@ -945,8 +945,7 @@ mp_game = {
 		
 		opponent = this;
 		
-		
-		
+				
 		//фиксируем врему начала игры для статистики
 		this.start_time = Date.now();
 				
@@ -1039,8 +1038,7 @@ sp_game = {
 		
 	},
 	
-	process_bet : async function(action, min_bet, no_rasing) {
-		
+	process_bet : async function(action, min_bet, no_rasing) {		
 		
 		await new Promise(resolve => setTimeout(resolve, 2000));
 		
@@ -1077,6 +1075,7 @@ sp_game = {
 			
 		}
 		
+		
 		if (action === 'CHECK_BET') {
 			
 			bet_making.online_waiting_resolve({action:'CHECK', value:Math.min(opp_data.rating, min_bet)})	
@@ -1104,6 +1103,10 @@ sp_game = {
 	
 	switch_close : function() {
 		
+		if (bet_making.online_waiting_resolve!==null)
+			bet_making.online_waiting_resolve({action:'CLOSE', value:0})	
+		
+		bet_dialog.force_close();
 		
 	}
 
@@ -1424,7 +1427,7 @@ round_finish_dialog = {
 				
 				
 		let res_array = [
-			['my_win',WIN , ['Вы выиграли!\nВаша комбинация лучще!','You win! You have the best hand!']],		
+			['my_win',WIN , ['Вы выиграли!\nВаша комбинация лучше!','You win! You have the best hand!']],		
 			['opp_win',LOSE, ['Вы проиграли!\nКомбинация соперника лучше!','You lose! Opponent have the best hand!']],
 			['my_fold',LOSE, ['Вы скинули карты!','You lose!']],
 			['opp_fold',WIN, ['Соперник скинул карты!','You win! Opponent fold!']],
@@ -1541,7 +1544,7 @@ wait_confirm_from_opponent = {
 		objects.wait_confirm_title.visible = true;
 		for (let i = WAITING_TIME_SEC ; i > 0; i--) {
 						
-			objects.wait_confirm_title.text = ['Ждем соперника...','Waiting opponent...'] + i;
+			objects.wait_confirm_title.text = ['Ждем соперника...','Waiting opponent...'][LANG] + i;
 			//провряем получение поддтверждения о продолжении игры
 			if (this.opp_confirm_flag === 1) {
 				this.opp_confirm_flag = 0;
@@ -1574,6 +1577,7 @@ timer = {
 	
 	start : function(player, t) {
 		
+		this.clear();
 		this.disconnect_time = 0;
 		this.time_left = 30 || t;
 		this.id = setTimeout(timer.check.bind(timer),1000);
@@ -1592,6 +1596,12 @@ timer = {
 	stop : function() {
 			
 		anim2.add(objects.timer_cont,{scale_x:[1, 0]}, false, 0.2,'linear');	
+		this.clear();
+		
+	},
+	
+	clear : function() {
+
 		clearTimeout(this.id);
 		
 	},
@@ -1612,8 +1622,7 @@ timer = {
 			if (this.disconnect_time > 5) {
 				bet_dialog.no_connection();
 				bet_making.no_connection();				
-			}
-			
+			}			
 		}
 
 		
@@ -1727,13 +1736,24 @@ bet_dialog = {
 		
 	},
 	
+	force_close : function() {
+		
+		
+		if (this.p_resolve!==null)
+			this.p_resolve({action:'CLOSE', value:0})
+		
+		if (objects.bet_dialog_cont.visible === true)
+			this.close();
+		
+	},
+	
 	ok_down : function () {
 		
 		sound.play('click');	
 		this.p_resolve({action:objects.call_title.text, value:this.bet_amount})		
 		this.close();
 	},
-	
+			
 	no_time : function () {
 		
 		this.p_resolve({action:'NOTIME', value:0})		
@@ -1828,7 +1848,11 @@ bet_making = {
 		if (player === ME) {
 						
 			bet_data = await bet_dialog.show(action, min_bet, no_rasing);	
-
+			
+			if (bet_data.action === 'CLOSE')
+				return {action:'CLOSE', value:0};		
+			
+			
 			//отправляем сопернику
 			opponent.send_move({sender:my_data.uid, message:'MOVE',data : bet_data, tm : Date.now()});
 		
@@ -1893,6 +1917,13 @@ game = {
 	
 	activate : async function(start_player, opponent, seed){
 		
+		
+		//убираем таймер
+		timer.clear();
+		
+		//выключаем бота соперника если он работает
+		sp_game.switch_close();
+		
 		//активируем все что связано с онлайн или ботом
 		opponent.activate();
 		
@@ -1905,6 +1936,9 @@ game = {
 			
 		//цикл который длиться пока игрокам не надоест играть
 		let info = await this.loop(start_player, seed);		
+		
+		//это если экстренно вышли из игры
+		if (info === 'CLOSE') return;
 		
 		//показываем финальное сообщение с возможностью отзыва
 		await big_message.show(info, 1);
@@ -1941,8 +1975,9 @@ game = {
 			
 			if (opponent === mp_game)
 				anim2.add(objects.chat_button_cont,{y:[objects.chat_button_cont.y,500 ]}, false, 0.2,'linear');	
-
 			
+			if (round_res === 'CLOSE')
+				return	'CLOSE'		
 			
 			if (round_res === 'FOLD0') 
 				table.round_result = 'my_fold';
@@ -1995,12 +2030,14 @@ game = {
 				if (opt.action === 'FOLD') return 'FOLD'+start_player;	
 				if (opt.action === 'NOTIME') return 'NOTIME'+start_player;
 				if (opt.action === 'NOCONN') return 'NOCONN';
+				if (opt.action === 'CLOSE') return 'CLOSE';
 				if (opt.action === 'CALL' && i > 0) break	
 				
 				opt = await bet_making.start(1 - start_player, opt.action, opt.value, i > 3);				
 				if (opt.action === 'FOLD') return 'FOLD'+(1 - start_player);	
 				if (opt.action === 'NOTIME') return 'NOTIME'+(1 - start_player);
-				if (opt.action === 'NOCONN') return 'NOCONN';			
+				if (opt.action === 'NOCONN') return 'NOCONN';	
+				if (opt.action === 'CLOSE') return 'CLOSE';
 				if (opt.action === 'CALL' || opt.action === 'CHECK') break;		
 			}	
 
@@ -2021,9 +2058,6 @@ game = {
 				if (street === 'RIVER')
 					cards_to_check = [...table.my_cards,...table.cen_cards];
 				
-				console.log('----------------')
-				for(let c of cards_to_check)
-				console.log(c.value_num);
 				
 				let check = hand_check.check(cards_to_check);
 				objects.my_result.text = comb_to_text[check.name][LANG];
@@ -2037,12 +2071,14 @@ game = {
 					if (opt.action === 'FOLD') return 'FOLD'+start_player;	
 					if (opt.action === 'NOTIME') return 'NOTIME'+start_player;
 					if (opt.action === 'NOCONN') return 'NOCONN';
+					if (opt.action === 'CLOSE') return 'CLOSE';
 					if (opt.action === 'CALL') break;
 					
 					opt = await bet_making.start(1 - start_player, opt.action, opt.value, i > 3);		
 					if (opt.action === 'FOLD') return 'FOLD'+(1 - start_player);	
 					if (opt.action === 'NOTIME') return 'NOTIME'+(1 - start_player);
 					if (opt.action === 'NOCONN') return 'NOCONN';
+					if (opt.action === 'CLOSE') return 'CLOSE';
 					if (opt.action === 'CALL' || opt.action === 'CHECK') break;
 					
 				}					
@@ -2092,6 +2128,7 @@ table = {
 	
 	init : async function(start_player, seed) {		
 	
+		this.round_result = '';
 	
 		//формируем и тусуем колоду карт
 		big_deck.init(seed);		
