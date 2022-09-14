@@ -5,6 +5,7 @@ opp_data={}, some_process = {}, git_src = '', ME = 0, OPP = 1, WIN = 1, DRAW = 0
 
 const suit_num_to_txt = ['h','d','s','c'], MIN_CHIPS = 20;
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const comb_to_text = {HIGH_CARD : ['СТАРШАЯ КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
 
 irnd = function(min,max) {	
     min = Math.ceil(min);
@@ -1062,7 +1063,7 @@ sp_game = {
 			if (Math.random() > 0.5)
 				bet_making.online_waiting_resolve({action:'CALL', value:Math.min(opp_data.rating, min_bet)})	
 			else
-				bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,10))})		
+				bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,4))})		
 			
 		}
 		
@@ -1072,7 +1073,7 @@ sp_game = {
 			if (Math.random() > 0.5)
 				bet_making.online_waiting_resolve({action:'CHECK', value:Math.min(opp_data.rating, min_bet)})	
 			else
-				bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,10))})		
+				bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,5))})		
 			
 		}
 		
@@ -1181,11 +1182,11 @@ hand_check = {
 		}		
 		
 		if (['10h','Jh','Qh','Kh','Ah'].every(card => hand.includes(card)))
-			return {check:1, name:'ROYAL FLUSH', data:[{value:0}]}; 
+			return {check:1, name:'ROYAL_FLUSH', data:[{value:0}]}; 
 		if (['10d','Jd','Qd','Kd','Ad'].every(card => hand.includes(card)))
-			return {check:1, name:'ROYAL FLUSH', data:[{value:0}]}; 
+			return {check:1, name:'ROYAL_FLUSH', data:[{value:0}]}; 
 		if (['10s','Js','Qs','Ks','As'].every(card => hand.includes(card)))
-			return {check:1, name:'ROYAL FLUSH', data:[{value:0}]}; 
+			return {check:1, name:'ROYAL_FLUSH', data:[{value:0}]}; 
 		if (['10c','Jc','Qc','Kc','Ac'].every(card => hand.includes(card)))
 			return {check:1, name:'ROYAL_FLUSH', data:[{value:0}]}; 
 
@@ -1985,7 +1986,7 @@ game = {
 			
 			//***************PRE-FLOP*********************				
 			let check = hand_check.check(table.my_cards);
-			objects.my_result.text = check.name;
+			objects.my_result.text = comb_to_text[check.name][LANG];
 			
 			let opt = {action:'INIT_BET', value : BIG_BLIND};
 			for(let i = 0 ; i < 1000 ; i ++) {
@@ -2025,7 +2026,7 @@ game = {
 				console.log(c.value_num);
 				
 				let check = hand_check.check(cards_to_check);
-				objects.my_result.text = check.name;
+				objects.my_result.text = comb_to_text[check.name][LANG];
 				
 				opt = {action:'INIT_CHECK', value : 0};
 				table.row[0]++;
@@ -2242,8 +2243,6 @@ table = {
 		let opp_res = hand_check.check([...this.opp_cards,...this.cen_cards]);
 		let my_res = hand_check.check([...this.my_cards,...this.cen_cards]);
 		
-		console.log(opp_res.data);
-		console.log(my_res.data);
 		
 		let opp_winner ='';
 		let my_winner = '';
@@ -2273,8 +2272,8 @@ table = {
 		objects.my_result.visible = true;
 		objects.opp_result.visible = true;
 		
-		objects.my_result.text = my_res.name + my_winner+['\nкикеры: ','\nkickers: '][LANG]+winner[1];				
-		objects.opp_result.text = opp_res.name + opp_winner+['\nкикеры: ','\nkickers: '][LANG]+winner[2] ;
+		objects.my_result.text = comb_to_text[my_res.name][LANG] + my_winner+['\nкикеры: ','\nkickers: '][LANG]+winner[1];				
+		objects.opp_result.text = comb_to_text[opp_res.name][LANG]  + opp_winner+['\nкикеры: ','\nkickers: '][LANG]+winner[2] ;
 		
 		
 	},
