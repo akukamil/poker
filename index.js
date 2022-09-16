@@ -3235,11 +3235,9 @@ cards_menu={
 
 
 		objects.desktop.texture=game_res.resources.cards_bcg.texture;
-		anim2.add(objects.cards_menu_header,{y:[-50, objects.cards_menu_header.sy]}, true, 0.5,'easeOutBack');
 		anim2.add(objects.cards_cont,{alpha:[0,1]}, true, 0.4,'linear');		
 		anim2.add(objects.back_button,{x:[800, objects.back_button.sx]}, true, 0.5,'easeOutCubic');
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.4,'linear');
-		anim2.add(objects.players_online,{y:[470, objects.players_online.sy]}, true, 0.5,'easeOutCubic');
 
 		//расставляем по соответствующим координатам
 		for(let i=0;i<15;i++) {
@@ -3256,7 +3254,9 @@ cards_menu={
 		//добавляем карточку ии
 		this.add_card_ai();
 
-		
+		//включаем сколько игроков онлайн
+		anim2.add(objects.players_online,{y:[500,objects.players_online.sy],x:[0,objects.players_online.sx]}, true, 0.6,'linear');		
+		anim2.add(objects.cards_menu_header,{y:[-50,objects.cards_menu_header.sy],x:[0,objects.cards_menu_header.sx]}, true, 0.6,'linear');	
 		
 		//подписываемся на изменения состояний пользователей
 		firebase.database().ref(room_name) .on('value', (snapshot) => {cards_menu.players_list_updated(snapshot.val());});
