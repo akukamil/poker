@@ -2402,6 +2402,16 @@ var	ad = {
 			.catch(error => console.log(error));	
 		}			
 		
+		if (game_platform==="CRAZYGAMES") {				
+			try {
+				const crazysdk = window.CrazyGames.CrazySDK.getInstance();
+				crazysdk.init();
+				crazysdk.requestAd('midgame');		
+			} catch (e) {			
+				console.error(e);
+			}	
+		}	
+		
 	},
 	
 	show2 : async function() {
@@ -3074,7 +3084,7 @@ rules = {
 		anim2.add(objects.rules_back_button,{x:[800, objects.rules_back_button.sx]}, true, 0.5,'easeOutCubic');
 		anim2.add(objects.rules_text,{alpha:[0, 1]}, true, 1,'linear');
 				
-		objects.rules_text.text = ['Добро пожаловать в карточную игру Покер (онлайн дуэль)!\n\nВ игре участвуют 2 игрока. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк (pot). Также можно выиграть банк если соперник откажется продолжать партию (скинет карты). Выиграть можно также вводя соперника в заблуждение величиной ставок (блеф) и тем самым заставляя его скидывать карты.\n\nУдачной игры!','Welcome to the Poker card game (online duel)!\n\n The game involves 2 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\nHave a good game!'][LANG];
+		objects.rules_text.text = ['Добро пожаловать в карточную игру Покер (онлайн дуэль)!\n\nВ игре участвуют 2 игрока. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк (pot). Также можно выиграть банк если соперник откажется продолжать партию (скинет карты). Выиграть можно также вводя соперника в заблуждение величиной ставок (блеф) и тем самым заставляя его скидывать карты.\n\nУдачной игры!','Welcome to the Poker card game (Heads Up)!\n\n The game involves 2 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\nHave a good game!'][LANG];
 	},
 	
 	back_button_down : async function() {
@@ -3646,8 +3656,8 @@ cards_menu={
 		objects.mini_cards[0].bcg.tint=this.state_tint.bot;
 		objects.mini_cards[0].visible=true;
 		objects.mini_cards[0].uid="BOT";
-		objects.mini_cards[0].name='Joker (BOT)';
-		objects.mini_cards[0].name_text.text='Joker (BOT)';
+		objects.mini_cards[0].name=objects.mini_cards[0].name_text.text=['Джокер','Joker'][LANG];
+
 		objects.mini_cards[0].rating=50;		
 		objects.mini_cards[0].rating_text.text = objects.mini_cards[0].rating;
 		objects.mini_cards[0].avatar.texture=game_res.resources.pc_icon.texture;
@@ -4205,6 +4215,18 @@ auth2 = {
 			return;
 		}
 		
+		if (s.includes("crazygames")) {
+			
+			let country_code = await this.get_country_code();
+			game_platform = 'CRAZYGAMES';				
+			try {await this.load_script('https://sdk.crazygames.com/crazygames-sdk-v1.js')} catch (e) {alert(e)};			
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('CG_');
+			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
+			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+			let crazysdk = window.CrazyGames.CrazySDK.getInstance();
+			crazysdk.init();			
+			return;
+		}
 		
 		//если не нашли платформу
 		alert('Неизвестная платформа. Кто Вы?')
