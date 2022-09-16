@@ -886,7 +886,9 @@ big_message = {
 	
 	feedback_down : async function () {
 		
-		if (objects.big_message_cont.ready===false) {
+		
+		
+		if (objects.big_message_cont.ready===false || LANG === 1) {
 			sound.play('locked');
 			return;			
 		}
@@ -955,6 +957,11 @@ mp_game = {
 	},
 		
 	send_message : async function() {
+		
+		if (LANG === 1) {
+			sound.play('locked');
+			return;		
+		}
 		
 		let msg_data = await feedback.show();
 		
@@ -3848,7 +3855,7 @@ cards_menu={
 	fb_my_down : async function() {
 		
 		
-		if (this._opp_data.uid !== my_data.uid || objects.feedback_cont.visible === true)
+		if (this._opp_data.uid !== my_data.uid || objects.feedback_cont.visible === true || LANG === 1)
 			return;
 		
 		let fb = await feedback.show(this._opp_data.uid);
