@@ -1502,6 +1502,12 @@ round_finish_dialog = {
 	
 	ok_down : function() {
 		
+		
+		if (objects.rfd_cont.ready === false) {
+			sound.click('locked')
+			return;
+		}
+		
 		if (this.end_flag === 1) {
 			
 			//время ожидания прошло завершаем игру
@@ -1521,6 +1527,12 @@ round_finish_dialog = {
 	},
 	
 	exit_down : function() {
+		
+		if (objects.rfd_cont.ready === false) {
+			sound.click('locked')
+			return;
+		}
+		
 		
 		sound.play('click');
 		firebase.database().ref("inbox/"+opp_data.uid).set({sender:my_data.uid,message:"NO_RESUME",tm:Date.now()});
@@ -1756,6 +1768,11 @@ bet_dialog = {
 	
 	ok_down : function () {
 		
+		if (objects.bet_dialog_cont.ready === false) {
+			sound.click('locked')
+			return;
+		}
+		
 		sound.play('click');	
 		this.p_resolve({action:objects.call_title.text, value:this.bet_amount})		
 		this.close();
@@ -1782,6 +1799,11 @@ bet_dialog = {
 	},
 
 	fold_down : function () {
+		
+		if (objects.bet_dialog_cont.ready === false) {
+			sound.click('locked')
+			return;
+		}
 		
 		sound.play('click');	
 		this.p_resolve({action:'FOLD', value:0})				
