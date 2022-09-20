@@ -1950,6 +1950,10 @@ game = {
 	activate : async function(start_player, opponent, seed){
 		
 		
+		//если открыт лидерборд то закрываем его
+		if (objects.lb_1_cont.visible===true)
+			lb.close();		
+		
 		//убираем таймер
 		timer.clear();
 		
