@@ -2968,12 +2968,12 @@ main_menu= {
 		if (my_data.rating > 50) {
 			
 			let res = await confirm_dialog.show(['Получить фишки можно только если у вас их меньше 50. Хотите все равно посмотреть рекламу?','You can only get chips if you have less than 50 of them. Do you want to watch the ad anyway?'][LANG]);
-			if (res = 'ok')	await ad.show2();
+			if (res === 'ok')	await ad.show2();
 			return;
 		}
 		
 		let res = await confirm_dialog.show(['Получить 100 фишек за просмотр рекламы?','Get 100 chips (reward video)?'][LANG]);
-		if (res = 'ok') {
+		if (res === 'ok') {
 			
 			let res2 = await ad.show2();
 			if (res2 !== 'err')
