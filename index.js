@@ -1724,7 +1724,7 @@ bet_dialog = {
 				this.min_max_vals = [my_data.rating, my_data.rating];			
 				this.min_max_opts = ['CHECK', 'CHECK'];
 			} else {
-				this.min_max_vals = [min_bet, Math.min(99,my_data.rating)];			
+				this.min_max_vals = [0, Math.min(99,my_data.rating)];			
 				this.min_max_opts = ['CHECK', 'RAISE'];				
 			}			
 			
