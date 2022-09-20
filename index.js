@@ -1828,8 +1828,11 @@ bet_dialog = {
 
 			
 		objects.bet_title1.text = this.bet_amount;
-		objects.call_title.text = this.min_max_opts[0];				
-
+		
+		if (this.bet_amount === this.min_max_vals[0])
+			objects.call_title.text = this.min_max_opts[0];		
+		else
+			objects.call_title.text = this.min_max_opts[1];		
 		
 	},
 	
