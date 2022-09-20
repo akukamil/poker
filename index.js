@@ -1598,7 +1598,7 @@ timer = {
 		
 		this.clear();
 		this.disconnect_time = 0;
-		this.time_left = 30 || t;
+		this.time_left = 35 || t;
 		this.id = setTimeout(timer.check.bind(timer),1000);
 		objects.timer_cont.visible = true;
 		objects.timer_text.text = this.time_left;
