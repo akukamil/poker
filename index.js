@@ -1029,7 +1029,7 @@ sp_game = {
 		opponent = this;
 		
 		opp_data.uid = 'BOT';
-		opp_data.rating = 50;
+		opp_data.rating = 15;
 		
 		objects.desktop.texture = gres.desktop.texture;
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');				
@@ -3689,7 +3689,7 @@ cards_menu={
 		objects.mini_cards[0].uid="BOT";
 		objects.mini_cards[0].name=objects.mini_cards[0].name_text.text=['Джокер','Joker'][LANG];
 
-		objects.mini_cards[0].rating=50;		
+		objects.mini_cards[0].rating=15;		
 		objects.mini_cards[0].rating_text.text = objects.mini_cards[0].rating;
 		objects.mini_cards[0].avatar.texture=game_res.resources.pc_icon.texture;
 	},
