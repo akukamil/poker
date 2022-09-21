@@ -3773,7 +3773,7 @@ cards_menu={
 
 	show_invite_dialog: function(card_id) {
 
-		if (anim2.any_on() === true) {
+		if (anim2.any_on() === true || objects.invite_cont.visible === true) {
 			sound.play('locked');
 			return
 		};
