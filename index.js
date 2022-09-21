@@ -1665,6 +1665,9 @@ bet_dialog = {
 	no_rasing : false,
 	min_max_vals : [0,0],
 	min_max_opts : ['',''],
+	dragging : 0,
+	slider_min_max_x : [40,280],
+
 	
 	
 	show : async function (opp_action, min_bet, no_rasing) {
@@ -1715,6 +1718,12 @@ bet_dialog = {
 				this.min_max_opts = ['CALL', 'RAISE'];				
 			}	
 			
+			//если нельзя поднять
+			if (no_rasing) {
+				this.min_max_vals = [min_bet, min_bet];			
+				this.min_max_opts = ['CALL', 'CALL'];	
+			}
+			
 		}
 		
 		//это возможность большого блайнда на префлопе
@@ -1746,12 +1755,22 @@ bet_dialog = {
 		objects.call_title.text = this.min_max_opts[0];
 		objects.bet_title1.text = this.min_max_vals[0];
 		
+		//устанаваем слайдер на минимальное значение
+		objects.slider_button.x = this.slider_min_max_x[0];		
+		
 		
 		anim2.add(objects.bet_dialog_cont,{y:[600,objects.bet_dialog_cont.sy]}, true, 0.6,'easeOutBack');	
 	
 		return new Promise(function(resolve, reject){
 			bet_dialog.p_resolve = resolve;			
 		})		
+		
+	},
+	
+	set_slider_to_bet_value : function(val) {
+		
+
+		
 		
 	},
 	
@@ -1810,55 +1829,53 @@ bet_dialog = {
 		this.close();
 	},
 	
-	minus : function () {	
-	
-		this.bet_amount--;		
-			
-		//если ниже биг блайнда то сразу в ноль
-		if (BIG_BLIND > this.bet_amount) this.bet_amount = 0;
-		
-		if (this.bet_amount < this.min_max_vals[0]) {
-			
-			this.bet_amount = this.min_max_vals[0]			
-			sound.play('locked');			
-		} else {
-			
-			sound.play('plus_minus_bet');			
-		}
-
-			
-		objects.bet_title1.text = this.bet_amount;
-		
-		if (this.bet_amount === this.min_max_vals[0])
-			objects.call_title.text = this.min_max_opts[0];		
-		else
-			objects.call_title.text = this.min_max_opts[1];		
-		
+	slider_down : function(e) {		
+		this.dragging = 1;		
 	},
 	
-	plus : function () {	
+	slider_move : function(e) {
+				
+		if (this.dragging === 1) {		
 
-		if (this.no_rasing) return;
-	
-		this.bet_amount++;
-		
-		//если увеличили 0 то сразу на биг блайнд
-		if (this.bet_amount === 1) this.bet_amount = Math.min(BIG_BLIND,my_data.rating);
-		
-		if (this.bet_amount > this.min_max_vals[1]) {			
-			this.bet_amount = this.min_max_vals[1]		
-			sound.play('locked');			
-		} else {
-			sound.play('plus_minus_bet');
-		}
-
-		
-		objects.call_title.text = this.min_max_opts[1];
-		objects.bet_title1.text = this.bet_amount;
-		
+			//устанавливаем слайдер где указатель
+			let mx = e.data.global.x/app.stage.scale.x;		
+			objects.slider_button.x = mx - objects.bet_dialog_cont.x;					
+					
+					
+			let frac_pos_x = (objects.slider_button.x - this.slider_min_max_x[0]) / (this.slider_min_max_x[1] - this.slider_min_max_x[0]);					
+			this.bet_amount = Math.round((frac_pos_x * (this.min_max_vals[1] - this.min_max_vals[0]) + this.min_max_vals[0]));
+						
+			
+			objects.call_title.text = this.min_max_opts[1];	
+			
+			if (objects.slider_button.x >= this.slider_min_max_x[1]) {
+				
+				objects.slider_button.x = this.slider_min_max_x[1];				
+				this.bet_amount = this.min_max_vals[1];
+				
+			}
 
 			
-	},
+			if (objects.slider_button.x <= this.slider_min_max_x[0]) {
+				
+				objects.slider_button.x = this.slider_min_max_x[0];				
+				objects.call_title.text = this.min_max_opts[0];		
+				this.bet_amount = this.min_max_vals[0];
+			}
+			
+			objects.bet_title1.text = this.bet_amount;
+
+			
+		}		
+	},	
+	
+	slider_up : function(e) {		
+		this.dragging = 0;		
+	},	
+	
+
+	
+
 			
 }
 
