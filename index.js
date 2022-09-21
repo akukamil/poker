@@ -1113,7 +1113,9 @@ sp_game = {
 		if (bet_making.online_waiting_resolve!==null)
 			bet_making.online_waiting_resolve({action:'CLOSE', value:0})	
 		
-		bet_dialog.force_close();
+		round_finish_dialog.hard_close();
+		
+		bet_dialog.hard_close();
 		
 	}
 
@@ -1428,7 +1430,7 @@ hand_check = {
 round_finish_dialog = {
 	
 	end_flag : 0,
-	p_resole : null,
+	p_resolve : null,
 	
 	show : function () {
 				
@@ -1473,12 +1475,14 @@ round_finish_dialog = {
 		
 		//ожидаем выбор
 		return new Promise(function(res, rej){			
-			round_finish_dialog.p_resole = res;			
+			round_finish_dialog.p_resolve = res;			
 		})
 		
 		
 		
 	},
+	
+	
 	
 	wait_resume_game : async function() {
 		
@@ -1511,13 +1515,13 @@ round_finish_dialog = {
 		if (this.end_flag === 1) {
 			
 			//время ожидания прошло завершаем игру
-			this.p_resole('exit');
+			this.p_resolve('exit');
 			
 		} else {
 			
 			//отправляем сообщение что готовы продолжать
 			firebase.database().ref("inbox/"+opp_data.uid).set({sender:my_data.uid,message:"CN",tm:Date.now()});
-			this.p_resole('ok');
+			this.p_resolve('ok');
 			
 		}
 		sound.play('click');
@@ -1536,8 +1540,20 @@ round_finish_dialog = {
 		
 		sound.play('click');
 		firebase.database().ref("inbox/"+opp_data.uid).set({sender:my_data.uid,message:"NO_RESUME",tm:Date.now()});
-		this.p_resole('exit');
+		this.p_resolve('exit');
 		this.close();
+	},
+	
+	hard_close : function() {
+		
+	
+	if (this.p_resolve!==null)
+		this.p_resolve('CLOSE')
+	
+	if (objects.rfd_cont.visible === true)
+		this.close();
+		
+		
 	},
 	
 	close : function() {
@@ -1774,7 +1790,7 @@ bet_dialog = {
 		
 	},
 	
-	force_close : function() {
+	hard_close : function() {
 		
 		
 		if (this.p_resolve!==null)
@@ -2058,6 +2074,7 @@ game = {
 			//показыаем результаты
 			let m_res = await round_finish_dialog.show()
 			if (m_res === 'exit') return ['Игра закончена','Game is over'][LANG];
+			if (m_res === 'CLOSE') return 'CLOSE';
 			
 			table.close();
 			
