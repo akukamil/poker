@@ -1490,7 +1490,8 @@ round_finish_dialog = {
 		
 		for (let i = WAITING_TIME_SEC ; i > 0 ; i--) {	
 		
-			if (this.visible === false) return;
+			if (objects.rfd_cont.visible === false)
+				return;
 			
 			objects.rfd_ok_title.text = ['Дальше ','Resume '][LANG] + i + ['сек','sec'][LANG];		
 			await new Promise(resolve => setTimeout(resolve, 1000));				
