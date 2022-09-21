@@ -1113,8 +1113,7 @@ sp_game = {
 		if (bet_making.online_waiting_resolve!==null)
 			bet_making.online_waiting_resolve({action:'CLOSE', value:0})	
 		
-		round_finish_dialog.hard_close();
-		
+		round_finish_dialog.hard_close();		
 		bet_dialog.hard_close();
 		
 	}
@@ -1481,9 +1480,7 @@ round_finish_dialog = {
 		
 		
 	},
-	
-	
-	
+		
 	wait_resume_game : async function() {
 		
 		this.end_flag = 0;
@@ -1558,11 +1555,9 @@ round_finish_dialog = {
 	
 	close : function() {
 		
-		anim2.add(objects.rfd_cont,{y:[objects.rfd_cont.y, 600]}, false, 0.5,'easeInBack');	
+		anim2.add(objects.rfd_cont,{y:[objects.rfd_cont.y, 600]}, false, 0.5,'easeInBack');			
 		
-		
-	}
-	
+	}	
 	
 }
 
@@ -3002,7 +2997,7 @@ main_menu= {
 		if (my_data.rating > 50) {
 			
 			let res = await confirm_dialog.show(['Получить фишки можно только если у вас их меньше 50. Хотите все равно посмотреть рекламу?','You can only get chips if you have less than 50 of them. Do you want to watch the ad anyway?'][LANG]);
-			if (res === 'ok')	await ad.show2();
+			if (res === 'ok')	await ad.show2();			
 			return;
 		}
 		
@@ -3010,7 +3005,7 @@ main_menu= {
 		if (res === 'ok') {
 			
 			let res2 = await ad.show2();
-			if (res2 !== 'err')
+			if (res2 !== 'err' || game_platform === 'GOOGLE_PLAY')
 				table.update_balance(ME,100);
 		}
 		
@@ -4460,7 +4455,7 @@ async function init_game_env(lang) {
 		
 		
 	//если это гугл плей то показываем выбор языка
-	if (window.location.href.includes('google_play') === true || window.location.href.includes('crazygames') === true ) {
+	if (window.location.href.includes('google_play') === true) {
 		
 		if (lang === undefined) {
 			
@@ -4468,9 +4463,15 @@ async function init_game_env(lang) {
 			return;			
 		}
 
-	} else {		
-		lang = 0;		
+	} else {	
+
+		if (window.location.href.includes('yndx_eng') === true)
+			lang = 1;	
+		else
+			lang = 0;
 	}
+	
+	
 		
 		
 	//отображаем шкалу загрузки
