@@ -1065,10 +1065,21 @@ sp_game = {
 		
 		if (action === 'CALL_RAISE') {
 			
-			if (Math.random() > 0.5)
-				bet_making.online_waiting_resolve({action:'CALL', value:Math.min(opp_data.rating, min_bet)})	
-			else
-				bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,4))})		
+			
+			if (min_bet > opp_data.rating) {
+				
+				bet_making.online_waiting_resolve({action:'CALL', value:opp_data.rating})	
+				
+			} else {
+				
+				if (Math.random() > 0.5)
+					bet_making.online_waiting_resolve({action:'CALL', value:Math.min(opp_data.rating, min_bet)})	
+				else
+					bet_making.online_waiting_resolve({action:'RAISE', value:Math.min(opp_data.rating, min_bet + irnd(1,4))})									
+				
+			}
+			
+	
 			
 		}
 		
