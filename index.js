@@ -4466,7 +4466,7 @@ async function init_game_env(lang) {
 
 	} else {	
 
-		if (window.location.href.includes('yndx_eng') === true)
+		if (window.location.href.includes('lang=ru') === true)
 			lang = 1;	
 		else
 			lang = 0;
