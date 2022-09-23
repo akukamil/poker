@@ -4645,9 +4645,11 @@ async function init_game_env(lang) {
 	let other_data = _other_data.val();
 	
 	//это защита от неправильных данных
-	other_data===null ?
-		my_data.rating=100 :
-		my_data.rating = other_data.rating || 100;
+	if (other_data===null || isNaN(other_data.rating))
+		my_data.rating = 100;
+	else
+		my_data.rating = other_data.rating;
+	
 
 	other_data===null ?
 		my_data.games = 0 :
