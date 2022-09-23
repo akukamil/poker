@@ -2056,6 +2056,8 @@ game = {
 			if (min_rating > 300)	BIG_BLIND = 8;
 			if (min_rating > 600)	BIG_BLIND = 20;
 			if (BIG_BLIND > 1000)	BIG_BLIND = 30;
+			if (BIG_BLIND > 1500)	BIG_BLIND = 60;
+			if (BIG_BLIND > 2000)	BIG_BLIND = 80;
 						
 			//проверяем есть ли у соперника фишки
 			if (opp_data.rating < 50)
