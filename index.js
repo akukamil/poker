@@ -946,8 +946,7 @@ mp_game = {
 	activate : async function () {
 		
 		opponent = this;
-		
-				
+					
 		//фиксируем врему начала игры для статистики
 		this.start_time = Date.now();
 				
@@ -1021,15 +1020,25 @@ sp_game = {
 	level_id : 0,
 	state : 'opp_move',
 	center_size : 0,
+	true_rating : null,
 
 	activate: async function(role, seed) {
 		
+		//сохраняем рейтинг
+		this.true_rating = my_data.rating;
 		this.on = 1;		
+		
+		//рейтинг не настоящий поэтому его затемняем
+		objects.my_card_rating.alpha = 0.5;
 
 		opponent = this;
 		
+		message.add('Я бот. В конце игры баланс фишек будет возвращен', 5000);
+		
 		opp_data.uid = 'BOT';
-		opp_data.rating = 15;
+		opp_data.rating = 100;
+		
+		BIG_BLIND = 2;
 		
 		objects.desktop.texture = gres.desktop.texture;
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');				
@@ -1115,11 +1124,20 @@ sp_game = {
 			
 	close : async function() {
 		
-	
+		//восстанавливаем рейтинг
+		if (this.true_rating !== null)
+			my_data.rating = this.true_rating;			
+		objects.my_card_rating.text = my_data.rating;
+		objects.my_card_rating.alpha = 1;
+		this.true_rating = null;
+		
+		this.on = 0;	
 		
 	},
 	
 	switch_close : function() {
+		
+		this.close();	
 		
 		if (bet_making.online_waiting_resolve!==null)
 			bet_making.online_waiting_resolve({action:'CLOSE', value:0})	
@@ -1471,15 +1489,11 @@ round_finish_dialog = {
 		anim2.add(objects.rfd_cont,{y:[600,objects.rfd_cont.sy]}, true, 0.6,'easeOutBack');	
 		
 		//проверка что есть деньги
-		if (my_data.rating >= BIG_BLIND) {
-			
+		if (my_data.rating >= 50) {			
 			this.wait_resume_game();			
-			
-		} else {
-			
+		} else {			
 			objects.rfd_ok_title.text = ['Выйти','Exit'][LANG];
-			this.end_flag = 1;
-			
+			this.end_flag = 1;			
 		}
 
 		
@@ -1731,13 +1745,24 @@ bet_dialog = {
 			objects.bet_title0.text = ['Соперник поднял ставку (RAISE), можно только ответить (CALL), поднять нельзя','Opponent raised a bet, you can CALL or FOLD'][LANG];	
 		
 		
+		//определяем максимальную ставку
+		let min_rating =  Math.min(opp_data.rating, my_data.rating);
+		let max_bet = 100;		
+		if (min_rating > 300)
+			max_bet = 150;
+		if (min_rating > 600)
+			max_bet = 200;
+		if (BIG_BLIND > 1000)
+			max_bet = 300;
+				
+		
 		if (action === 'CALL_RAISE') {
 			
 			if (min_bet > my_data.rating) {
 				this.min_max_vals = [my_data.rating, my_data.rating];			
 				this.min_max_opts = ['CALL', 'CALL'];
 			} else {
-				this.min_max_vals = [min_bet, Math.min(99,my_data.rating)];			
+				this.min_max_vals = [min_bet, Math.min(max_bet,my_data.rating)];			
 				this.min_max_opts = ['CALL', 'RAISE'];				
 			}	
 			
@@ -1756,7 +1781,7 @@ bet_dialog = {
 				this.min_max_vals = [my_data.rating, my_data.rating];			
 				this.min_max_opts = ['CHECK', 'CHECK'];
 			} else {
-				this.min_max_vals = [0, Math.min(99,my_data.rating)];			
+				this.min_max_vals = [0, Math.min(max_bet,my_data.rating)];			
 				this.min_max_opts = ['CHECK', 'RAISE'];				
 			}			
 			
@@ -1768,7 +1793,7 @@ bet_dialog = {
 				this.min_max_vals = [my_data.rating, my_data.rating];			
 				this.min_max_opts = ['CHECK', 'CHECK'];
 			} else {
-				this.min_max_vals = [0, Math.min(99,my_data.rating)];			
+				this.min_max_vals = [0, Math.min(max_bet,my_data.rating)];			
 				this.min_max_opts = ['CHECK', 'BET'];				
 			}
 			
@@ -1789,14 +1814,7 @@ bet_dialog = {
 		})		
 		
 	},
-	
-	set_slider_to_bet_value : function(val) {
 		
-
-		
-		
-	},
-	
 	hard_close : function() {
 		
 		
@@ -1877,7 +1895,6 @@ bet_dialog = {
 				this.bet_amount = this.min_max_vals[1];
 				
 			}
-
 			
 			if (objects.slider_button.x <= this.slider_min_max_x[0]) {
 				
@@ -1885,6 +1902,7 @@ bet_dialog = {
 				objects.call_title.text = this.min_max_opts[0];		
 				this.bet_amount = this.min_max_vals[0];
 			}
+			
 			
 			objects.bet_title1.text = this.bet_amount;
 
@@ -2001,7 +2019,7 @@ game = {
 		sp_game.switch_close();
 		
 		//активируем все что связано с онлайн или ботом
-		opponent.activate();
+		await opponent.activate();
 		
 		//показыаем карточки
 		anim2.add(objects.my_card_cont,{x:[-100,objects.my_card_cont.sx]}, true, 0.6,'easeOutBack');	
@@ -2032,16 +2050,22 @@ game = {
 		
 		for (let i = 0 ; i < 1000 ; i++ ) {
 						
+			//определяем биг блайнд		
+			let min_rating =  Math.min(opp_data.rating, my_data.rating);
+			BIG_BLIND = 2;		
+			if (min_rating > 300)	BIG_BLIND = 8;
+			if (min_rating > 600)	BIG_BLIND = 20;
+			if (BIG_BLIND > 1000)	BIG_BLIND = 30;
 						
 			//проверяем есть ли у соперника фишки
-			if (opp_data.rating < BIG_BLIND)
+			if (opp_data.rating < 50)
 				return 'У соперника недостаточно фишек чтобы продолжить игру';
 			
 			if (await wait_confirm_from_opponent.start(i) === false)		
 				return 'Похоже соперник не захотел продолжать игру';
 				
 			
-			//инициируем стол и блайнды
+			//инициируем стол и списываем блайнды
 			await table.init(start_player, seed);
 			
 			if (opponent === mp_game)
@@ -2211,9 +2235,10 @@ table = {
 		big_deck.init(seed);		
 		
 		//обнуляем данные о ставках и устанаваем начальную ставку
+		let small_blind = BIG_BLIND / 2;
 		this.bets_info.forEach(b => b.forEach(i=>i.text = ''));
-		this.bets_info[1][0].text = 2 - start_player;
-		this.bets_info[0][0].text = 1 + start_player;
+		this.bets_info[1][0].text = BIG_BLIND - start_player*small_blind;
+		this.bets_info[0][0].text = small_blind + start_player*small_blind;
 			
 			
 		//выдергиваем из большой колоды 4 карты (2 моих и 2 соперника)
@@ -2229,8 +2254,7 @@ table = {
 			this.opp_cards[0].set(big_deck.cards.pop());
 			this.opp_cards[1].set(big_deck.cards.pop());			
 			this.my_cards[0].set(big_deck.cards.pop());
-			this.my_cards[1].set(big_deck.cards.pop());
-			
+			this.my_cards[1].set(big_deck.cards.pop());			
 		}		
 		
 		//активный колл
@@ -2244,15 +2268,15 @@ table = {
 		this.card_to_open=0;
 		
 		//делаем блайнды
-		this.update_balance(start_player, -1);
-		this.update_balance(1 - start_player, -2);		
+		this.update_balance(start_player, -small_blind);
+		this.update_balance(1 - start_player, -BIG_BLIND);		
 		
 		//показываем результаты игры но они пока не видны
 		objects.my_result.visible = objects.opp_result.visible = true;	
 		objects.my_result.text = objects.opp_result.text = '';
 		
 		//отображаем начальный банк
-		this.total_pot = 3;		
+		this.total_pot = BIG_BLIND + small_blind;		
 		objects.total_pot.text = this.total_pot;
 
 		//победителя пока не существует
@@ -2316,12 +2340,17 @@ table = {
 			
 			my_data.rating += amount;			
 			objects.my_card_rating.text = my_data.rating;
-			firebase.database().ref("players/"+my_data.uid+"/rating").set(my_data.rating);
-			firebase.database().ref(room_name+"/"+my_data.uid+"/rating").set(my_data.rating);
+			
+			if (opp_data.uid !== 'BOT') {
+				firebase.database().ref("players/"+my_data.uid+"/rating").set(my_data.rating);
+				firebase.database().ref(room_name+"/"+my_data.uid+"/rating").set(my_data.rating);				
+			}
+
 		} else {
 			
 			opp_data.rating += amount;			
 			objects.opp_card_rating.text = opp_data.rating;
+			console.log('Изменлся рейтинг оппонента ',opp_data.rating, amount)
 			
 		}
 		
@@ -3737,7 +3766,7 @@ cards_menu={
 		objects.mini_cards[0].uid="BOT";
 		objects.mini_cards[0].name=objects.mini_cards[0].name_text.text=['Джокер','Joker'][LANG];
 
-		objects.mini_cards[0].rating=15;		
+		objects.mini_cards[0].rating=100;		
 		objects.mini_cards[0].rating_text.text = objects.mini_cards[0].rating;
 		objects.mini_cards[0].avatar.texture=game_res.resources.pc_icon.texture;
 	},
@@ -3819,7 +3848,7 @@ cards_menu={
 		let invite_available = 	cards_menu._opp_data.uid !== my_data.uid;
 		invite_available=invite_available && (objects.mini_cards[card_id].state==="o" || objects.mini_cards[card_id].state==="b");
 		invite_available=invite_available || cards_menu._opp_data.uid==="BOT";
-		invite_available=invite_available && cards_menu._opp_data.rating >= BIG_BLIND && my_data.rating >= BIG_BLIND;
+		invite_available=invite_available && cards_menu._opp_data.rating >= 50 && my_data.rating >= 50;
 
 		//показыаем кнопку приглашения только если это допустимо
 		objects.invite_button.visible=objects.invite_button_title.visible=invite_available;
@@ -4349,7 +4378,11 @@ function set_state(params) {
 	if (opp_data.uid!==undefined)
 		small_opp_id=opp_data.uid.substring(0,10);
 
-	firebase.database().ref(room_name+"/"+my_data.uid).set({state:state, name:my_data.name, rating : my_data.rating, hidden:h_state, opp_id : small_opp_id});
+	let rating_to_show = my_data.rating;
+	if (sp_game.on === 1)
+		rating_to_show = sp_game.true_rating;
+
+	firebase.database().ref(room_name+"/"+my_data.uid).set({state:state, name:my_data.name, rating : rating_to_show, hidden:h_state, opp_id : small_opp_id});
 
 }
 
@@ -4482,13 +4515,9 @@ async function init_game_env(lang) {
 		else
 			lang = 0;
 	}
-	
-	
-		
-		
+			
 	//отображаем шкалу загрузки
 	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
-
 		
 	//устанаваем язык
 	LANG = lang;
@@ -4592,7 +4621,6 @@ async function init_game_env(lang) {
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
 	}
 
-
 	//загружаем аватарку игрока
 	let loader=new PIXI.Loader();
 	await new Promise(function(resolve, reject) {		
@@ -4629,7 +4657,8 @@ async function init_game_env(lang) {
 	if (my_data.rating >= 222500)
 		room_name= 'states2';			
 	else
-		room_name= 'states';			
+		room_name= 'states';
+	room_name= 'states2';
 
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=objects.my_card_rating.text=my_data.rating;
