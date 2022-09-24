@@ -2493,7 +2493,7 @@ var	ad = {
 		
 	show : function() {
 		
-		if (game_platform==="YANDEX") {			
+		if (game_platform==='YANDEX') {			
 			//показываем рекламу
 			window.ysdk.adv.showFullscreenAdv({
 			  callbacks: {
@@ -2503,14 +2503,14 @@ var	ad = {
 			})
 		}
 		
-		if (game_platform==="VK") {
+		if (game_platform==='VK') {
 					 
 			vkBridge.send("VKWebAppShowNativeAds", {ad_format:"interstitial"})
 			.then(data => console.log(data.result))
 			.catch(error => console.log(error));	
 		}			
 		
-		if (game_platform==="CRAZYGAMES") {				
+		if (game_platform==='CRAZYGAMES') {				
 			try {
 				const crazysdk = window.CrazyGames.CrazySDK.getInstance();
 				crazysdk.init();
@@ -2520,6 +2520,9 @@ var	ad = {
 			}	
 		}	
 		
+		if (game_platform==='GD') {
+			sdk.showBanner();
+		}
 	},
 	
 	show2 : async function() {
@@ -4255,34 +4258,27 @@ auth2 = {
 	
 		if (game_platform === 'GD') {
 			
-			try {await this.load_script('https://html5.api.gamedistribution.com/main.min.js')} catch (e) {alert(e)};
+			try {await this.load_script('https://api.gamemonetize.com/sdk.js')} catch (e) {alert(e)};
 			
-			window["GD_OPTIONS"] = {
-				"gameId": "3dec9de19236476f9f29deb17a80209d",
-				"onEvent": function(event) {
-					console.log(event.name);
-					switch (event.name) {
-						case "SDK_GAME_START":
-							
-							break;
-						case "SDK_GAME_PAUSE":
-							// pause game logic / mute audio
-							break;
-						case "SDK_GDPR_TRACKING":
-							// this event is triggered when your user doesn't want to be tracked
-							break;
-						case "SDK_GDPR_TARGETING":
-							// this event is triggered when your user doesn't want personalised targeting of ads and such
-							break;
-						case "SDK_REWARDED_WATCH_COMPLETE":
-							// this event is triggered when your user completely watched rewarded ad
-							break;
-					}
-				},
-			};	
+			window.SDK_OPTIONS = {
+			  gameId: "itlfj6x5pluki04lefb9z3n73xedj19x",
+			  onEvent: function (a) {
+				 switch (a.name) {
+					case "SDK_GAME_PAUSE":
+					   // pause game logic / mute audio
+					   break;
+					case "SDK_GAME_START":
+					   // advertisement done, resume game logic and unmute audio
+					   break;
+					case "SDK_READY":
+					   // when sdk is ready
+					   break;
+				 }
+			  }
+			};
 			
 			let country_code = await this.get_country_code();
-			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GP_');
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GD_');
 			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			return;
