@@ -4282,6 +4282,14 @@ auth2 = {
 			if (my_data.name === '')
 				my_data.name = this.get_random_name(my_data.uid);
 			
+			//если английский яндекс до добавляем к имени страну
+			
+			if (s.includes('lang=en') === true) {				
+				let country_code = await this.get_country_code();
+				my_data.name = my_data.name + ' (' + country_code + ')';			
+			}
+
+			
 			return;
 		}
 		
@@ -4662,7 +4670,6 @@ async function init_game_env(lang) {
 		room_name= 'states2';			
 	else
 		room_name= 'states';
-	room_name= 'states2';
 
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=objects.my_card_rating.text=my_data.rating;
