@@ -4252,10 +4252,37 @@ auth2 = {
 	
 	init : async function() {	
 	
-		//смотрим что есть в локальном хранилище
-		for (var key in localStorage){
-			console.log(key + ': ' + localStorage.getItem( key ))
+	
+		if (game_platform === 'GD') {
+			
+			try {await this.load_script('https://html5.api.gamedistribution.com/main.min.js')} catch (e) {alert(e)};
+			
+			window["GD_OPTIONS"] = {
+				"gameId": "3dec9de19236476f9f29deb17a80209d",
+				"onEvent": function(event) {
+					console.log(event.name);
+					switch (event.name) {
+						case "SDK_GAME_START":
+							
+							break;
+						case "SDK_GAME_PAUSE":
+							// pause game logic / mute audio
+							break;
+						case "SDK_GDPR_TRACKING":
+							// this event is triggered when your user doesn't want to be tracked
+							break;
+						case "SDK_GDPR_TARGETING":
+							// this event is triggered when your user doesn't want personalised targeting of ads and such
+							break;
+						case "SDK_REWARDED_WATCH_COMPLETE":
+							// this event is triggered when your user completely watched rewarded ad
+							break;
+					}
+				},
+			};			
 		}
+	
+	
 		
 		let s = window.location.href;
 		
@@ -4506,18 +4533,15 @@ async function load_resources() {
 
 }
 
-async function init_game_env(lang) {
+async function init_game_env(lang, gd) {
 		
 		
 	//если это гугл плей то показываем выбор языка
-	if (window.location.href.includes('google_play') === true) {
-		
-		if (lang === undefined) {
-			
+	if (window.location.href.includes('google_play') === true) {		
+		if (lang === undefined) {			
 			document.body.innerHTML='<style>		html,		body {		margin: 0;		padding: 0;		height: 100%;	}		body {		display: flex;		align-items: center;		justify-content: center;		background-color: rgba(24,24,64,1);		flex-direction: column	}		.two_buttons_area {	  width: 70%;	  height: 50%;	  margin: 20px 20px 0px 20px;	  display: flex;	  flex-direction: row;	}		.button {		margin: 5px 5px 5px 5px;		width: 50%;		height: 100%;		color:white;		display: block;		background-color: rgba(44,55,100,1);		font-size: 10vw;		padding: 0px;	}  	#m_progress {	  background: rgba(11,255,255,0.1);	  justify-content: flex-start;	  border-radius: 100px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 10px 40px -10px #fff;	  border-radius: 100px;	  background: #fff;	  height: 70%;	  width: 0%;	}	</style><div id ="two_buttons" class="two_buttons_area">	<button class="button" id ="but_ref1" onclick="init_game_env(0)">RUS</button>	<button class="button" id ="but_ref2"  onclick="init_game_env(1)">ENG</button></div><div id="m_progress">  <div id="m_bar"></div></div>';
 			return;			
 		}
-
 	} else {	
 
 		if (window.location.href.includes('lang=en') === true)
@@ -4528,6 +4552,12 @@ async function init_game_env(lang) {
 			
 	//отображаем шкалу загрузки
 	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
+		
+	//переопределяем все если это gamedistribution
+	if (gd === 1) {
+		lang = 1;
+		game_platform = 'GD';
+	}
 		
 	//устанаваем язык
 	LANG = lang;
