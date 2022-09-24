@@ -4256,31 +4256,16 @@ auth2 = {
 	init : async function() {	
 	
 	
-		if (game_platform === 'GD') {
+		if (game_platform === 'FACEBOOK') {
+					
+			await FBInstant.initializeAsync();
+			await FBInstant.startGameAsync()
 			
-			try {await this.load_script('https://api.gamemonetize.com/sdk.js')} catch (e) {alert(e)};
-			
-			window.SDK_OPTIONS = {
-			  gameId: "itlfj6x5pluki04lefb9z3n73xedj19x",
-			  onEvent: function (a) {
-				 switch (a.name) {
-					case "SDK_GAME_PAUSE":
-					   // pause game logic / mute audio
-					   break;
-					case "SDK_GAME_START":
-					   // advertisement done, resume game logic and unmute audio
-					   break;
-					case "SDK_READY":
-					   // when sdk is ready
-					   break;
-				 }
-			  }
-			};
-			
+			my_data.name = FBInstant.player.getName();
+			my_data.pic_url = FBInstant.player.getPhoto();
+			my_data.uid = FBInstant.player.getID();			
 			let country_code = await this.get_country_code();
-			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GM_');
-			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
-			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+			my_data.name += this.get_random_name(my_data.uid) + ' (' + country_code + ')';	
 			return;
 		}
 	
@@ -4535,7 +4520,7 @@ async function load_resources() {
 
 }
 
-async function init_game_env(lang, gd) {
+async function init_game_env(lang, fb) {
 		
 		
 	//если это гугл плей то показываем выбор языка
@@ -4555,10 +4540,10 @@ async function init_game_env(lang, gd) {
 	//отображаем шкалу загрузки
 	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
 		
-	//переопределяем все если это gamedistribution
-	if (gd === 1) {
+	//переопределяем все если это facebook
+	if (fb === 1) {
 		lang = 1;
-		game_platform = 'GD';
+		game_platform = 'FACEBOOK';
 	}
 		
 	//устанаваем язык
