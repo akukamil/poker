@@ -4298,10 +4298,10 @@ auth2 = {
 			
 			//если английский яндекс до добавляем к имени страну
 			
-			if (s.includes('lang=en') === true) {				
+			//if (s.includes('lang=en') === true) {				
 				let country_code = await this.get_country_code();
 				my_data.name = my_data.name + ' (' + country_code + ')';			
-			}
+			//}
 
 			
 			return;
