@@ -4254,23 +4254,8 @@ auth2 = {
 	},
 	
 	init : async function() {	
-	
-	
-		if (game_platform === 'FACEBOOK') {
-					
-			await FBInstant.initializeAsync();
-			await FBInstant.startGameAsync()
-			
-			my_data.name = FBInstant.player.getName();
-			my_data.pic_url = FBInstant.player.getPhoto();
-			my_data.uid = FBInstant.player.getID();			
-			let country_code = await this.get_country_code();
-			my_data.name += this.get_random_name(my_data.uid) + ' (' + country_code + ')';	
-			return;
-		}
-	
-	
 		
+	
 		let s = window.location.href;
 		
 		if (s.includes("yandex")) {
@@ -4297,11 +4282,9 @@ auth2 = {
 				my_data.name = this.get_random_name(my_data.uid);
 			
 			//если английский яндекс до добавляем к имени страну
-			
-			//if (s.includes('lang=en') === true) {				
-				let country_code = await this.get_country_code();
-				my_data.name = my_data.name + ' (' + country_code + ')';			
-			//}
+			let country_code = await this.get_country_code();
+			my_data.name = my_data.name + ' (' + country_code + ')';			
+
 
 			
 			return;
@@ -4555,6 +4538,8 @@ async function init_game_env(lang, fb) {
 	await load_resources();
 	
 	await auth2.init();
+	
+	console.log(window.ysdk);
 	
 	//инициируем файербейс
 	if (firebase.apps.length===0) {
