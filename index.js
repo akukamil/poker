@@ -4466,6 +4466,7 @@ async function load_resources() {
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
+	
 
 	game_res=new PIXI.Loader();
 	
@@ -4545,6 +4546,8 @@ async function init_game_env(lang, fb) {
 		lang = 1;
 		game_platform = 'FACEBOOK';
 	}
+	
+	lang = lang || 0;
 		
 	//устанаваем язык
 	LANG = lang;
