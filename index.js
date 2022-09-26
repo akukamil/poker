@@ -1489,7 +1489,7 @@ round_finish_dialog = {
 		anim2.add(objects.rfd_cont,{y:[600,objects.rfd_cont.sy]}, true, 0.6,'easeOutBack');	
 		
 		//проверка что есть деньги
-		if (my_data.rating >= 50) {			
+		if (my_data.rating >= 50 && table.round_result!=='opp_notime') {			
 			this.wait_resume_game();			
 		} else {			
 			objects.rfd_ok_title.text = ['Выйти','Exit'][LANG];
@@ -1635,7 +1635,7 @@ timer = {
 		
 		this.clear();
 		this.disconnect_time = 0;
-		this.time_left = 35 || t;
+		this.time_left = 30 || t;
 		this.id = setTimeout(timer.check.bind(timer),1000);
 		objects.timer_cont.visible = true;
 		objects.timer_text.text = this.time_left;
@@ -1671,6 +1671,9 @@ timer = {
 		
 		if (turn === OPP && this.time_left === -5)
 			bet_making.no_time();
+		
+		if (this.time_left === 5)
+			sound.play('clock');
 		
 		if (connected === 0) {
 			
