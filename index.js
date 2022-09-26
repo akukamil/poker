@@ -4254,14 +4254,9 @@ auth2 = {
 	},
 	
 	init : async function() {	
+				
+		if (game_platform === 'YANDEX') {			
 		
-	
-		let s = window.location.href;
-		
-		if (s.includes("yandex")) {
-			
-			game_platform = 'YANDEX';
-			
 			try {await this.load_script('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
 					
 			let _player;
@@ -4290,9 +4285,7 @@ auth2 = {
 			return;
 		}
 		
-		if (s.includes("vk.com")) {
-			
-			game_platform = 'VK';
+		if (game_platform === 'VK') {
 			
 			try {await this.load_script('https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js')} catch (e) {alert(e)};
 			
@@ -4312,28 +4305,25 @@ auth2 = {
 			
 		}
 		
-		if (s.includes("google_play")) {	
+		if (game_platform === 'GOOGLE_PLAY') {	
 
 			let country_code = await this.get_country_code();
-			game_platform = 'GOOGLE_PLAY';	
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GP_');
 			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			return;
 		}
 		
-		if (s.includes("192.168")) {		
+		if (game_platform === 'DEBUG') {		
 
-			game_platform = 'DEBUG';
 			my_data.name = my_data.uid = 'debug' + prompt('Отладка. Введите ID', 100);
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';		
 			return;
 		}
 		
-		if (s.includes("crazygames")) {
+		if (game_platform === 'CRAZYGAMES') {
 			
 			let country_code = await this.get_country_code();
-			game_platform = 'CRAZYGAMES';				
 			try {await this.load_script('https://sdk.crazygames.com/crazygames-sdk-v1.js')} catch (e) {alert(e)};			
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('CG_');
 			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
@@ -4343,14 +4333,14 @@ auth2 = {
 			return;
 		}
 		
-		//если не нашли платформу
-		alert('Неизвестная платформа. Кто Вы?')
-		game_platform = 'UNKNOWN';
-		my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('LS_');
-		my_data.name = this.get_random_name(my_data.uid);
-		my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
-
-
+		if (game_platform === 'UNKNOWN') {
+			
+			//если не нашли платформу
+			alert('Неизвестная платформа. Кто Вы?')
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('LS_');
+			my_data.name = this.get_random_name(my_data.uid);
+			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+		}
 	}
 	
 }
@@ -4504,42 +4494,86 @@ async function load_resources() {
 
 }
 
-async function init_game_env(lang, fb) {
+language_dialog = {
+	
+	p_resolve : {},
+	
+	show : function() {
+				
+		return new Promise(function(resolve, reject){
+
+
+			document.body.innerHTML='<style>		html,		body {		margin: 0;		padding: 0;		height: 100%;	}		body {		display: flex;		align-items: center;		justify-content: center;		background-color: rgba(24,24,64,1);		flex-direction: column	}		.two_buttons_area {	  width: 70%;	  height: 50%;	  margin: 20px 20px 0px 20px;	  display: flex;	  flex-direction: row;	}		.button {		margin: 5px 5px 5px 5px;		width: 50%;		height: 100%;		color:white;		display: block;		background-color: rgba(44,55,100,1);		font-size: 10vw;		padding: 0px;	}  	#m_progress {	  background: rgba(11,255,255,0.1);	  justify-content: flex-start;	  border-radius: 100px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 10px 40px -10px #fff;	  border-radius: 100px;	  background: #fff;	  height: 70%;	  width: 0%;	}	</style><div id ="two_buttons" class="two_buttons_area">	<button class="button" id ="but_ref1" onclick="language_dialog.p_resolve(0)">RUS</button>	<button class="button" id ="but_ref2"  onclick="language_dialog.p_resolve(1)">ENG</button></div><div id="m_progress">  <div id="m_bar"></div></div>';
+			
+			language_dialog.p_resolve = resolve;	
+						
+		})
 		
-		
-	//если это гугл плей то показываем выбор языка
-	if (window.location.href.includes('google_play') === true) {		
-		if (lang === undefined) {			
-			document.body.innerHTML='<style>		html,		body {		margin: 0;		padding: 0;		height: 100%;	}		body {		display: flex;		align-items: center;		justify-content: center;		background-color: rgba(24,24,64,1);		flex-direction: column	}		.two_buttons_area {	  width: 70%;	  height: 50%;	  margin: 20px 20px 0px 20px;	  display: flex;	  flex-direction: row;	}		.button {		margin: 5px 5px 5px 5px;		width: 50%;		height: 100%;		color:white;		display: block;		background-color: rgba(44,55,100,1);		font-size: 10vw;		padding: 0px;	}  	#m_progress {	  background: rgba(11,255,255,0.1);	  justify-content: flex-start;	  border-radius: 100px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 10px 40px -10px #fff;	  border-radius: 100px;	  background: #fff;	  height: 70%;	  width: 0%;	}	</style><div id ="two_buttons" class="two_buttons_area">	<button class="button" id ="but_ref1" onclick="init_game_env(0)">RUS</button>	<button class="button" id ="but_ref2"  onclick="init_game_env(1)">ENG</button></div><div id="m_progress">  <div id="m_bar"></div></div>';
-			return;			
-		}
 	}
+	
+}
+
+async function define_platform_and_language() {
+	
+	let s = window.location.href;
+	
+	if (s.includes('yandex')) {
+		
+		game_platform = 'YANDEX';
+		
+		if (s.match(/yandex\.ru|yandex\.by|yandex\.kg|yandex\.kz|yandex\.tj|yandex\.ua|yandex\.uz/))
+			LANG = 0;
+		else 
+			LANG = 1;		
+		return;
+	}
+	
+	if (s.includes('vk.com')) {
+		game_platform = 'VK';	
+		LANG = 0;	
+		return;
+	}
+	
+	if (s.includes('google_play')) {
 			
-	if (window.location.href.includes('yandex.com') === true)
-		lang = 1;	
-	if (window.location.href.includes('yandex.ru') === true)
-		lang = 0;	
+		game_platform = 'GOOGLE_PLAY';	
+		LANG = await language_dialog.show();
+		return;
+	}	
+
+	if (s.includes('google_play')) {
 			
+		game_platform = 'GOOGLE_PLAY';	
+		LANG = await language_dialog.show();
+		return;	
+	}	
+	
+	if (s.includes('192.168')) {
 			
+		game_platform = 'DEBUG';	
+		LANG = await language_dialog.show();
+		return;	
+	}	
+	
+	game_platform = 'UNKNOWN';	
+	LANG = await language_dialog.show();
+	
+	console.log(game_platform, LANG);
+
+}
+
+
+async function init_game_env(lang, fb) {
+				
+	await define_platform_and_language();
+						
 	//отображаем шкалу загрузки
 	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
 		
-	//переопределяем все если это facebook
-	if (fb === 1) {
-		lang = 1;
-		game_platform = 'FACEBOOK';
-	}
-	
-	lang = lang || 0;
-		
-	//устанаваем язык
-	LANG = lang;
 	
 	await load_resources();
 	
 	await auth2.init();
-	
-	console.log(window.ysdk);
 	
 	//инициируем файербейс
 	if (firebase.apps.length===0) {
