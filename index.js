@@ -3054,8 +3054,13 @@ main_menu= {
 		if (res === 'ok') {
 			
 			let res2 = await ad.show2();
-			if (res2 !== 'err' || game_platform === 'GOOGLE_PLAY')
-				table.update_balance(ME,100);
+			if (res2 !== 'err' || game_platform === 'GOOGLE_PLAY' || game_platform === 'DEBUG') {
+				sound.play("confirm_dialog");
+				table.update_balance(ME,100);				
+			} else {
+				sound.play('locked')
+			}
+
 		}
 		
 	},
