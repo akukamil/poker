@@ -2520,7 +2520,7 @@ var	ad = {
 			}	
 		}	
 		
-		if (game_platform==='GD') {
+		if (game_platform==='GM') {
 			sdk.showBanner();
 		}
 	},
@@ -4255,6 +4255,29 @@ auth2 = {
 	
 	init : async function() {	
 				
+		if (game_platform === 'GM') {
+			
+			try {await this.load_script('https://api.gamemonetize.com/sdk.js')} catch (e) {alert(e)};
+			
+			window.SDK_OPTIONS = {
+				gameId: "itlfj6x5pluki04lefb9z3n73xedj19x",
+				onEvent: function (a) {
+					switch (a.name) {
+						case "SDK_GAME_PAUSE":
+						   // pause game logic / mute audio
+						   break;
+						case "SDK_GAME_START":
+						   // advertisement done, resume game logic and unmute audio
+						   break;
+						case "SDK_READY":
+						   // when sdk is ready
+						   break;
+					}
+				}
+			
+			}
+		}
+				
 		if (game_platform === 'YANDEX') {			
 		
 			try {await this.load_script('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
@@ -4341,6 +4364,9 @@ auth2 = {
 			my_data.name = this.get_random_name(my_data.uid);
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 		}
+	
+		
+	
 	}
 	
 }
@@ -4478,9 +4504,16 @@ language_dialog = {
 	
 }
 
-async function define_platform_and_language() {
+async function define_platform_and_language(env) {
 	
 	let s = window.location.href;
+	
+	if (env === 'game_monetize') {
+				
+		game_platform = 'GM';
+		LANG = await language_dialog.show();
+		return;
+	}
 	
 	if (s.includes('yandex')) {
 		
@@ -4529,7 +4562,7 @@ async function define_platform_and_language() {
 
 async function init_game_env(env) {
 				
-	await define_platform_and_language();
+	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
 						
 	//отображаем шкалу загрузки
