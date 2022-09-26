@@ -4527,8 +4527,7 @@ async function define_platform_and_language() {
 
 }
 
-
-async function init_game_env(lang, fb) {
+async function init_game_env(env) {
 				
 	await define_platform_and_language();
 	console.log(game_platform, LANG);
