@@ -4392,38 +4392,6 @@ function vis_change() {
 		
 }
 
-async function check_daily_reward (last_seen_ts) {
-	
-	
-	//вычисляем номер дня последнего посещения
-	let last_seen_day = new Date(last_seen_ts).getDate();		
-	
-	//считываем текущее время
-	await firebase.database().ref("server_time").set(firebase.database.ServerValue.TIMESTAMP);
-
-	//определяем текущий день
-	let _cur_ts = await firebase.database().ref("server_time").once('value');
-	let cur_ts = _cur_ts.val();
-	let cur_day = new Date(cur_ts).getDate();
-	
-	//обновляем время последнего посещения
-	firebase.database().ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
-	if (cur_day !== last_seen_day)
-	{		
-		my_data.money++;
-		firebase.database().ref("players/"+my_data.uid + "/money").set(my_data.money);	
-		
-		sound.play('daily_reward');
-
-		objects.dr_title.text=['Ежедневный бонус!\n+1$','Daily reward!\n+1$'][LANG];
-		await anim2.add(objects.dr_cont,{alpha:[0, 1]}, true, 1,'linear');
-		await new Promise((resolve, reject) => setTimeout(resolve, 1000));
-		anim2.add(objects.dr_cont,{alpha:[1, 0]}, false, 1,'linear');
-		
-	}
-
-}
-
 async function load_resources() {
 
 	//это нужно удалить потом
@@ -4555,7 +4523,7 @@ async function define_platform_and_language() {
 	game_platform = 'UNKNOWN';	
 	LANG = await language_dialog.show();
 	
-	console.log(game_platform, LANG);
+	
 
 }
 
@@ -4563,6 +4531,7 @@ async function define_platform_and_language() {
 async function init_game_env(lang, fb) {
 				
 	await define_platform_and_language();
+	console.log(game_platform, LANG);
 						
 	//отображаем шкалу загрузки
 	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
