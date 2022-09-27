@@ -127,6 +127,100 @@ class lb_player_card_class extends PIXI.Container{
 
 }
 
+class chat_record_class extends PIXI.Container {
+	
+	constructor() {
+		
+		super();
+		
+		this.tm = 0;
+		this.msg_id = 0;
+		
+		this.avatar = new PIXI.Sprite(PIXI.Texture.WHITE);
+		this.avatar.width = this.avatar.height = 30;
+
+		
+		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 20,align: 'center'});
+		this.name.x=35;
+		this.name.y=5;
+		
+		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 20,align: 'left'}); 
+		this.msg.x=135;
+		this.msg.y=5;
+		
+		this.visible = false;
+		this.addChild(this.avatar, this.name, this.msg);
+		
+	}
+	
+	async update_avatar(uid, tar_sprite) {
+		
+		
+		let pic_url = '';
+		//если есть в кэше то =берем оттуда если нет то загружаем
+		if (cards_menu.uid_pic_url_cache[uid] !== undefined) {
+			
+			pic_url = cards_menu.uid_pic_url_cache[uid];
+			
+		} else {
+			
+			pic_url = await firebase.database().ref("players/" + uid + "/pic_url").once('value');		
+			pic_url = pic_url.val();			
+			cards_menu.uid_pic_url_cache[uid] = pic_url;
+		}
+		
+
+		
+		//сначала смотрим на загруженные аватарки в кэше
+		if (PIXI.utils.TextureCache[pic_url]===undefined || PIXI.utils.TextureCache[pic_url].width===1) {
+
+			//загружаем аватарку игрока
+			let loader=new PIXI.Loader();
+			loader.add("pic", pic_url,{loadType: PIXI.LoaderResource.LOAD_TYPE.IMAGE, timeout: 3000});
+			
+			let texture = await new Promise((resolve, reject) => {				
+				loader.load(function(l,r) {	resolve(l.resources.pic.texture)});
+			})
+			
+			if (texture.width === 1) {
+				texture = PIXI.Texture.WHITE;
+				texture.tint = this.msg.tint;
+			}
+			
+			tar_sprite.texture = texture;
+			
+		}
+		else
+		{
+			//загружаем текустуру из кэша
+			//console.log(`Текстура взята из кэша ${pic_url}`)	
+			tar_sprite.texture =  PIXI.utils.TextureCache[pic_url];
+		}
+		
+	}
+	
+	async set(uid, name, msg, tm, msg_id) {
+						
+		//получаем pic_url из фб
+		this.avatar.texture=PIXI.Texture.WHITE;
+		await this.update_avatar(uid, this.avatar);
+
+		this.tm = tm;
+			
+		this.msg_id = msg_id;
+		
+		if (name.length > 10) name = name.substring(0, 10);	
+		this.name.text=name +':';		
+		
+		this.msg.text=msg;
+
+		this.msg.tint = this.name.tint = 0xffffff*(Math.random()*0.001+0.999);
+		this.visible = true;
+		
+	}	
+	
+}
+
 class playing_cards_class extends PIXI.Container {
 	
 	constructor() {
@@ -2008,6 +2102,10 @@ game = {
 		if (objects.lb_1_cont.visible===true)
 			lb.close();		
 		
+		//если открыт чат то закрываем его
+		if (objects.chat_cont.visible===true)
+			chat.close();
+		
 		//убираем таймер
 		timer.clear();
 		
@@ -3082,12 +3180,149 @@ main_menu= {
 		
 	},
 
+	chat_button_down : async function() {
+		
+		if (anim2.any_on()===true) {
+			sound.play('locked');
+			return
+		};
+
+		sound.play('click');
+
+		await this.close();
+		
+		chat.activate();
+		
+		
+	},
+
 	rules_ok_down: function () {
 
 		anim2.add(objects.rules_cont,{y:[objects.rules_cont.sy, -450]}, false, 0.5,'easeInBack');
 
 	},
 
+}
+
+var chat = {
+	
+	last_record_end : 0,
+	
+	activate : function() {
+		
+		//firebase.database().ref('chat').remove();
+		//return;
+		
+		
+		this.last_record_end = 0;
+		objects.chat_records_cont.y = objects.chat_records_cont.sy;
+		
+		for(let rec of objects.chat_records) {
+			rec.visible = false;			
+			rec.msg_id = -1;	
+			rec.tm=0;
+		}
+
+		
+		objects.chat_cont.visible = true;
+		//подписываемся на чат
+		//подписываемся на изменения состояний пользователей
+		firebase.database().ref('chat').once('value', snapshot => {chat.chat_load(snapshot.val());});		
+		firebase.database().ref('chat').on('child_changed', snapshot => {chat.chat_updated(snapshot.val());});
+	},
+				
+	get_oldest_record : function () {
+		
+		let oldest = objects.chat_records[0];
+		
+		for(let rec of objects.chat_records)
+			if (rec.tm < oldest.tm)
+				oldest = rec;			
+		return oldest;
+
+	},
+		
+	chat_load : async function(data) {
+		
+		if (data === null) return;
+		
+		data = Object.keys(data).map((key) => data[key]);
+		data.sort(function(a, b) {	return a[3] - b[3];});
+			
+		for (let c = data.length - 13; c<data.length;c++)
+			await this.chat_updated(data[c]);			
+		
+	},	
+		
+	chat_updated : async function(data) {		
+		
+		console.log(data);
+		
+		var result = objects.chat_records.find(obj => {
+		  return obj.msg_id === data[4];
+		})
+		
+		if (result !== undefined) {			
+			//result.tm = data[3];
+			return;
+		};
+		
+		let rec = this.get_oldest_record();
+		
+		//сразу заносим айди чтобы проверять
+		rec.msg_id = data[4];
+		
+		rec.y = this.last_record_end;
+		
+		await rec.set(...data)		
+		
+		this.last_record_end += 35;		
+		
+		objects.chat_records_cont.y-=35
+
+		//anim2.add(objects.chat_records_cont,{y:[objects.chat_records_cont.y, objects.chat_records_cont.y-35]}, true, 0.25,'easeInOutCubic');		
+		
+	},
+	
+	wheel_event : function(delta) {
+		
+		//objects.chat_records_cont.y-=delta*5;
+		
+		
+	},
+	
+	close : function() {
+		
+		objects.chat_cont.visible = false;
+		firebase.database().ref('chat').off();
+		if (objects.feedback_cont.visible === true)
+			feedback.close();
+	},
+	
+	close_down : async function() {
+		
+		sound.play('click');
+		this.close();
+		main_menu.activate();
+		
+
+		
+	},
+	
+	open_keyboard : async function() {
+		
+		//пишем отзыв и отправляем его		
+		sound.play('click');
+		let fb = await feedback.show(opp_data.uid);		
+		if (fb[0] === 'sent') {
+			
+			await firebase.database().ref('chat/'+irnd(1,50)).set([ my_data.uid, my_data.name, fb[1], firebase.database.ServerValue.TIMESTAMP, irnd(0,9999999)]);
+		
+		}		
+		
+	}
+
+	
 }
 
 lb = {
@@ -4459,8 +4694,8 @@ async function load_resources() {
 
 	document.getElementById("m_progress").style.display = 'flex';
 
-	//let git_src="https://akukamil.github.io/poker/"
-	git_src=""
+	let git_src="https://akukamil.github.io/poker/"
+	//git_src=""
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
