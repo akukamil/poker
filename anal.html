@@ -297,12 +297,12 @@ async function get_games(ref) {
 	let _data = [];
 	for (let i = 0 ; i < uids.length ; i++) {
 				
-		_data.push([uids[i],data[uids[i]].player1, data[uids[i]].player2, data[uids[i]].res, data[uids[i]].client_id, data[uids[i]].ts ])		
+		_data.push([uids[i],data[uids[i]].player1, data[uids[i]].player2, data[uids[i]].res, data[uids[i]].pot, data[uids[i]].client_id, data[uids[i]].ts ])		
 		
 	}	
 	
 	//это заголовки
-	let header = ['game_id','player1','player2','res','client_id','ts'];
+	let header = ['game_id','player1','player2','res','pot','client_id','ts'];
 	
 	my_table.create(_data, header, 'none', 'list');	
 		

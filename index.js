@@ -2205,6 +2205,7 @@ game = {
 					'player1':objects.my_card_name.text,
 					'player2':objects.opp_card_name.text,
 					'res':table.round_result,
+					'pot':table.total_pot,
 					'client_id':client_id,
 					'ts':firebase.database.ServerValue.TIMESTAMP
 				});			
