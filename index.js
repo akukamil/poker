@@ -1,5 +1,5 @@
 var M_WIDTH=800, M_HEIGHT=450;
-var app, game_res, game, objects = {}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, h_state = 0, game_platform = "",
+var app, game_res, game, objects = {}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "",
 hidden_state_start = 0,room_name = 'states2', pending_player = '', opponent = {}, my_data={opp_id : ''},
 opp_data={}, some_process = {}, git_src = '', ME = 0, OPP = 1, WIN = 1, DRAW = 0, LOSE = -1, NOSYNC = 2, turn = 0, BET = 0, BIG_BLIND = 2;
 
@@ -2169,8 +2169,8 @@ game = {
 			if (opponent === mp_game)
 				anim2.add(objects.chat_button_cont,{y:[500,objects.chat_button_cont.sy ]}, true, 0.2,'linear');	
 
-			let round_res = await this.process_round(start_player);
-			
+			let round_res = await this.process_round(start_player);			
+		
 			if (opponent === mp_game)
 				anim2.add(objects.chat_button_cont,{y:[objects.chat_button_cont.y,500 ]}, false, 0.2,'linear');	
 			
@@ -2190,8 +2190,7 @@ game = {
 				table.round_result = 'opp_notime';
 			
 			if (round_res === 'NOCONN') 
-				table.round_result = 'no_conn';
-			
+				table.round_result = 'no_conn';			
 
 			//если раунд закончился нормально или фолдом то проверяем дальше
 			await table.opp_cards[0].open();
@@ -2200,6 +2199,19 @@ game = {
 			//определяем и заносим показатели о результате игры
 			table.calculate_winner();
 			
+			//записываем результаты партий
+			if (opponent === mp_game) {				
+				firebase.database().ref("finishes/" + game_id + "_" + i).set({
+					'player1':objects.my_card_name.text,
+					'player2':objects.opp_card_name.text,
+					'res':table.round_result,
+					'client_id':client_id,
+					'ts':firebase.database.ServerValue.TIMESTAMP
+				});			
+			}
+
+						
+						
 			//показыаем результаты
 			let m_res = await round_finish_dialog.show()
 			if (m_res === 'exit') return ['Игра закончена','Game is over'][LANG];
@@ -4963,6 +4975,8 @@ async function init_game_env(env) {
 	else
 		my_data.rating = other_data.rating;
 	
+	//идентификатор клиента
+	client_id = irnd(10,999999);
 
 	other_data===null ?
 		my_data.games = 0 :
