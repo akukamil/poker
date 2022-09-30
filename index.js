@@ -2608,6 +2608,7 @@ var	ad = {
 		
 		if ((Date.now() - this.prv_show) < 100000 )
 			return;
+		this.prv_show = Date.now();
 		
 		if (game_platform==='YANDEX') {			
 			//показываем рекламу
