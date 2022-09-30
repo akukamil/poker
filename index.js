@@ -2238,6 +2238,9 @@ game = {
 			let opt = {action:'INIT_BET', value : BIG_BLIND};
 			for(let i = 0 ; i < 1000 ; i ++) {
 				
+				
+				if (i > 3) ad.show();
+				
 				opt = await bet_making.start(start_player, opt.action, opt.value, i > 3);	
 				if (opt.action === 'FOLD') return 'FOLD'+start_player;	
 				if (opt.action === 'NOTIME') return 'NOTIME'+start_player;
@@ -2598,9 +2601,13 @@ social_dialog = {
 }
 
 var	ad = {
-		
+	
+	prv_show : -9999,
 		
 	show : function() {
+		
+		if ((Date.now() - this.prv_show) < 100000 )
+			return;
 		
 		if (game_platform==='YANDEX') {			
 			//показываем рекламу
@@ -2670,6 +2677,7 @@ var	ad = {
 		return 'err';
 		
 	}
+
 }
 
 confirm_dialog = {
