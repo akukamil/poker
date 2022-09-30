@@ -2169,6 +2169,9 @@ game = {
 			if (opponent === mp_game)
 				anim2.add(objects.chat_button_cont,{y:[500,objects.chat_button_cont.sy ]}, true, 0.2,'linear');	
 
+				
+			if (i > 3) ad.show();
+
 			let round_res = await this.process_round(start_player);			
 		
 			if (opponent === mp_game)
@@ -2237,10 +2240,7 @@ game = {
 			
 			let opt = {action:'INIT_BET', value : BIG_BLIND};
 			for(let i = 0 ; i < 1000 ; i ++) {
-				
-				
-				if (i > 3) ad.show();
-				
+								
 				opt = await bet_making.start(start_player, opt.action, opt.value, i > 3);	
 				if (opt.action === 'FOLD') return 'FOLD'+start_player;	
 				if (opt.action === 'NOTIME') return 'NOTIME'+start_player;
