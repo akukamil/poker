@@ -272,10 +272,10 @@ async function delete_old_players() {
 //ИГРЫ
 async function get_games(ref) {
 	
-	let max_games = document.getElementById("max_players").value * 1;
+	let max_games = document.getElementById("max_games").value * 1;
 	
 	if(ref === 'finishes')
-		max_games = document.getElementById("max_players").value * 1;
+		max_games = document.getElementById("max_games").value * 1;
 	if(ref === 'finishes2')
 		max_games = document.getElementById("max_leaders_games").value * 1;
 	
