@@ -4904,6 +4904,8 @@ async function init_game_env(env) {
 	else
 		room_name= 'states';
 	room_name= 'states2';
+	//my_data.rating = 100;
+	
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=objects.my_card_rating.text=my_data.rating;
 
