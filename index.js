@@ -1,3 +1,4 @@
+@@ -1,4967 +1,4892 @@
 var M_WIDTH=800, M_HEIGHT=450;
 var app, game_res, game, objects = {}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "",
 hidden_state_start = 0,room_name = 'states2', pending_player = '', opponent = {}, my_data={opp_id : ''},
@@ -1844,9 +1845,12 @@ bet_dialog = {
 			max_bet = 150;
 		if (min_rating > 600)
 			max_bet = 200;
-		if (BIG_BLIND > 1000)
+		if (min_rating > 1000)
 			max_bet = 300;
-				
+		if (min_rating > 2000)
+			max_bet = 500;
+		if (min_rating > 5000)
+			max_bet = 1000;
 		
 		if (action === 'CALL_RAISE') {
 			
