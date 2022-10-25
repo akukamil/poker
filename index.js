@@ -285,8 +285,7 @@ class playing_cards_class extends PIXI.Container {
 		await anim2.add(this,{scale_x:[0, 1]}, true, 0.2,'linear');	
 		
 	}	
-	
-	
+		
 }
 
 big_deck = {
@@ -1029,6 +1028,7 @@ mp_game = {
 	opp_conf_play : 0,
 	made_moves: 0,
 	my_role : '',
+	timer_id : 0,
 	
 	send_move :  function(move_data) {
 				
@@ -1333,13 +1333,19 @@ hand_check = {
 		//console.log(hand);
 		
 		for (let s = 0 ; s < 4; s++) {				
-			for (let d = 0 ; d < 8 ; d ++) {
+			for (let d = 0 ; d < 9 ; d ++) {
 				let tar_hand = [];
-				for (let i = 9 ; i < 14; i++)
+				for (let i = 10 ; i < 15; i++)
 					tar_hand.push(value_num_to_txt[i - d] + suit_num_to_txt[s]);
 				
 				if (tar_hand.every(card => hand.includes(card)))
-					return {check:1, name:'STRAIGHT_FLUSH', data: [{value : 13 - d}]};
+					return {check:1, name:'STRAIGHT_FLUSH', data: [{value : 14 - d}]};
+				
+				//стрит от туза
+				let sf_small = [value_num_to_txt[14]+suit_num_to_txt[s],value_num_to_txt[2]+suit_num_to_txt[s],	value_num_to_txt[3]+suit_num_to_txt[s],value_num_to_txt[4]+suit_num_to_txt[s],value_num_to_txt[5]+suit_num_to_txt[s]];
+				
+				if (sf_small.every(card => hand.includes(card)))
+					return {check: 1, name:'STRAIGHT_FLUSH', data : [{value : 5}]};	
 			}
 		}
 		
@@ -1416,8 +1422,7 @@ hand_check = {
 		let hand = [];
 		for (let card of cards)		
 			hand.push(card.value_num);
-	
-			
+				
 		for (let d = 0 ; d < 9 ; d ++) {	
 
 			let tar_hand = [];
@@ -1427,6 +1432,11 @@ hand_check = {
 			if (tar_hand.every(card => hand.includes(card)))
 				return {check: 1, name:'STRAIGHT', data : [{value : 14 - d}]};	
 		}		
+		
+		//стрит от туза		
+		if ([14,2,3,4,5].every(card => hand.includes(card)))
+			return {check: 1, name:'STRAIGHT', data : [{value : 5}]};	
+		
 		return {check:0};			
 	},
 	
@@ -4615,6 +4625,7 @@ function vis_change() {
 
 async function load_resources() {
 
+
 	//это нужно удалить потом
 	/*document.body.innerHTML = "Привет!\nДобавляем в игру некоторые улучшения))\nЗайдите через 40 минут.";
 	document.body.style.fontSize="24px";
@@ -4756,6 +4767,8 @@ async function define_platform_and_language(env) {
 }
 
 async function init_game_env(env) {
+				
+
 				
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
