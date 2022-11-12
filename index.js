@@ -4542,6 +4542,15 @@ auth2 = {
 			return;
 		}
 		
+		if (game_platform === 'RUSTORE') {	
+
+			let country_code = await this.get_country_code();
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('RS_');
+			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
+			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+			return;
+		}
+		
 		if (game_platform === 'DEBUG') {		
 
 			my_data.name = my_data.uid = 'debug' + prompt('Отладка. Введите ID', 100);
@@ -4745,10 +4754,10 @@ async function define_platform_and_language(env) {
 		return;
 	}	
 
-	if (s.includes('google_play')) {
+	if (s.includes('rustore')) {
 			
-		game_platform = 'GOOGLE_PLAY';	
-		LANG = await language_dialog.show();
+		game_platform = 'RUSTORE';	
+		LANG = 0;
 		return;	
 	}	
 	
