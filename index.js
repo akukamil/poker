@@ -4504,12 +4504,7 @@ auth2 = {
 			if (my_data.name === '')
 				my_data.name = this.get_random_name(my_data.uid);
 			
-			//если английский яндекс до добавляем к имени страну
-			let country_code = await this.get_country_code();
-			my_data.name = my_data.name + ' (' + country_code + ')';			
-
-
-			
+		
 			return;
 		}
 		
@@ -4535,18 +4530,16 @@ auth2 = {
 		
 		if (game_platform === 'GOOGLE_PLAY') {	
 
-			let country_code = await this.get_country_code();
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GP_');
-			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
+			my_data.name = this.get_random_name(my_data.uid);
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			return;
 		}
 		
 		if (game_platform === 'RUSTORE') {	
 
-			let country_code = await this.get_country_code();
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('RS_');
-			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
+			my_data.name = this.get_random_name(my_data.uid);
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			return;
 		}
@@ -4920,7 +4913,10 @@ async function init_game_env(env) {
 	other_data===null ?
 		my_data.games = 0 :
 		my_data.games = other_data.games || 0;
-						
+				
+	//получаем информацию о стране
+	const country =  other_data.country || await auth2.get_country_code();
+				
 	//номер комнаты
 	if (my_data.rating >= 222500)
 		room_name= 'states2';			
@@ -4940,9 +4936,13 @@ async function init_game_env(env) {
 	
 	//обновляем базовые данные в файербейс так могло что-то поменяться
 	firebase.database().ref("players/"+my_data.uid+"/name").set(my_data.name);
+	firebase.database().ref("players/"+my_data.uid+"/country").set(country);
 	firebase.database().ref("players/"+my_data.uid+"/pic_url").set(my_data.pic_url);				
 	firebase.database().ref("players/"+my_data.uid+"/rating").set(my_data.rating);
 	firebase.database().ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
+	
+	//добавляем страну в имя
+	my_data.name = my_data.name+' (' +country +')'
 	
 	//устанавливаем мой статус в онлайн
 	set_state({state : 'o'});
