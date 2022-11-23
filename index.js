@@ -2653,6 +2653,13 @@ var	ad = {
 		if (game_platform==='GM') {
 			sdk.showBanner();
 		}
+	
+		if (game_platform==='GOOGLE_PLAY') {
+			if (Android) {
+				Android.showAdFromJs();
+			}			
+		}
+	
 	},
 	
 	show2 : async function() {
