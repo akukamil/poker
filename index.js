@@ -2655,7 +2655,7 @@ var	ad = {
 		}
 	
 		if (game_platform==='GOOGLE_PLAY') {
-			if (Android) {
+			if (typeof Android !== 'undefined') {
 				Android.showAdFromJs();
 			}			
 		}
