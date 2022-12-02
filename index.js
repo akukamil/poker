@@ -136,22 +136,38 @@ class chat_record_class extends PIXI.Container {
 		this.tm = 0;
 		this.msg_id = 0;
 		
-		this.avatar = new PIXI.Sprite(PIXI.Texture.WHITE);
-		this.avatar.width = this.avatar.height = 30;
-
 		
-		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 17,align: 'left'});
-		this.name.x=35;
-		this.name.y=15;
-		this.name.anchor.set(0,0.5);
-		this.name.maxWidth = 75;
+		this.msg_bcg = new PIXI.Sprite(gres.msg_bcg.texture);
+		this.msg_bcg.width=560;
+		this.msg_bcg.height=75;
+		this.msg_bcg.x=90;
+		//this.msg_bcg.tint=Math.random() * 0xffffff;
+		
+		this.avatar = new PIXI.Sprite(PIXI.Texture.WHITE);
+		this.avatar.width = this.avatar.height = 40;
+		this.avatar.x=65;
+		this.avatar.y=5;
+		this.avatar.anchor.set(0.5,0)
+		
+		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 15});
+		this.name.anchor.set(0.5,0.5);
+		this.name.x=65;
+		this.name.y=55;
 		
 		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 20,align: 'left'}); 
-		this.msg.x=135;
-		this.msg.y=5;
+		this.msg.x=140;
+		this.msg.y=37.5;
+		this.msg.maxWidth=400;
+		this.msg.anchor.set(0,0.5);
+		this.msg.tint = PIXI.utils.rgb2hex([250/255,250/255,250/255]);
+		
+		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: 14,align: 'left'}); 
+		this.msg_tm.y=52;
+		this.msg_tm.tint=0xffffff;
+		this.msg_tm.alpha=0.7;
 		
 		this.visible = false;
-		this.addChild(this.avatar, this.name, this.msg);
+		this.addChild(this.msg_bcg,this.avatar, this.name, this.msg,this.msg_tm);
 		
 	}
 	
@@ -171,7 +187,6 @@ class chat_record_class extends PIXI.Container {
 			cards_menu.uid_pic_url_cache[uid] = pic_url;
 		}
 		
-
 		
 		//сначала смотрим на загруженные аватарки в кэше
 		if (PIXI.utils.TextureCache[pic_url]===undefined || PIXI.utils.TextureCache[pic_url].width===1) {
@@ -184,7 +199,7 @@ class chat_record_class extends PIXI.Container {
 				loader.load(function(l,r) {	resolve(l.resources.pic.texture)});
 			})
 			
-			if (texture.width === 1) {
+			if (texture === undefined || texture.width === 1) {
 				texture = PIXI.Texture.WHITE;
 				texture.tint = this.msg.tint;
 			}
@@ -207,17 +222,33 @@ class chat_record_class extends PIXI.Container {
 		this.avatar.texture=PIXI.Texture.WHITE;
 		await this.update_avatar(uid, this.avatar);
 
+
+
 		this.tm = tm;
 			
 		this.msg_id = msg_id;
 		
-		if (name.length > 20) name = name.substring(0, 20);	
-		this.name.text=name;		
+		if (name.length > 15) name = name.substring(0, 10);	
+		this.name.text=name ;		
 		
 		this.msg.text=msg;
+		
+		if (msg.length<25) {
+			this.msg_bcg.texture = gres.msg_bcg_short.texture;			
+			this.msg_tm.x=310;
+		}
 
-		this.msg.tint = this.name.tint = 0xffffff*(Math.random()*0.001+0.999);
+		else {
+			
+			this.msg_bcg.texture = gres.msg_bcg.texture;	
+			this.msg_tm.x=535;
+		}
+
+
+		
 		this.visible = true;
+		
+		this.msg_tm.text = new Date(tm).toLocaleString();
 		
 	}	
 	
@@ -3251,12 +3282,21 @@ main_menu= {
 
 var chat = {
 	
+	MESSAGE_HEIGHT : 75,
 	last_record_end : 0,
+	drag : false,
+	touch_y:0,
 	
 	activate : function() {
 		
 		//firebase.database().ref('chat').remove();
-		//return;		
+		//return;
+		
+		objects.desktop.visible=true;
+		objects.desktop.pointerdown=this.down.bind(this);
+		objects.desktop.pointerup=this.up.bind(this);
+		objects.desktop.pointermove=this.move.bind(this);
+		objects.desktop.interactive=true;
 		
 		this.last_record_end = 0;
 		objects.chat_records_cont.y = objects.chat_records_cont.sy;
@@ -3266,12 +3306,42 @@ var chat = {
 			rec.msg_id = -1;	
 			rec.tm=0;
 		}
+
 		
 		objects.chat_cont.visible = true;
 		//подписываемся на чат
 		//подписываемся на изменения состояний пользователей
 		firebase.database().ref('chat').once('value', snapshot => {chat.chat_load(snapshot.val());});		
 		firebase.database().ref('chat').on('child_changed', snapshot => {chat.chat_updated(snapshot.val());});
+	},
+	
+	down : function(e) {
+		
+		this.drag=true;
+        this.touch_y = e.data.global.y / app.stage.scale.y;
+	},
+	
+	up : function(e) {
+		
+		this.drag=false;
+		
+	},
+	
+	move : function(e) {
+		
+		if (this.drag === true) {
+			
+			let cur_y = e.data.global.y / app.stage.scale.y;
+			let dy = this.touch_y - cur_y;
+			if (dy!==0){
+				
+				objects.chat_records_cont.y-=dy;
+				this.touch_y=cur_y;
+				this.wheel_event(0);
+			}
+			
+		}
+		
 	},
 				
 	get_oldest_record : function () {
@@ -3290,9 +3360,12 @@ var chat = {
 		if (data === null) return;
 		
 		data = Object.keys(data).map((key) => data[key]);
+		
+		//сортируем сообщения от старых к новым
 		data.sort(function(a, b) {	return a[3] - b[3];});
 			
-		for (let c = data.length - 13; c<data.length;c++)
+		//покаываем несколько последних сообщений
+		for (let c = data.length - 20; c<data.length;c++)
 			await this.chat_updated(data[c]);			
 		
 	},	
@@ -3319,23 +3392,33 @@ var chat = {
 		
 		await rec.set(...data)		
 		
-		this.last_record_end += 35;		
+		this.last_record_end += this.MESSAGE_HEIGHT;		
 		
-		objects.chat_records_cont.y-=35
-
+		await anim2.add(objects.chat_records_cont,{y:[objects.chat_records_cont.y,objects.chat_records_cont.y-this.MESSAGE_HEIGHT]}, true, 0.05,'linear');		
+		
+		console.log(objects.chat_records_cont.y)
 		//anim2.add(objects.chat_records_cont,{y:[objects.chat_records_cont.y, objects.chat_records_cont.y-35]}, true, 0.25,'easeInOutCubic');		
 		
 	},
 	
 	wheel_event : function(delta) {
 		
-		//objects.chat_records_cont.y-=delta*5;
+		objects.chat_records_cont.y-=delta*this.MESSAGE_HEIGHT;	
+		const chat_bottom = this.last_record_end;
+		const chat_top = this.last_record_end - 20*this.MESSAGE_HEIGHT;
 		
+		if (objects.chat_records_cont.y+chat_bottom<450)
+			objects.chat_records_cont.y =  450-chat_bottom;
+		
+		if (objects.chat_records_cont.y+chat_top>0)
+			objects.chat_records_cont.y=-chat_top;
 		
 	},
 	
 	close : function() {
 		
+		objects.desktop.interactive=false;
+		objects.desktop.visible=false;
 		objects.chat_cont.visible = false;
 		firebase.database().ref('chat').off();
 		if (objects.feedback_cont.visible === true)
@@ -3344,7 +3427,6 @@ var chat = {
 	
 	close_down : async function() {
 		
-		sound.play('click');
 		this.close();
 		main_menu.activate();
 		
@@ -3355,7 +3437,6 @@ var chat = {
 	open_keyboard : async function() {
 		
 		//пишем отзыв и отправляем его		
-		sound.play('click');
 		let fb = await feedback.show(opp_data.uid);		
 		if (fb[0] === 'sent') {
 			
@@ -4777,7 +4858,6 @@ async function define_platform_and_language(env) {
 
 async function init_game_env(env) {
 				
-
 				
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
@@ -4898,7 +4978,12 @@ async function init_game_env(env) {
 
 	
 	//разные события
-	window.addEventListener("wheel", event => cards_menu.wheel_event(Math.sign(event.deltaY)));	
+	window.addEventListener("wheel", (event) => {		
+		cards_menu.wheel_event(Math.sign(event.deltaY));
+		chat.wheel_event(Math.sign(event.deltaY));
+	});	
+	
+	
 	window.addEventListener('keydown', function(event) { feedback.key_down(event.key)});
 	document.addEventListener("visibilitychange", vis_change);
 		
