@@ -4564,9 +4564,8 @@ auth2 = {
 			
 			}
 			
-			let country_code = await this.get_country_code();
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GM_');
-			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
+			my_data.name = this.get_random_name(my_data.uid);
 			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
 			
 		}
