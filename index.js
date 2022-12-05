@@ -228,7 +228,7 @@ class chat_record_class extends PIXI.Container {
 			
 		this.msg_id = msg_id;
 		
-		if (name.length > 15) name = name.substring(0, 10);	
+		if (name.length > 15) name = name.substring(0, 15);	
 		this.name.text=name ;		
 		
 		this.msg.text=msg;
