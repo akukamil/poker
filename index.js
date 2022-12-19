@@ -2192,12 +2192,7 @@ game = {
 						
 			//определяем биг блайнд		
 			let min_rating =  Math.min(opp_data.rating, my_data.rating);
-			BIG_BLIND = 2;		
-			if (min_rating > 300)	BIG_BLIND = 8;
-			if (min_rating > 600)	BIG_BLIND = 20;
-			if (min_rating > 1000)	BIG_BLIND = 30;
-			if (min_rating > 1500)	BIG_BLIND = 60;
-			if (min_rating > 2000)	BIG_BLIND = 80;
+			BIG_BLIND = 2*Math.round(min_rating*0.04);		
 						
 			//проверяем есть ли у соперника фишки
 			if (opp_data.rating < 50)
