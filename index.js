@@ -4982,29 +4982,22 @@ async function init_game_env(env) {
 	let _other_data = await firebase.database().ref("players/" + my_data.uid).once('value');
 	let other_data = _other_data.val();
 	
-	//это защита от неправильных данных
-	if (other_data===null || isNaN(other_data.rating))
-		my_data.rating = 100;
-	else
-		my_data.rating = other_data.rating;
+	
+	my_data.rating = (other_data && other_data.rating) || 100;
+	my_data.games = (other_data && other_data.games) || 0;
+	my_data.name = (other_data && other_data.name) || my_data.name;
+	
 	
 	//идентификатор клиента
 	client_id = irnd(10,999999);
-
-	other_data===null ?
-		my_data.games = 0 :
-		my_data.games = other_data.games || 0;
 				
 	//получаем информацию о стране
 	const country =  (other_data && other_data.country) || await auth2.get_country_code();
 				
+				
+				
 	//номер комнаты
-	if (my_data.rating >= 222500)
-		room_name= 'states2';			
-	else
-		room_name= 'states';
 	room_name= 'states2';
-	//my_data.rating = 100;
 	
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=objects.my_card_rating.text=my_data.rating;
