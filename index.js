@@ -2336,14 +2336,11 @@ game = {
 					if (opt.action === 'CALL' || opt.action === 'CHECK') break;
 					
 				}					
-				
 			}
 			
 			//раунд закончился нормально
 			return 'OK';
-					
-					
-		
+			
 	},
 	
 	close : function() {
@@ -2522,12 +2519,12 @@ table = {
 		}		
 		
 		if (this.round_result === 'my_notime') {			
-			this.update_balance(OPP, this.total_pot);	
+			this.update_balance(OPP, ~~(this.total_pot*0.5));	
 			return;
 		}
 						
 		if (this.round_result === 'opp_notime') {			
-			this.update_balance(ME, this.total_pot);
+			this.update_balance(ME, ~~(this.total_pot*0.5));
 			return;
 		}		
 		
