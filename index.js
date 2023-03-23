@@ -1484,7 +1484,10 @@ hand_check = {
 		}
 		
 		//проверяем есть ли триппл
-		let pos_of_3 = counter.findIndex(e => e.count === 3);
+		let pos_of_3=-1;
+		for (let i=0;i<15;i++)
+			if (counter[i].count===3)
+				pos_of_3=i;
 		
 		//если не нашли триппл
 		if (pos_of_3 === -1)	return {check:0};
@@ -4848,15 +4851,13 @@ async function define_platform_and_language(env) {
 }
 
 async function init_game_env(env) {
-				
-				
+						
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
 						
 	//отображаем шкалу загрузки
 	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
-		
-	
+			
 	await load_resources();
 	
 	await auth2.init();
@@ -4965,8 +4966,6 @@ async function init_game_env(env) {
 
 	//устанавливаем фотки в попап и другие карточки
 	objects.id_avatar.texture = objects.my_avatar.texture = loader.resources.my_avatar.texture;
-
-
 	
 	//разные события
 	window.addEventListener("wheel", (event) => {		
