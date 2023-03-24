@@ -4774,7 +4774,7 @@ async function load_resources() {
 	game_res.add('clock',git_src+'sounds/clock.mp3');
 	game_res.add('card',git_src+'sounds/card.mp3');
 	game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
-	game_res.add('card_open',git_src+'sounds/_card_open3.mp3');
+	game_res.add('card_open',git_src+'sounds/card_open.mp3');
 	game_res.add('dialog',git_src+'sounds/dialog.mp3');
 	game_res.add('keypress',git_src+'sounds/keypress.mp3');
 	
