@@ -928,6 +928,9 @@ sound = {
 	on : 1,
 	
 	play : function(snd_res) {
+				
+		if (game_res.resources[snd_res]===undefined)
+			return;
 		
 		if (this.on === 0)
 			return;
