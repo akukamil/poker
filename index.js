@@ -929,7 +929,7 @@ sound = {
 	
 	play : function(snd_res) {
 				
-		if (game_res.resources[snd_res]===undefined)
+		if (game_res.resources[snd_res].sound===undefined)
 			return;
 		
 		if (this.on === 0)
