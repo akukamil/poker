@@ -133,8 +133,9 @@ class chat_record_class extends PIXI.Container {
 		
 		super();
 		
-		this.tm = 0;
-		this.msg_id = 0;
+		this.tm=0;
+		this.msg_id=0;
+		this.msg_index=0;
 		
 		
 		this.msg_bcg = new PIXI.Sprite(gres.msg_bcg.texture);
@@ -143,28 +144,33 @@ class chat_record_class extends PIXI.Container {
 		this.msg_bcg.x=90;
 		//this.msg_bcg.tint=Math.random() * 0xffffff;
 		
-		this.avatar = new PIXI.Sprite(PIXI.Texture.WHITE);
-		this.avatar.width = this.avatar.height = 40;
-		this.avatar.x=65;
-		this.avatar.y=5;
-		this.avatar.anchor.set(0.5,0)
-		
+
 		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 15});
 		this.name.anchor.set(0.5,0.5);
 		this.name.x=65;
 		this.name.y=55;
+		
+		
+		this.avatar = new PIXI.Sprite(PIXI.Texture.WHITE);
+		this.avatar.width = this.avatar.height = 40;
+		this.avatar.x=65;
+		this.avatar.y=5;
+		this.avatar.interactive=true;
+		this.avatar.pointerdown=feedback.response_message.bind(this,this);
+		this.avatar.anchor.set(0.5,0)
+				
 		
 		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 20,align: 'left'}); 
 		this.msg.x=140;
 		this.msg.y=37.5;
 		this.msg.maxWidth=400;
 		this.msg.anchor.set(0,0.5);
-		this.msg.tint = PIXI.utils.rgb2hex([250/255,250/255,250/255]);
+		this.msg.tint = 0xffffff;
 		
-		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: 14,align: 'left'}); 
-		this.msg_tm.y=52;
-		this.msg_tm.tint=0xffffff;
-		this.msg_tm.alpha=0.7;
+		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: 14}); 
+		this.msg_tm.y=57;
+		this.msg_tm.tint=0xddeeff;
+		this.msg_tm.anchor.set(1,0.5);
 		
 		this.visible = false;
 		this.addChild(this.msg_bcg,this.avatar, this.name, this.msg,this.msg_tm);
@@ -216,39 +222,38 @@ class chat_record_class extends PIXI.Container {
 		
 	}
 	
-	async set(uid, name, msg, tm, msg_id) {
+	async set(msg_data) {
 						
 		//получаем pic_url из фб
 		this.avatar.texture=PIXI.Texture.WHITE;
-		await this.update_avatar(uid, this.avatar);
+		await this.update_avatar(msg_data.uid, this.avatar);
 
 
 
-		this.tm = tm;
+		this.tm = msg_data.tm;
 			
-		this.msg_id = msg_id;
+		this.msg_id = msg_data.msg_id;
+		this.msg_index=msg_data.msg_index;
 		
-		if (name.length > 15) name = name.substring(0, 15);	
-		this.name.text=name ;		
+		if (msg_data.name.length > 15) msg_data.name = msg_data.name.substring(0, 15);	
+		this.name.text=msg_data.name ;		
 		
-		this.msg.text=msg;
+		this.msg.text=msg_data.msg;
 		
-		if (msg.length<25) {
+		if (msg_data.msg.length<25) {
 			this.msg_bcg.texture = gres.msg_bcg_short.texture;			
-			this.msg_tm.x=310;
+			this.msg_tm.x=400;
 		}
-
 		else {
 			
 			this.msg_bcg.texture = gres.msg_bcg.texture;	
-			this.msg_tm.x=535;
+			this.msg_tm.x=630;
 		}
-
 
 		
 		this.visible = true;
 		
-		this.msg_tm.text = new Date(tm).toLocaleString();
+		this.msg_tm.text = new Date(msg_data.tm).toLocaleString();
 		
 	}	
 	
@@ -1685,7 +1690,7 @@ round_finish_dialog = {
 	exit_down : function() {
 		
 		if (objects.rfd_cont.ready === false) {
-			sound.click('locked')
+			sound.play('locked')
 			return;
 		}
 		
@@ -1964,7 +1969,7 @@ bet_dialog = {
 	ok_down : function () {
 		
 		if (objects.bet_dialog_cont.ready === false) {
-			sound.click('locked')
+			sound.play('locked')
 			return;
 		}
 		
@@ -1996,7 +2001,7 @@ bet_dialog = {
 	fold_down : function () {
 		
 		if (objects.bet_dialog_cont.ready === false) {
-			sound.click('locked')
+			sound.play('locked')
 			return;
 		}
 		
@@ -3022,6 +3027,14 @@ feedback = {
 		
 	},
 	
+	response_message:function(s) {
+
+		
+		objects.feedback_msg.text = s.name.text.split(' ')[0]+', ';	
+		objects.feedback_control.text = `${objects.feedback_msg.text.length}/${feedback.MAX_SYMBOLS}`		
+		
+	},
+	
 	get_texture_for_key (key) {
 		
 		if (key === '<' || key === 'EN' || key === 'RU') return gres.hl_key1.texture;
@@ -3276,6 +3289,7 @@ chat = {
 	MESSAGE_HEIGHT : 75,
 	last_record_end : 0,
 	drag : false,
+	data:[],
 	touch_y:0,
 	
 	activate : function() {
@@ -3298,12 +3312,13 @@ chat = {
 			rec.tm=0;
 		}
 
+		objects.chat_enter_button.visible=true
 		
 		objects.chat_cont.visible = true;
 		//подписываемся на чат
 		//подписываемся на изменения состояний пользователей
-		firebase.database().ref('chat').once('value', snapshot => {chat.chat_load(snapshot.val());});		
-		firebase.database().ref('chat').on('child_changed', snapshot => {chat.chat_updated(snapshot.val());});
+		firebase.database().ref('chat2').orderByChild('tm').limitToLast(20).once('value', snapshot => {chat.chat_load(snapshot.val());});		
+		firebase.database().ref('chat2').on('child_changed', snapshot => {chat.chat_updated(snapshot.val());});
 	},
 	
 	down : function(e) {
@@ -3345,50 +3360,74 @@ chat = {
 		return oldest;
 
 	},
+	
+	shuffle_array : function(array) {
+		for (let i = array.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+	},
+	
+	get_oldest_index : function () {
+		
+		let nums=Array.from(Array(50).keys());
+		this.shuffle_array(nums);
+		loop1:for (let num of nums){
+			
+			for(let rec of objects.chat_records)
+				if (rec.visible===true && rec.msg_index===num)
+					continue loop1;
+			return num;
+		}
+		
+		let oldest = {tm:9671801786406 ,visible:true};		
+		for(let rec of objects.chat_records)
+			if (rec.visible===true && rec.tm < oldest.tm)
+				oldest = rec;	
+		return oldest.msg_index;		
+		
+	},
 		
 	chat_load : async function(data) {
 		
 		if (data === null) return;
 		
+		//превращаем в массив
 		data = Object.keys(data).map((key) => data[key]);
 		
 		//сортируем сообщения от старых к новым
-		data.sort(function(a, b) {	return a[3] - b[3];});
+		data.sort(function(a, b) {	return a.tm - b.tm;});
 			
 		//покаываем несколько последних сообщений
-		for (let c = data.length - 20; c<data.length;c++)
-			await this.chat_updated(data[c]);			
-		
+		for (let c of data)
+			await this.chat_updated(c);	
 	},	
 		
 	chat_updated : async function(data) {		
+	
+		if(data===undefined) return;
 		
-		console.log(data);
-		
+		//если это сообщение уже есть в чате
 		var result = objects.chat_records.find(obj => {
-		  return obj.msg_id === data[4];
+		  return obj.msg_id === data.msg_id;
 		})
 		
-		if (result !== undefined) {			
-			//result.tm = data[3];
+		if (result !== undefined)		
 			return;
-		};
 		
-		let rec = this.get_oldest_record();
+		let rec = objects.chat_records[data.msg_index];
 		
 		//сразу заносим айди чтобы проверять
-		rec.msg_id = data[4];
+		rec.msg_id = data.msg_id;
 		
 		rec.y = this.last_record_end;
 		
-		await rec.set(...data)		
+		await rec.set(data)		
 		
 		this.last_record_end += this.MESSAGE_HEIGHT;		
 		
-		await anim2.add(objects.chat_records_cont,{y:[objects.chat_records_cont.y,objects.chat_records_cont.y-this.MESSAGE_HEIGHT]}, true, 0.05,'linear');		
 		
-		console.log(objects.chat_records_cont.y)
-		//anim2.add(objects.chat_records_cont,{y:[objects.chat_records_cont.y, objects.chat_records_cont.y-35]}, true, 0.25,'easeInOutCubic');		
+		await anim2.add(objects.chat_records_cont,{y:[objects.chat_records_cont.y,objects.chat_records_cont.y-this.MESSAGE_HEIGHT]}, true, 0.05,'linear');		
 		
 	},
 	
@@ -3396,10 +3435,10 @@ chat = {
 		
 		objects.chat_records_cont.y-=delta*this.MESSAGE_HEIGHT;	
 		const chat_bottom = this.last_record_end;
-		const chat_top = this.last_record_end - 20*this.MESSAGE_HEIGHT;
+		const chat_top = this.last_record_end - objects.chat_records.filter(obj => obj.visible === true).length*this.MESSAGE_HEIGHT;
 		
 		if (objects.chat_records_cont.y+chat_bottom<450)
-			objects.chat_records_cont.y =  450-chat_bottom;
+			objects.chat_records_cont.y = 450-chat_bottom;
 		
 		if (objects.chat_records_cont.y+chat_top>0)
 			objects.chat_records_cont.y=-chat_top;
@@ -3411,7 +3450,7 @@ chat = {
 		objects.desktop.interactive=false;
 		objects.desktop.visible=false;
 		objects.chat_cont.visible = false;
-		firebase.database().ref('chat').off();
+		firebase.database().ref('chat2').off();
 		if (objects.feedback_cont.visible === true)
 			feedback.close();
 	},
@@ -3421,20 +3460,16 @@ chat = {
 		this.close();
 		main_menu.activate();
 		
-
-		
 	},
 	
 	open_keyboard : async function() {
 		
 		//пишем отзыв и отправляем его		
-		let fb = await feedback.show(opp_data.uid);		
-		if (fb[0] === 'sent') {
-			
-			await firebase.database().ref('chat/'+irnd(1,50)).set([ my_data.uid, my_data.name, fb[1], firebase.database.ServerValue.TIMESTAMP, irnd(0,9999999)]);
-		
+		let fb = await feedback.show(opp_data.uid,65);		
+		if (fb[0] === 'sent') {			
+			const msg_index=this.get_oldest_index();
+			await firebase.database().ref('chat2/'+msg_index).set({uid:my_data.uid,name:my_data.name,msg:fb[1], tm:firebase.database.ServerValue.TIMESTAMP, msg_id:irnd(0,9999999),rating:my_data.rating,msg_index:msg_index});
 		}		
-		
 	}
 
 	
@@ -4734,17 +4769,10 @@ async function load_resources() {
 	game_res.add('close',git_src+'sounds/close.mp3');
 	game_res.add('locked',git_src+'sounds/locked.mp3');
 	game_res.add('clock',git_src+'sounds/clock.mp3');
-	game_res.add('card',git_src+'sounds/card2.mp3');
-	game_res.add('card_take',git_src+'sounds/card.mp3');
+	game_res.add('card',git_src+'sounds/card.mp3');
 	game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
-	game_res.add('move',git_src+'sounds/move.mp3');
-	game_res.add('done',git_src+'sounds/done.mp3');
-	game_res.add('razdacha',git_src+'sounds/razdacha.mp3');
-	game_res.add('card_open',git_src+'sounds/card_open.mp3');
-	game_res.add('inc_card',git_src+'sounds/inc_card.mp3');
-	game_res.add('take',git_src+'sounds/take.mp3');
-	game_res.add('dialog',git_src+'sounds/dialog.mp3');
-	game_res.add('plus_minus_bet',git_src+'sounds/plus_minus_bet.mp3');
+	game_res.add('card_open',git_src+'sounds/_card_open3.mp3');
+	game_res.add('dialog',git_src+'sounds/_dialog4.mp3');
 	game_res.add('keypress',git_src+'sounds/keypress.mp3');
 	
     //добавляем из листа загрузки
