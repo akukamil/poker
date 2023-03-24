@@ -3,7 +3,7 @@ var app, game_res, game, objects = {}, LANG = 0, state="", game_tick = 0, game_i
 hidden_state_start = 0,room_name = 'states2', pending_player = '', opponent = {}, my_data={opp_id : ''},
 opp_data={}, some_process = {}, git_src = '', ME = 0, OPP = 1, WIN = 1, DRAW = 0, LOSE = -1, NOSYNC = 2, turn = 0, BET = 0, BIG_BLIND = 2;
 
-const suit_num_to_txt = ['h','d','s','c'], MIN_CHIPS = 20;
+const suit_num_to_txt = ['h','d','s','c'];
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const comb_to_text = {HIGH_CARD : ['СТАРШАЯ КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
 
@@ -951,7 +951,7 @@ sound = {
 	
 }
 
-var message =  {
+message =  {
 	
 	promise_resolve :0,
 	
@@ -1084,12 +1084,8 @@ mp_game = {
 				
 		let msg_data = await feedback.show();
 		
-		if (msg_data[0] === 'sent') {			
+		if (msg_data[0] === 'sent')			
 			firebase.database().ref("inbox/"+opp_data.uid).set({sender:my_data.uid,message:"CHAT",tm:Date.now(),data:msg_data[1]});	
-
-		} else {			
-			message.add('Сообщение не отправлено');
-		}
 		
 	},
 		
@@ -2639,7 +2635,7 @@ social_dialog = {
 	
 }
 
-var	ad = {
+ad = {
 	
 	prv_show : -9999,
 		
@@ -3275,7 +3271,7 @@ main_menu= {
 
 }
 
-var chat = {
+chat = {
 	
 	MESSAGE_HEIGHT : 75,
 	last_record_end : 0,
@@ -4992,8 +4988,6 @@ async function init_game_env(env) {
 				
 	//получаем информацию о стране
 	const country =  (other_data && other_data.country) || await auth2.get_country_code();
-				
-				
 				
 	//номер комнаты
 	room_name= 'states2';
