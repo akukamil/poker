@@ -117,8 +117,9 @@ class lb_player_card_class extends PIXI.Container{
 
 
 		this.rating=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'});
-		this.rating.x=298;
-		this.rating.tint=0xff55ff;
+		this.rating.x=350;
+		this.rating.anchor.set(1,0);
+		this.rating.tint=0x00aa00;
 		this.rating.y=22;
 
 		this.addChild(this.bcg,this.place, this.avatar, this.name, this.rating);
@@ -1844,8 +1845,6 @@ bet_dialog = {
 	min_max_opts : ['',''],
 	dragging : 0,
 	slider_min_max_x : [40,280],
-
-	
 	
 	show : async function (opp_action, min_bet, no_rasing) {
 	
@@ -2057,10 +2056,7 @@ bet_dialog = {
 		this.dragging = 0;		
 	},	
 	
-
 	
-
-			
 }
 
 bet_making = {
@@ -2381,6 +2377,7 @@ table = {
 	cen_cards : [],
 	bets_info : [],
 	total_pot : 0,
+	my_bets_in_pot:0,
 	row : [0,0],
 	round_result : '',
 	
@@ -2396,7 +2393,7 @@ table = {
 		this.bets_info.forEach(b => b.forEach(i=>i.text = ''));
 		this.bets_info[1][0].text = BIG_BLIND - start_player*small_blind;
 		this.bets_info[0][0].text = small_blind + start_player*small_blind;
-			
+						
 			
 		//выдергиваем из большой колоды 4 карты (2 моих и 2 соперника)
 		if (start_player === ME) {
@@ -2405,13 +2402,15 @@ table = {
 			this.my_cards[1].set(big_deck.cards.pop());
 			this.opp_cards[0].set(big_deck.cards.pop());
 			this.opp_cards[1].set(big_deck.cards.pop());
+			this.my_bets_in_pot=small_blind;
 			
 		} else {
 			
 			this.opp_cards[0].set(big_deck.cards.pop());
 			this.opp_cards[1].set(big_deck.cards.pop());			
 			this.my_cards[0].set(big_deck.cards.pop());
-			this.my_cards[1].set(big_deck.cards.pop());			
+			this.my_cards[1].set(big_deck.cards.pop());		
+			this.my_bets_in_pot=BIG_BLIND;
 		}		
 		
 		//активный колл
@@ -2435,7 +2434,7 @@ table = {
 		//отображаем начальный банк
 		this.total_pot = BIG_BLIND + small_blind;		
 		objects.total_pot.text = this.total_pot;
-
+		
 		//победителя пока не существует
 		this.winner = null;
 		
@@ -2479,6 +2478,11 @@ table = {
 							
 		//уменьшаем количество фищек у игрока
 		this.update_balance(player, -bet_data.value);
+		
+		if (player === ME){
+			this.my_bets_in_pot+=bet_data.value;
+			//console.log('my_bets_in_pot: ',this.my_bets_in_pot);
+		}
 							
 		//увеличиваем банк
 		this.total_pot += bet_data.value;		
@@ -2507,7 +2511,7 @@ table = {
 			
 			opp_data.rating += amount;			
 			objects.opp_card_rating.text = opp_data.rating;
-			console.log('Изменлся рейтинг оппонента ',opp_data.rating, amount)
+			//console.log('Изменлся рейтинг оппонента ',opp_data.rating, amount)
 			
 		}
 		
@@ -2531,7 +2535,7 @@ table = {
 		}
 						
 		if (this.round_result === 'opp_notime') {			
-			this.update_balance(ME, ~~(this.total_pot*0.5));
+			this.update_balance(ME, this.my_bets_in_pot);
 			return;
 		}		
 		
@@ -3487,7 +3491,7 @@ lb = {
 
 		this.active = 1;
 		objects.desktop.visible=true;
-		objects.desktop.texture=game_res.resources.lb_bcg.texture;
+		//objects.desktop.texture=game_res.resources.lb_bcg.texture;
 
 		
 		anim2.add(objects.leader_header,{y:[-50, objects.leader_header.sy]}, true, 0.5,'easeOutBack');
