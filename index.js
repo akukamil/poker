@@ -1164,9 +1164,7 @@ sp_game = {
 		opp_data.rating = 100;
 		
 		BIG_BLIND = 2;
-		
-		objects.desktop.texture = gres.desktop.texture;
-		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');				
+			
 		
 		//устанавливаем локальный и удаленный статус
 		set_state ({state : 'b'});		
@@ -2163,6 +2161,9 @@ game = {
 		
 		//активируем все что связано с онлайн или ботом
 		await opponent.activate();
+		
+		objects.desktop.texture = gres.desktop.texture;
+		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');		
 		
 		//показыаем карточки
 		anim2.add(objects.my_card_cont,{x:[-100,objects.my_card_cont.sx]}, true, 0.6,'easeOutBack');	
