@@ -2375,9 +2375,9 @@ table = {
 	my_cards : [],
 	opp_cards : [],
 	cen_cards : [],
-	bets_info : [],
 	total_pot : 0,
-	my_bets_in_pot:0,
+	my_pot:0,
+	opp_pot:0,
 	row : [0,0],
 	round_result : '',
 	
@@ -2389,12 +2389,9 @@ table = {
 		big_deck.init(seed);		
 		
 		//обнуляем данные о ставках и устанаваем начальную ставку
-		let small_blind = BIG_BLIND / 2;
-		this.bets_info.forEach(b => b.forEach(i=>i.text = ''));
-		this.bets_info[1][0].text = BIG_BLIND - start_player*small_blind;
-		this.bets_info[0][0].text = small_blind + start_player*small_blind;
-						
-			
+		const small_blind = BIG_BLIND / 2;
+					
+									
 		//выдергиваем из большой колоды 4 карты (2 моих и 2 соперника)
 		if (start_player === ME) {
 
@@ -2402,7 +2399,9 @@ table = {
 			this.my_cards[1].set(big_deck.cards.pop());
 			this.opp_cards[0].set(big_deck.cards.pop());
 			this.opp_cards[1].set(big_deck.cards.pop());
-			this.my_bets_in_pot=small_blind;
+			this.my_pot=small_blind;
+			this.opp_pot=BIG_BLIND;
+
 			
 		} else {
 			
@@ -2410,8 +2409,16 @@ table = {
 			this.opp_cards[1].set(big_deck.cards.pop());			
 			this.my_cards[0].set(big_deck.cards.pop());
 			this.my_cards[1].set(big_deck.cards.pop());		
-			this.my_bets_in_pot=BIG_BLIND;
+			this.my_pot=BIG_BLIND;
+			this.opp_pot=small_blind;
 		}		
+		
+		//
+		this.total_pot=this.my_pot+this.opp_pot;		
+		objects.my_pot0.text = this.my_pot;
+		objects.opp_pot0.text = this.opp_pot;
+		objects.total_pot.text = this.total_pot;
+		
 		
 		//активный колл
 		this.active_call = 2;
@@ -2472,21 +2479,21 @@ table = {
 	
 	process_bet : function(bet_data, player) {		
 		
-		//отображаем ставку в таблице
-		let cur_bet = this.bets_info[player][this.row[player]].text*1;
-		this.bets_info[player][this.row[player]].text = cur_bet + bet_data.value;
 							
 		//уменьшаем количество фищек у игрока
 		this.update_balance(player, -bet_data.value);
 		
-		if (player === ME){
-			this.my_bets_in_pot+=bet_data.value;
-			//console.log('my_bets_in_pot: ',this.my_bets_in_pot);
-		}
-							
-		//увеличиваем банк
-		this.total_pot += bet_data.value;		
+		if (player === ME)
+			this.my_pot+=bet_data.value;
+		else
+			this.opp_pot+=bet_data.value;
+			
+		//
+		this.total_pot=this.my_pot+this.opp_pot;		
+		objects.my_pot0.text = this.my_pot;
+		objects.opp_pot0.text = this.opp_pot;
 		objects.total_pot.text = this.total_pot;
+
 		
 		//устанаваем состояние если кто-то сбросил карты
 		if (bet_data.action === 'FOLD')
@@ -2535,7 +2542,7 @@ table = {
 		}
 						
 		if (this.round_result === 'opp_notime') {			
-			this.update_balance(ME, this.my_bets_in_pot);
+			this.update_balance(ME, this.my_pot);
 			return;
 		}		
 		
