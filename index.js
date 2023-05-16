@@ -955,6 +955,11 @@ sound = {
 		setTimeout(function(){game_res.resources[snd_res].sound.play()}, delay);
 			
 		
+	},
+	
+	stop_all(){
+		
+		PIXI.sound.stopAll();
 	}
 	
 	
@@ -2181,6 +2186,8 @@ game = {
 		//показываем финальное сообщение с возможностью отзыва
 		await big_message.show(info, 1);
 		
+		ad.show();
+		
 		main_menu.activate();
 		
 		//убираем все элементы игры		
@@ -2212,8 +2219,6 @@ game = {
 			if (opponent === mp_game)
 				anim2.add(objects.chat_button_cont,{y:[500,objects.chat_button_cont.sy ]}, true, 0.2,'linear');	
 
-				
-			if (i > 3) ad.show();
 
 			let round_res = await this.process_round(start_player);			
 		
@@ -4746,8 +4751,19 @@ function set_state(params) {
 
 function vis_change() {
 
-		if (document.hidden === true)		
-			hidden_state_start = Date.now();			
+		if (document.hidden === true){
+			
+			sound.stop_all();
+			sound.on=0;
+			hidden_state_start = Date.now();				
+		}
+		
+		if (document.hidden === false){
+
+			sound.on=1;
+			hidden_state_start = Date.now();				
+		}
+		
 		
 		set_state({hidden : document.hidden});
 		
