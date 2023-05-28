@@ -2136,7 +2136,12 @@ bet_making = {
 	
 	recv_bet_online (bet) {
 				
-		//завершаем ожидание
+		//ждем когда ставку готовы принять
+		for (let i=0;i<7;i++)
+		if (objects.opp_waiting_note.visible === false)
+			await new Promise(resolve => setTimeout(resolve, 1000));	
+		
+		//принимаем ставку
 		this.online_waiting_resolve(bet)			
 		
 	}	
