@@ -2134,7 +2134,7 @@ bet_making = {
 		this.online_waiting_resolve({action:'NOCONN', value:0});
 	},
 	
-	recv_bet_online (bet) {
+	async recv_bet_online (bet) {
 				
 		//ждем когда ставку готовы принять
 		for (let i=0;i<7;i++)
