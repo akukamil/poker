@@ -29,8 +29,8 @@ class player_mini_card_class extends PIXI.Container {
 		this.bcg=new PIXI.Sprite(game_res.resources.mini_player_card.texture);
 		this.bcg.width=gdata.player_card_w;
 		this.bcg.height=gdata.player_card_h;
-		this.bcg.interactive=true;
-		this.bcg.pointerdown=feedback.response_message.bind(this,this);
+		//this.bcg.interactive=true;
+		//this.bcg.pointerdown=feedback.response_message.bind(this,this);
 		
 		this.info_button=new PIXI.Sprite(gres.info_img.texture);
 		this.info_button.interactive=true;
