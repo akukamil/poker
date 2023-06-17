@@ -1,4 +1,5 @@
 var M_WIDTH=800, M_HEIGHT=450;
+var gdata={};
 var app, game_res, game, objects = {}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "",
 hidden_state_start = 0,room_name = 'states2', pending_player = '', opponent = {}, my_data={opp_id : ''},
 opp_data={}, some_process = {}, git_src = '', ME = 0, OPP = 1, WIN = 1, DRAW = 0, LOSE = -1, NOSYNC = 2, turn = 0, BET = 0, BIG_BLIND = 2;
@@ -23,66 +24,85 @@ class player_mini_card_class extends PIXI.Container {
 		this.type = "single";
 		this.x=x;
 		this.y=y;
+		
+		
 		this.bcg=new PIXI.Sprite(game_res.resources.mini_player_card.texture);
-		this.bcg.interactive=true;
-		this.bcg.buttonMode=true;
-		this.bcg.pointerdown=function(){cards_menu.card_down(id)};
-		this.bcg.pointerover=function(){this.bcg.alpha=0.5;}.bind(this);
-		this.bcg.pointerout=function(){this.bcg.alpha=1;}.bind(this);
-		this.bcg.width=200;
-		this.bcg.height=100;
+		this.bcg.width=gdata.player_card_w;
+		this.bcg.height=gdata.player_card_h;
+		
+		this.info_button=new PIXI.Sprite(gres.info_img.texture);
+		this.info_button.interactive=true;
+		this.info_button.buttonMode=true;
+		this.info_button.pointerdown=function(){lobby.card_down(id)};
+		this.info_button.pointerover=function(){this.bcg.alpha=0.5;}.bind(this);
+		this.info_button.pointerout=function(){this.bcg.alpha=1;}.bind(this);
+		this.info_button.width=gdata.player_card_info_button_w;
+		this.info_button.height=gdata.player_card_info_button_h;
+		this.info_button.x=gdata.player_card_info_button_x;
+		this.info_button.y=gdata.player_card_info_button_y;
 
 		this.avatar=new PIXI.Sprite();
-		this.avatar.x=20;
-		this.avatar.y=20;
-		this.avatar.width=this.avatar.height=60;
+		this.avatar.x=gdata.player_card_avatar_x;
+		this.avatar.y=gdata.player_card_avatar_y;
+		this.avatar.width=gdata.player_card_avatar_w;
+		this.avatar.height=gdata.player_card_avatar_h;
+		
+		this.avatar_frame=new PIXI.Sprite(gres.avatar_frame2.texture);
+		this.avatar_frame.x=gdata.player_card_avatar_x-10;
+		this.avatar_frame.y=gdata.player_card_avatar_y-10;
+		this.avatar_frame.width=gdata.player_card_avatar_w+20;
+		this.avatar_frame.height=gdata.player_card_avatar_h+20;
 
+		this.table_frame=new PIXI.Sprite(gres.table_frame.texture);
+		this.table_frame.width=gdata.player_card_w;
+		this.table_frame.height=gdata.player_card_h;
+		
 		this.name="";
-		this.name_text=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 20,align: 'center'});
-		this.name_text.anchor.set(0.5,0.5);
-		this.name_text.x=135;
-		this.name_text.y=35;
+		this.name_text=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: gdata.player_card_name_font_size,align: 'center'});
+		this.name_text.anchor.set(0,0.5);
+		this.name_text.x=gdata.player_card_name_x;
+		this.name_text.y=gdata.player_card_name_y;
+		this.name_text.tint=gdata.chat_record_name_tint;
+		
 
 		this.rating=0;
-		this.rating_text=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 24,align: 'center'});
+		this.rating_text=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: gdata.player_card_rating_font_size,align: 'center'});
 		this.rating_text.tint=0xffff00;
 		this.rating_text.anchor.set(0.5,0.5);
-		this.rating_text.x=135;
-		this.rating_text.y=70;
+		this.rating_text.x=gdata.player_card_rating_x;
+		this.rating_text.y=gdata.player_card_rating_y;		
+		this.rating_text.tint=gdata.player_card_rating_col;
 
 		//аватар первого игрока
 		this.avatar1=new PIXI.Sprite();
 		this.avatar1.x=20;
 		this.avatar1.y=20;
-		this.avatar1.width=this.avatar1.height=60;
+		this.avatar1.width=this.avatar1.height=gdata.player_card_avatar_w;
 
 		//аватар второго игрока
 		this.avatar2=new PIXI.Sprite();
-		this.avatar2.x=120;
+		this.avatar2.x=90;
 		this.avatar2.y=20;
-		this.avatar2.width=this.avatar2.height=60;
+		this.avatar2.width=this.avatar2.height=gdata.player_card_avatar_w;
 
+		
 		this.rating_text1=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 18,align: 'center'});
 		this.rating_text1.tint=0xffff00;
 		this.rating_text1.anchor.set(0.5,0);
-		this.rating_text1.x=50;
-		this.rating_text1.y=70;
+		this.rating_text1.x=45;
+		this.rating_text1.y=60;
 
 		this.rating_text2=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 18,align: 'center'});
 		this.rating_text2.tint=0xffff00;
 		this.rating_text2.anchor.set(0.5,0);
-		this.rating_text2.x=150;
-		this.rating_text2.y=70;
+		this.rating_text2.x=115;
+		this.rating_text2.y=60;
 		
-		//
-		this.rating_bcg = new PIXI.Sprite(game_res.resources.rating_bcg.texture);
-		this.rating_bcg.width=200;
-		this.rating_bcg.height=100;
 		
 		this.name1="";
 		this.name2="";
 
-		this.addChild(this.bcg,this.avatar, this.avatar1, this.avatar2, this.rating_bcg, this.rating_text,this.rating_text1,this.rating_text2, this.name_text);
+		this.addChild(this.bcg,this.info_button,this.avatar, this.avatar_frame, this.avatar1, this.avatar2, this.table_frame,this.rating_text,this.rating_text1,this.rating_text2, this.name_text);
 	}
 
 }
@@ -135,46 +155,47 @@ class chat_record_class extends PIXI.Container {
 		super();
 		
 		this.tm=0;
-		this.msg_id=0;
-		this.msg_index=0;
-		
+		this.hash=0;
+	
 		
 		this.msg_bcg = new PIXI.Sprite(gres.msg_bcg.texture);
-		this.msg_bcg.width=560;
-		this.msg_bcg.height=75;
-		this.msg_bcg.x=90;
-		//this.msg_bcg.tint=Math.random() * 0xffffff;
-		
+		this.msg_bcg.width=gdata.chat_record_w;
+		this.msg_bcg.height=gdata.chat_record_h;
 
-		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 15});
+
+		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: gdata.chat_record_name_font_size});
 		this.name.anchor.set(0.5,0.5);
-		this.name.x=65;
-		this.name.y=55;
+		this.name.x=gdata.chat_record_name_x;
+		this.name.y=gdata.chat_record_name_y;	
+		this.name.tint=gdata.chat_record_name_tint;
 		
 		
 		this.avatar = new PIXI.Sprite(PIXI.Texture.WHITE);
-		this.avatar.width = this.avatar.height = 40;
-		this.avatar.x=65;
-		this.avatar.y=5;
+		this.avatar.width=gdata.chat_record_avatar_w;
+		this.avatar.height=gdata.chat_record_avatar_h;
+		this.avatar.x=gdata.chat_record_avatar_sx;
+		this.avatar.y=gdata.chat_record_avatar_sy;
 		this.avatar.interactive=true;
 		this.avatar.pointerdown=feedback.response_message.bind(this,this);
-		this.avatar.anchor.set(0.5,0)
+		this.avatar.anchor.set(0,0)
 				
 		
-		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 20,align: 'left'}); 
-		this.msg.x=140;
-		this.msg.y=37.5;
-		this.msg.maxWidth=400;
+		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: gdata.chat_record_text_font_size,align: 'left'}); 
+		this.msg.x=gdata.chat_record_text_x;
+		this.msg.y=gdata.chat_record_text_y;
+		this.msg.maxWidth=gdata.chat_record_text_max_w;
 		this.msg.anchor.set(0,0.5);
-		this.msg.tint = 0xffffff;
+		this.msg.tint = gdata.chat_record_text_col;
 		
-		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: 14}); 
-		this.msg_tm.y=57;
-		this.msg_tm.tint=0xddeeff;
-		this.msg_tm.anchor.set(1,0.5);
+		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: gdata.chat_record_tm_font_size}); 
+		this.msg_tm.x=gdata.chat_record_tm_x;		
+		this.msg_tm.y=gdata.chat_record_tm_y;
+
+		this.msg_tm.tint=gdata.chat_record_tm_col;
+		this.msg_tm.anchor.set(0,0);
 		
 		this.visible = false;
-		this.addChild(this.msg_bcg,this.avatar, this.name, this.msg,this.msg_tm);
+		this.addChild(this.msg_bcg,this.avatar,this.name,this.msg,this.msg_tm);
 		
 	}
 	
@@ -183,15 +204,15 @@ class chat_record_class extends PIXI.Container {
 		
 		let pic_url = '';
 		//если есть в кэше то =берем оттуда если нет то загружаем
-		if (cards_menu.uid_pic_url_cache[uid] !== undefined) {
+		if (lobby.uid_pic_url_cache[uid] !== undefined) {
 			
-			pic_url = cards_menu.uid_pic_url_cache[uid];
+			pic_url = lobby.uid_pic_url_cache[uid];
 			
 		} else {
 			
 			pic_url = await firebase.database().ref("players/" + uid + "/pic_url").once('value');		
 			pic_url = pic_url.val();			
-			cards_menu.uid_pic_url_cache[uid] = pic_url;
+			lobby.uid_pic_url_cache[uid] = pic_url;
 		}
 		
 		
@@ -229,31 +250,13 @@ class chat_record_class extends PIXI.Container {
 		this.avatar.texture=PIXI.Texture.WHITE;
 		await this.update_avatar(msg_data.uid, this.avatar);
 
-
-
-		this.tm = msg_data.tm;
-			
-		this.msg_id = msg_data.msg_id;
-		this.msg_index=msg_data.msg_index;
+		this.tm = msg_data.tm;			
+		this.hash = msg_data.hash;
 		
 		if (msg_data.name.length > 15) msg_data.name = msg_data.name.substring(0, 15);	
 		this.name.text=msg_data.name ;		
-		
-		this.msg.text=msg_data.msg;
-		
-		if (msg_data.msg.length<25) {
-			this.msg_bcg.texture = gres.msg_bcg_short.texture;			
-			this.msg_tm.x=400;
-		}
-		else {
-			
-			this.msg_bcg.texture = gres.msg_bcg.texture;	
-			this.msg_tm.x=630;
-		}
-
-		
-		this.visible = true;
-		
+		this.msg.text=msg_data.msg;		
+		this.visible = true;		
 		this.msg_tm.text = new Date(msg_data.tm).toLocaleString();
 		
 	}	
@@ -323,6 +326,31 @@ class playing_cards_class extends PIXI.Container {
 		
 	}	
 		
+}
+
+class feedback_record_class extends PIXI.Container {
+	
+	constructor() {
+		
+		super();		
+		this.text=new PIXI.BitmapText('Николай: хорошая игра', {fontName: 'mfont',fontSize: 20,align: 'left'}); 
+		this.text.maxWidth=255;
+		this.text.tint=0xFFFF00;
+		
+		this.name_text=new PIXI.BitmapText('Николай:', {fontName: 'mfont',fontSize: 20,align: 'left'}); 
+		this.name_text.tint=0xFFFFFF;
+		
+		
+		this.addChild(this.text,this.name_text)
+	}		
+	
+	set(name, feedback_text){
+		this.text.text=name+': '+feedback_text;
+		this.name_text.text=name+':';
+	
+	}
+	
+	
 }
 
 big_deck = {
@@ -1132,6 +1160,7 @@ mp_game = {
 	
 	chat : function(data) {
 		
+		sound.play('online_message');
 		message.add(data, 10000);
 		
 	},
@@ -2548,7 +2577,7 @@ table = {
 		}		
 		
 		if (this.round_result === 'my_notime') {			
-			this.update_balance(OPP, ~~(this.total_pot*0.5));	
+			this.update_balance(OPP, this.total_pot);	
 			return;
 		}
 						
@@ -2825,12 +2854,12 @@ process_new_message=function(msg) {
 		//в данном случае я мастер и хожу вторым
 		opp_data.uid=msg.sender;
 		game_id=msg.game_id;
-		cards_menu.accepted_invite(msg.seed);
+		lobby.accepted_invite(msg.seed);
 	}
 
 	//принимаем также отрицательный ответ от соответствующего соперника
 	if (msg.message==="REJECT"  && pending_player === msg.sender) {
-		cards_menu.rejected_invite();
+		lobby.rejected_invite();
 	}
 
 	//получение сообщение в состояни игры
@@ -2982,12 +3011,12 @@ req_dialog = {
 		firebase.database().ref("inbox/"+opp_data.uid).set({sender:my_data.uid,message:"ACCEPT", tm:Date.now(), game_id : game_id, seed : seed});
 
 		//заполняем карточку оппонента
-		make_text(objects.opp_card_name,opp_data.name,150);
+		make_text(objects.opp_card_name,opp_data.name,140);
 		objects.opp_card_rating.text=objects.req_rating.text;
 		objects.opp_avatar.texture=objects.req_avatar.texture;
 
 		main_menu.close();
-		cards_menu.close();
+		lobby.close();
 		sp_game.switch_close();
 		
 		game.activate(ME, mp_game, seed);
@@ -3016,8 +3045,9 @@ feedback = {
 	MAX_SYMBOLS : 50,
 	uid:0,
 	
-	show : function(uid) {
+	show : function(uid,max_symb) {
 		
+		this.MAX_SYMBOLS=max_symb||50;
 		this.set_keyboard_layout(['RU','EN'][LANG]);				
 		this.uid = uid;
 		objects.feedback_msg.text ='';
@@ -3154,14 +3184,17 @@ feedback = {
 			//если нашли ненормативную лексику то закрываем
 			let mats =/шлю[хш]|п[еи]д[аеор]|суч?ка|г[ао]ндо|х[ую][ейяе]л?|жоп|соси|дроч|чмо|говн|дерьм|трах|секс|сосат|выеб|пизд|срал|уеб[аико]щ?|ебень?|ебу[ч]|ху[йия]|еба[нл]|дроч|еба[тш]|педик|[ъы]еба|ебну|ебл[аои]|ебись|сра[кч]|манда|еб[лн]я|ублюд|пис[юя]/i;		
 			
+			//если нашли маты
 			let text_no_spaces = objects.feedback_msg.text.replace(/ /g,'');
-			if (text_no_spaces.match(mats)) {
+			if (text_no_spaces.match(mats) || objects.feedback_msg.text.length<3) {
 				this.close();
 				this.p_resolve(['close','']);	
 				key ='';
+				sound.play('locked');
 				return;
 			}
 			
+		
 			this.close();
 			this.p_resolve(['sent',objects.feedback_msg.text]);	
 			key ='';
@@ -3220,7 +3253,7 @@ main_menu= {
 
 	pb_down: async function () {
 
-		if (anim2.any_on()===true || objects.id_cont.visible === true) {
+		if (anim2.any_on() || objects.id_cont.visible === true) {
 			sound.play('locked');
 			return
 		};
@@ -3228,13 +3261,13 @@ main_menu= {
 		sound.play('click');
 
 		await this.close();
-		cards_menu.activate();
+		lobby.activate();
 
 	},
 	
 	lb_button_down: async function () {
 
-		if (anim2.any_on()===true) {
+		if (anim2.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -3248,7 +3281,7 @@ main_menu= {
 
 	rules_button_down: async function () {
 
-		if (anim2.any_on()===true) {
+		if (anim2.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -3287,7 +3320,7 @@ main_menu= {
 
 	chat_button_down : async function() {
 		
-		if (anim2.any_on()===true) {
+		if (anim2.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -3311,89 +3344,41 @@ main_menu= {
 
 chat = {
 	
-	MESSAGE_HEIGHT : 75,
 	last_record_end : 0,
 	drag : false,
 	data:[],
 	touch_y:0,
+	activated:false,
 	
-	activate : function() {
+	activate() {
 		
-		//firebase.database().ref('chat').remove();
-		//return;
 		
-		objects.desktop.visible=true;
-		objects.desktop.pointerdown=this.down.bind(this);
-		objects.desktop.pointerup=this.up.bind(this);
-		objects.desktop.pointermove=this.move.bind(this);
-		objects.desktop.interactive=true;
-		
+		objects.chat_cont.visible = true;
+		if(this.activated) return;
+				
 		this.last_record_end = 0;
-		objects.chat_records_cont.y = objects.chat_records_cont.sy;
+		objects.chat_cont.y = objects.chat_cont.sy;
 		
 		for(let rec of objects.chat_records) {
 			rec.visible = false;			
 			rec.msg_id = -1;	
 			rec.tm=0;
-		}
-
-		objects.chat_enter_button.visible=true
+		}	
 		
-		objects.chat_cont.visible = true;
-		//подписываемся на чат
-		//подписываемся на изменения состояний пользователей
-		firebase.database().ref('chat2').orderByChild('tm').limitToLast(20).once('value', snapshot => {chat.chat_load(snapshot.val());});		
-		firebase.database().ref('chat2').on('child_changed', snapshot => {chat.chat_updated(snapshot.val());});
-	},
-	
-	down : function(e) {
+		//загружаем чат
+		firebase.database().ref('chat').orderByChild('tm').limitToLast(20).once('value', snapshot => {chat.chat_load(snapshot.val());});		
 		
-		this.drag=true;
-        this.touch_y = e.data.global.y / app.stage.scale.y;
-	},
-	
-	up : function(e) {
-		
-		this.drag=false;
-		
-	},
-	
-	move : function(e) {
-		
-		if (this.drag === true) {
-			
-			let cur_y = e.data.global.y / app.stage.scale.y;
-			let dy = this.touch_y - cur_y;
-			if (dy!==0){
-				
-				objects.chat_records_cont.y-=dy;
-				this.touch_y=cur_y;
-				this.wheel_event(0);
-			}
-			
-		}
-		
+		this.activated=true;
 	},
 				
-	get_oldest_record : function () {
-		
-		let oldest = objects.chat_records[0];
-		
-		for(let rec of objects.chat_records)
-			if (rec.tm < oldest.tm)
-				oldest = rec;			
-		return oldest;
-
-	},
-	
-	shuffle_array : function(array) {
+	shuffle_array(array) {
 		for (let i = array.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[array[i], array[j]] = [array[j], array[i]];
 		}
 	},
 	
-	get_oldest_index : function () {
+	get_oldest_index () {
 		
 		let nums=Array.from(Array(50).keys());
 		this.shuffle_array(nums);
@@ -3412,8 +3397,24 @@ chat = {
 		return oldest.msg_index;		
 		
 	},
+	
+	get_oldest_or_free_msg () {
 		
-	chat_load : async function(data) {
+		//проверяем пустые записи чата
+		for(let rec of objects.chat_records)
+			if (!rec.visible)
+				return rec;
+		
+		//если пустых нет то выбираем самое старое
+		let oldest = {tm:9671801786406 ,visible:true};		
+		for(let rec of objects.chat_records)
+			if (rec.visible===true && rec.tm < oldest.tm)
+				oldest = rec;	
+		return oldest;		
+		
+	},
+		
+	async chat_load(data) {
 		
 		if (data === null) return;
 		
@@ -3426,78 +3427,128 @@ chat = {
 		//покаываем несколько последних сообщений
 		for (let c of data)
 			await this.chat_updated(c);	
-	},	
 		
-	chat_updated : async function(data) {		
+		//подписываемся на новые сообщения
+		firebase.database().ref('chat').on('child_changed', snapshot => {chat.chat_updated(snapshot.val());});
+	},	
+				
+	async chat_updated(data) {		
 	
+		console.log('receive message',data)
 		if(data===undefined) return;
 		
 		//если это сообщение уже есть в чате
 		var result = objects.chat_records.find(obj => {
-		  return obj.msg_id === data.msg_id;
+		  return obj.hash === data.hash;
 		})
 		
 		if (result !== undefined)		
 			return;
 		
-		let rec = objects.chat_records[data.msg_index];
-		
-		//сразу заносим айди чтобы проверять
-		rec.msg_id = data.msg_id;
-		
+		//выбираем свободное или самое старое сообщение
+		let rec = this.get_oldest_or_free_msg();
+				
 		rec.y = this.last_record_end;
 		
 		await rec.set(data)		
 		
-		this.last_record_end += this.MESSAGE_HEIGHT;		
+		this.last_record_end += gdata.chat_record_h;			
 		
+		//смещаем на одно сообщение
+		await anim2.add(objects.chat_cont,{y:[objects.chat_cont.y,objects.chat_cont.y-gdata.chat_record_h]}, true, 0.05,'linear');		
 		
-		await anim2.add(objects.chat_records_cont,{y:[objects.chat_records_cont.y,objects.chat_records_cont.y-this.MESSAGE_HEIGHT]}, true, 0.05,'linear');		
+	},
+		
+	make_hash() {
+	  let hash = '';
+	  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	  for (let i = 0; i < 6; i++) {
+		hash += characters.charAt(Math.floor(Math.random() * characters.length));
+	  }
+	  return hash;
+	},
+	
+	get_abs_top_bottom(){
+		
+		let top_y=999999;
+		let bot_y=-999999
+		for(let rec of objects.chat_records){
+			if (rec.visible===true){
+				const cur_abs_top=objects.chat_cont.y+rec.y;
+				const cur_abs_bot=objects.chat_cont.y+rec.y+rec.height;
+				if (cur_abs_top<top_y) top_y=cur_abs_top;
+				if (cur_abs_bot>bot_y) bot_y=cur_abs_bot;
+			}		
+		}
+		
+		return [top_y,bot_y];				
 		
 	},
 	
-	wheel_event : function(delta) {
+	shift(dy) {				
 		
-		objects.chat_records_cont.y-=delta*this.MESSAGE_HEIGHT;	
+		const [top_y,bot_y]=this.get_abs_top_bottom();
+		
+		//проверяем движение чата вверх
+		if (dy<0){
+			const new_bottom=bot_y+dy;
+			const overlap=435-new_bottom;
+			if (new_bottom<435) dy+=overlap;
+		}
+	
+		//проверяем движение чата вниз
+		if (dy>0){
+			const new_top=top_y+dy;
+			if (new_top>50)
+				return;
+		}
+		
+		objects.chat_cont.y+=dy;
+		
+	},
+	
+	async open_keyboard() {
+		
+		//пишем сообщение в чат и отправляем его		
+		let fb = await feedback.show(opp_data.uid,65);		
+		if (fb[0] === 'sent') {			
+			const hash=this.make_hash();
+			const msg_index=irnd(0,50);
+			console.log('send message',msg_index)
+			await firebase.database().ref('chat/'+msg_index).set({uid:my_data.uid,name:my_data.name,msg:fb[1], tm:firebase.database.ServerValue.TIMESTAMP, hash:hash});
+		}		
+	},
+	
+	wheel_event(delta) {
+		
+		objects.chat_cont.y-=delta*gdata.chat_record_h*0.5;	
 		const chat_bottom = this.last_record_end;
-		const chat_top = this.last_record_end - objects.chat_records.filter(obj => obj.visible === true).length*this.MESSAGE_HEIGHT;
+		const chat_top = this.last_record_end - objects.chat_records.filter(obj => obj.visible === true).length*gdata.chat_record_h;
 		
-		if (objects.chat_records_cont.y+chat_bottom<450)
-			objects.chat_records_cont.y = 450-chat_bottom;
+		if (objects.chat_cont.y+chat_bottom<430)
+			objects.chat_cont.y = 430-chat_bottom;
 		
-		if (objects.chat_records_cont.y+chat_top>0)
-			objects.chat_records_cont.y=-chat_top;
+		if (objects.chat_cont.y+chat_top>0)
+			objects.chat_cont.y=-chat_top;
 		
 	},
 	
-	close : function() {
+	close() {
 		
-		objects.desktop.interactive=false;
-		objects.desktop.visible=false;
+		//objects.desktop.interactive=false;
+		//objects.desktop.visible=false;
 		objects.chat_cont.visible = false;
-		firebase.database().ref('chat2').off();
 		if (objects.feedback_cont.visible === true)
 			feedback.close();
 	},
 	
-	close_down : async function() {
+	async close_down() {
 		
 		this.close();
 		main_menu.activate();
 		
 	},
-	
-	open_keyboard : async function() {
 		
-		//пишем отзыв и отправляем его		
-		let fb = await feedback.show(opp_data.uid,65);		
-		if (fb[0] === 'sent') {			
-			const msg_index=this.get_oldest_index();
-			await firebase.database().ref('chat2/'+msg_index).set({uid:my_data.uid,name:my_data.name,msg:fb[1], tm:firebase.database.ServerValue.TIMESTAMP, msg_id:irnd(0,9999999),rating:my_data.rating,msg_index:msg_index});
-		}		
-	}
-
-	
 }
 
 lb = {
@@ -3548,7 +3599,7 @@ lb = {
 
 	back_button_down: async function() {
 
-		if (anim2.any_on()===true) {
+		if (anim2.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -3637,7 +3688,7 @@ rules = {
 	
 	back_button_down : async function() {
 		
-		if (anim2.any_on()===true) {
+		if (anim2.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -3756,67 +3807,144 @@ stickers={
 
 }
 
-cards_menu={
+lobby={
 	
 	state_tint :{},
 	_opp_data : {},
 	pover : 0,
 	uid_pic_url_cache : {},
+	drag_cards:false,
+	drag_chat:false,
+	drag_sx:0,
+	drag_sy:-999,	
+	last_card_bottom:0,
+	rejected_invites:{},
+	fb_cache:{},
 	
-	cards_pos: [
-				[0,0],[0,90],[0,180],[0,270],
-				[190,0],[190,90],[190,180],[190,270],
-				[380,0],[380,90],[380,180],[380,270],
-				[570,0],[570,90],[570,180]
-
-				],
-
 	activate: function () {
 
-
-
-		objects.desktop.texture=game_res.resources.cards_bcg.texture;
+		
+		objects.desktop.interactive=true;
+		objects.desktop.pointerdown=this.pointer_down.bind(this);
+		objects.desktop.pointerup=this.pointer_up.bind(this);
+		objects.desktop.pointerupoutside=this.pointer_up.bind(this);
+		objects.desktop.pointermove=this.pointer_move.bind(this);
+		
+		objects.chat_bcg.visible=true;
+		
+		anim2.add(objects.online_counter_cont,{y:[470,objects.online_counter_cont.sy]}, true, 0.5,'easeInCubic');
 		anim2.add(objects.cards_cont,{alpha:[0,1]}, true, 0.4,'linear');		
 		anim2.add(objects.back_button,{x:[800, objects.back_button.sx]}, true, 0.5,'easeOutCubic');
+		anim2.add(objects.chat_enter_button,{x:[800, objects.chat_enter_button.sx]}, true, 0.6,'easeOutCubic');
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.4,'linear');
 
+		objects.lobby_header.x=800;
+		objects.lobby_header.visible=true;
+		
+		some_process.header_move=this.header_move.bind(this);
+		
 		//расставляем по соответствующим координатам
-		for(let i=0;i<15;i++) {
+		/*for(let i=0;i<15;i++) {
 			objects.mini_cards[i].x=this.cards_pos[i][0];
 			objects.mini_cards[i].y=this.cards_pos[i][1];
-		}
+		}*/
 
+
+		chat.activate();
+		
 
 		//отключаем все карточки
 		this.card_i=1;
-		for(let i=1;i<15;i++)
+		for(let i=1;i<objects.mini_cards.length;i++)
 			objects.mini_cards[i].visible=false;
 
 		//добавляем карточку ии
 		this.add_card_ai();
 
 		//включаем сколько игроков онлайн
-		anim2.add(objects.players_online,{y:[500,objects.players_online.sy],x:[0,objects.players_online.sx]}, true, 0.6,'linear');		
-		anim2.add(objects.cards_menu_header,{y:[-50,objects.cards_menu_header.sy],x:[0,objects.cards_menu_header.sx]}, true, 0.6,'linear');	
+		//anim2.add(objects.players_online,{y:[500,objects.players_online.sy],x:[0,objects.players_online.sx]}, true, 0.6,'linear');		
 		
 		//подписываемся на изменения состояний пользователей
-		firebase.database().ref(room_name) .on('value', (snapshot) => {cards_menu.players_list_updated(snapshot.val());});
+		firebase.database().ref(room_name) .on('value', (snapshot) => {lobby.players_list_updated(snapshot.val());});
 
+	},
+	
+	header_move(){
+		
+		objects.lobby_header.x-=1;
+		if (objects.lobby_header.x<-750)
+			objects.lobby_header.x=800;
+		
+	},
+	
+	pointer_down(e){
+		
+		const px=e.data.global.x/app.stage.scale.x;
+		this.drag_sy=e.data.global.y/app.stage.scale.y;
+		
+		if (px<205){
+			this.drag_cards=true;
+			objects.cards_cont.by=objects.cards_cont.y;			
+		}else{
+			this.drag_chat=true;
+			objects.chat_cont.by=objects.chat_cont.y;				
+		}
+	},
+	
+	shift(dy){
+		
+		const chat_bottom=objects.cards_cont.y+this.last_card_bottom;
+		const new_y=objects.cards_cont.y+dy;
+		console.log(dy);
+		
+		//ограничиваем движение вниз
+		if (dy>0&&new_y>30){
+			objects.cards_cont.y=30;
+			return;
+		}
+		
+		//ограничиваем движение вверх
+		if (dy<0&&chat_bottom<400)return;
+		
+		//если все ок то перемещаем
+		objects.cards_cont.y=new_y;
+		
+	},
+	
+	pointer_move(e){		
+	
+		if (!this.drag_cards&&!this.drag_chat) return;
+		const mx = e.data.global.x/app.stage.scale.x;
+		const my = e.data.global.y/app.stage.scale.y;
+		
+		const dy=my-this.drag_sy;		
+		this.drag_sy=my;
+		
+		if (this.drag_cards)
+			this.shift(dy);
+	
+		if (this.drag_chat){
+			chat.shift(dy);
+		}	
+	},
+	
+	pointer_up(){
+		
+		this.drag_chat=false;
+		this.drag_cards=false;
+		
 	},
 
 	players_list_updated: function(players) {
 
 		//если мы в игре то не обновляем карточки
-		if (state==="p" || state==="b")
-			return;
-
+		if (state==="p" || state==="b") return;
 
 		//это столы
 		let tables = {};
 		
 		//это свободные игроки
 		let single = {};
-
 
 		//делаем дополнительный объект с игроками и расширяем id соперника
 		let p_data = JSON.parse(JSON.stringify(players));
@@ -3826,14 +3954,11 @@ cards_menu={
 			if (players[uid].state !== 'p' && players[uid].hidden === 0)
 				single[uid] = players[uid].name;						
 		}
-		
-		//console.table(single);
-		
+			
 		//убираем не играющие состояние
 		for (let uid in p_data)
 			if (p_data[uid].state !== 'p')
 				delete p_data[uid];
-		
 		
 		//дополняем полными ид оппонента
 		for (let uid in p_data) {			
@@ -3847,10 +3972,8 @@ cards_menu={
 				}							
 			}			
 		}
-				
 		
 		//определяем столы
-		//console.log (`--------------------------------------------------`)
 		for (let uid in p_data) {
 			let opp_id = p_data[uid].opp_id;
 			let name1 = p_data[uid].name;
@@ -3860,28 +3983,21 @@ cards_menu={
 			if (p_data[opp_id] !== undefined) {
 				
 				if (uid === p_data[opp_id].opp_id && tables[uid] === undefined) {
-					
 					tables[uid] = opp_id;					
-					//console.log(`${name1} (Hid:${hid}) (${rating}) vs ${p_data[opp_id].name} (Hid:${p_data[opp_id].hidden}) (${p_data[opp_id].rating}) `)	
 					delete p_data[opp_id];				
-				}
-				
-			} else 
-			{				
+				}				
+			} else {				
 				//console.log(`${name1} (${rating}) - одиночка `)					
 			}			
 		}
 					
-		
-		
 		//считаем и показываем количество онлайн игрокова
 		let num = 0;
 		for (let uid in players)
 			if (players[uid].hidden===0)
 				num++
 			
-		objects.players_online.text=['Игроков онлайн: ','Players online: '][LANG] + num + ['     ( комната: ','     ( room: '][LANG] + room_name +' )';
-		
+		objects.players_online.text=['Игроков онлайн: ','Players online: '][LANG] + num;
 		
 		//считаем сколько одиночных игроков и сколько столов
 		let num_of_single = Object.keys(single).length;
@@ -3889,21 +4005,20 @@ cards_menu={
 		let num_of_cards = num_of_single + num_of_tables;
 		
 		//если карточек слишком много то убираем столы
-		if (num_of_cards > 14) {
-			let num_of_tables_cut = num_of_tables - (num_of_cards - 14);			
+		if (num_of_cards > objects.mini_cards.length) {
+			let num_of_tables_cut = num_of_tables - (num_of_cards - objects.mini_cards.length);		
 			
 			let num_of_tables_to_cut = num_of_tables - num_of_tables_cut;
 			
 			//удаляем столы которые не помещаются
 			let t_keys = Object.keys(tables);
-			for (let i = 0 ; i < num_of_tables_to_cut ; i++) {
+			for (let i=0;i<num_of_tables_to_cut;i++) {
 				delete tables[t_keys[i]];
 			}
 		}
-
 		
 		//убираем карточки пропавших игроков и обновляем карточки оставшихся
-		for(let i=1;i<15;i++) {			
+		for(let i=1;i<objects.mini_cards.length;i++) {			
 			if (objects.mini_cards[i].visible === true && objects.mini_cards[i].type === 'single') {				
 				let card_uid = objects.mini_cards[i].uid;				
 				if (single[card_uid] === undefined)					
@@ -3912,9 +4027,6 @@ cards_menu={
 					this.update_existing_card({id:i, state:players[card_uid].state , rating:players[card_uid].rating});
 			}
 		}
-
-
-
 		
 		//определяем новых игроков которых нужно добавить
 		new_single = {};		
@@ -3922,24 +4034,18 @@ cards_menu={
 		for (let p in single) {
 			
 			let found = 0;
-			for(let i=1;i<15;i++) {			
-			
-				if (objects.mini_cards[i].visible === true && objects.mini_cards[i].type === 'single') {					
-					if (p ===  objects.mini_cards[i].uid) {
-						
+			for(let i=1;i<objects.mini_cards.length;i++) {				
+				if (objects.mini_cards[i].visible === true && objects.mini_cards[i].type === 'single')					
+					if (p ===  objects.mini_cards[i].uid)
 						found = 1;							
-					}	
-				}				
 			}		
 			
 			if (found === 0)
 				new_single[p] = single[p];
-		}
-		
-
+		}	
 		
 		//убираем исчезнувшие столы (если их нет в новом перечне) и оставляем новые
-		for(let i=1;i<15;i++) {			
+		for(let i=1;i<objects.mini_cards.length;i++) {			
 		
 			if (objects.mini_cards[i].visible === true && objects.mini_cards[i].type === 'table') {
 				
@@ -3963,8 +4069,7 @@ cards_menu={
 					objects.mini_cards[i].visible = false;
 			}	
 		}
-		
-		
+				
 		//размещаем на свободных ячейках новых игроков
 		for (let uid in new_single)			
 			this.place_new_card({uid:uid, state:players[uid].state, name : players[uid].name,  rating : players[uid].rating});
@@ -3979,26 +4084,32 @@ cards_menu={
 			this.place_table({uid1:uid,uid2:tables[uid],name1: n1, name2: n2, rating1: r1, rating2: r2});
 		}
 		
+		//опредеяем нижнюю точку чтобы не перелистывать карточки слишком далеко
+		for(let i=0;i<objects.mini_cards.length;i++)
+			if (objects.mini_cards[i].visible)
+				this.last_card_bottom=objects.mini_cards[i].y+objects.mini_cards[i].height;
+
 	},
 
-	get_state_tint: function(s) {
+	get_state_texture: function(s) {
 
+	
 		switch(s) {
 
 			case "o":
-				return this.state_tint.o;
+				return gres.mini_player_card.texture;
 			break;
 
 			case "b":
-				return this.state_tint.b;
+				return gres.mini_player_card.texture;
 			break;
 
 			case "p":
-				return this.state_tint.p;
+				return gres.mini_player_card.texture;
 			break;
 			
 			case "bot":
-				return this.state_tint.bot;
+				return gres.mini_player_card.texture;
 			break;
 
 		}
@@ -4006,20 +4117,17 @@ cards_menu={
 
 	place_table : function (params={uid1:0,uid2:0,name1: "XXX",name2: "XXX", rating1: 1400, rating2: 1400}) {
 				
-		for(let i=1;i<15;i++) {
+		for(let i=1;i<objects.mini_cards.length;i++) {
 
 			//это если есть вакантная карточка
 			if (objects.mini_cards[i].visible===false) {
 
 				//устанавливаем цвет карточки в зависимости от состояния
-				objects.mini_cards[i].bcg.tint=this.get_state_tint(params.state);
 				objects.mini_cards[i].state=params.state;
 
 				objects.mini_cards[i].type = "table";
-				
-				
+								
 				objects.mini_cards[i].bcg.texture = gres.mini_player_card_table.texture;
-				objects.mini_cards[i].bcg.tint=this.get_state_tint('p');
 				
 				//присваиваем карточке данные
 				//objects.mini_cards[i].uid=params.uid;
@@ -4032,11 +4140,12 @@ cards_menu={
 				objects.mini_cards[i].name_text.visible = false;
 
 				//Включаем элементы стола 
+				objects.mini_cards[i].table_frame.visible=true;
+				
 				objects.mini_cards[i].rating_text1.visible = true;
 				objects.mini_cards[i].rating_text2.visible = true;
 				objects.mini_cards[i].avatar1.visible = true;
 				objects.mini_cards[i].avatar2.visible = true;
-				objects.mini_cards[i].rating_bcg.visible = true;
 
 				objects.mini_cards[i].rating_text1.text = params.rating1;
 				objects.mini_cards[i].rating_text2.text = params.rating2;
@@ -4050,20 +4159,17 @@ cards_menu={
 				//получаем аватар и загружаем его
 				this.load_avatar2({uid:params.uid2, tar_obj:objects.mini_cards[i].avatar2});
 
-
 				objects.mini_cards[i].visible=true;
-
 
 				break;
 			}
 		}
-		
 	},
 
 	update_existing_card: function(params={id:0, state:"o" , rating:1400}) {
 
 		//устанавливаем цвет карточки в зависимости от состояния(имя и аватар не поменялись)
-		objects.mini_cards[params.id].bcg.tint=this.get_state_tint(params.state);
+		objects.mini_cards[params.id].bcg.texture=this.get_state_texture(params.state);
 		objects.mini_cards[params.id].state=params.state;
 
 		objects.mini_cards[params.id].rating=params.rating;
@@ -4073,17 +4179,17 @@ cards_menu={
 
 	place_new_card: function(params={uid:0, state: "o", name: "XXX", rating: rating}) {
 
-		for(let i=1;i<15;i++) {
+		for(let i=1;i<objects.mini_cards.length;i++) {
 
 			//это если есть вакантная карточка
 			if (objects.mini_cards[i].visible===false) {
 
 				//устанавливаем цвет карточки в зависимости от состояния
-				objects.mini_cards[i].bcg.texture = gres.mini_player_card.texture;
-				objects.mini_cards[i].bcg.tint=this.get_state_tint(params.state);
+				objects.mini_cards[i].bcg.texture=this.get_state_texture(params.state);
 				objects.mini_cards[i].state=params.state;
 
 				objects.mini_cards[i].type = "single";
+				objects.mini_cards[i].table_frame.visible=false;
 
 				//присваиваем карточке данные
 				objects.mini_cards[i].uid=params.uid;
@@ -4093,7 +4199,7 @@ cards_menu={
 				objects.mini_cards[i].rating_text2.visible = false;
 				objects.mini_cards[i].avatar1.visible = false;
 				objects.mini_cards[i].avatar2.visible = false;
-				objects.mini_cards[i].rating_bcg.visible = false;
+				objects.mini_cards[i].table_frame.visible = false;
 				
 				//включаем элементы свободного стола
 				objects.mini_cards[i].rating_text.visible = true;
@@ -4117,7 +4223,6 @@ cards_menu={
 				break;
 			}
 		}
-
 	},
 
 	get_texture : function (pic_url) {
@@ -4199,9 +4304,8 @@ cards_menu={
 		objects.mini_cards[0].rating_text2.visible = false;
 		objects.mini_cards[0].avatar1.visible = false;
 		objects.mini_cards[0].avatar2.visible = false;
-		objects.mini_cards[0].rating_bcg.visible = false;
+		objects.mini_cards[0].table_frame.visible = false;
 
-		objects.mini_cards[0].bcg.tint=this.state_tint.bot;
 		objects.mini_cards[0].visible=true;
 		objects.mini_cards[0].uid="BOT";
 		objects.mini_cards[0].name=objects.mini_cards[0].name_text.text=['Джокер','Joker'][LANG];
@@ -4211,7 +4315,7 @@ cards_menu={
 		objects.mini_cards[0].avatar.texture=game_res.resources.pc_icon.texture;
 	},
 	
-	card_down : function ( card_id ) {
+	card_down : function (card_id) {
 		
 		if (objects.mini_cards[card_id].type === 'single')
 			this.show_invite_dialog(card_id);
@@ -4220,16 +4324,20 @@ cards_menu={
 			this.show_table_dialog(card_id);
 				
 	},
-	
-	show_table_dialog : function (card_id) {
 		
-		if (anim2.any_on === true) {
+	show_table_dialog : function (card_id) {
+					
+		
+		//если какая-то анимация или открыт диалог
+		if (anim2.any_on() || pending_player!=='') {
 			sound.play('locked');
 			return
 		};
-
 		
-		anim2.add(objects.td_cont,{y:[-150, objects.td_cont.sy]}, true, 0.5,'easeOutBack');
+		//закрываем диалог стола если он открыт
+		if(objects.invite_cont.visible) this.close_invite_dialog();
+		
+		anim2.add(objects.td_cont,{x:[800, objects.td_cont.sx]}, true, 0.1,'linear');
 		
 		objects.td_avatar1.texture = objects.mini_cards[card_id].avatar1.texture;
 		objects.td_avatar2.texture = objects.mini_cards[card_id].avatar2.texture;
@@ -4237,26 +4345,27 @@ cards_menu={
 		objects.td_rating1.text = objects.mini_cards[card_id].rating_text1.text;
 		objects.td_rating2.text = objects.mini_cards[card_id].rating_text2.text;
 		
-		make_text(objects.td_name1, objects.mini_cards[card_id].name1, 150);
-		make_text(objects.td_name2, objects.mini_cards[card_id].name2, 150);
+		make_text(objects.td_name1, objects.mini_cards[card_id].name1, 240);
+		make_text(objects.td_name2, objects.mini_cards[card_id].name2, 240);
 		
 	},
 	
 	close_table_dialog : function () {
-		
 		sound.play('close');
-		
-		anim2.add(objects.td_cont,{y:[objects.td_cont.sy, 400]}, false, 0.5,'easeInBack');
-
-		
+		anim2.add(objects.td_cont,{x:[objects.td_cont.x, 800]}, false, 0.1,'linear');
 	},
 
 	show_invite_dialog: function(card_id) {
 
-		if (anim2.any_on() === true || objects.invite_cont.visible === true) {
+		//если какая-то анимация или уже сделали запрос
+		if (anim2.any_on() || pending_player!=='') {
 			sound.play('locked');
 			return
 		};
+		
+				
+		//закрываем диалог стола если он открыт
+		if(objects.td_cont.visible) this.close_table_dialog();
 
 		pending_player="";
 
@@ -4269,86 +4378,118 @@ cards_menu={
 		objects.invite_button.texture=game_res.resources.invite_button.texture;
 	
 		anim2.add(objects.invite_cont,{x:[800, objects.invite_cont.sx]}, true, 0.15,'linear');
-		anim2.add(objects.cards_menu_header,{x:[objects.cards_menu_header.sx,230]}, true, 0.15,'linear');
-		anim2.add(objects.players_online,{x:[objects.players_online.sx,230]}, true, 0.15,'linear');
 		
 		//копируем предварительные данные
-		cards_menu._opp_data = {uid:objects.mini_cards[card_id].uid,name:objects.mini_cards[card_id].name,rating:objects.mini_cards[card_id].rating};
-		
-		//затемняем кнопку если это не наша карточка
-		objects.fb_my.alpha = 1;
-		if (this._opp_data.uid !== my_data.uid)
-			objects.fb_my.alpha = 0.2;		
+		lobby._opp_data = {uid:objects.mini_cards[card_id].uid,name:objects.mini_cards[card_id].name,rating:objects.mini_cards[card_id].rating};
 		
 		
-		this.show_feedbacks(cards_menu._opp_data.uid);
+		
+		this.show_feedbacks(lobby._opp_data.uid);
 		
 		objects.invite_button_title.text=['Пригласить','Send invite'][LANG];
 
-		let invite_available = 	cards_menu._opp_data.uid !== my_data.uid;
+		let invite_available = 	lobby._opp_data.uid !== my_data.uid;
 		invite_available=invite_available && (objects.mini_cards[card_id].state==="o" || objects.mini_cards[card_id].state==="b");
-		invite_available=invite_available || cards_menu._opp_data.uid==="BOT";
-		invite_available=invite_available && cards_menu._opp_data.rating >= 50 && my_data.rating >= 50;
+		invite_available=invite_available || lobby._opp_data.uid==="BOT";
+		invite_available=invite_available && lobby._opp_data.rating >= 50 && my_data.rating >= 50;
+		
+		//если мы в списке игроков которые нас недавно отврегли
+		if (this.rejected_invites[lobby._opp_data.uid] && Date.now()-this.rejected_invites[lobby._opp_data.uid]<60000) invite_available=false;
 
 		//показыаем кнопку приглашения только если это допустимо
 		objects.invite_button.visible=objects.invite_button_title.visible=invite_available;
 
 		//заполняем карточу приглашения данными
 		objects.invite_avatar.texture=objects.mini_cards[card_id].avatar.texture;
-		make_text(objects.invite_name,cards_menu._opp_data.name,230);
+		make_text(objects.invite_name,lobby._opp_data.name,230);
 		objects.invite_rating.text=objects.mini_cards[card_id].rating_text.text;
 
 	},
 
-	show_feedbacks: async function(uid) {
-		
-		
-		objects.invite_feedback.text = '';
-		objects.invite_feedback.y = 400;
-		
-		//получаем фидбэки
-		let _fb = await firebase.database().ref("fb/" + uid).once('value');
-		let fb_obj =_fb.val();
-		if (fb_obj === null) {
-			objects.invite_feedback.text = '***нет отзывов***'
-			return;
+	show_feedbacks: async function(uid) {	
+
+
+			
+		//получаем фидбэки сначала из кэша, если их там нет или они слишком старые то загружаем из фб
+		let fb_obj;		
+		if (!this.fb_cache[uid] || (Date.now()-this.fb_cache[uid].tm)>120000) {
+			let _fb = await firebase.database().ref("fb/" + uid).once('value');
+			fb_obj =_fb.val();	
+			
+			//сохраняем в кэше отзывов
+			this.fb_cache[uid]={};			
+			this.fb_cache[uid].tm=Date.now();					
+			if (fb_obj){
+				this.fb_cache[uid].fb_obj=fb_obj;				
+			}else{
+				fb_obj={0:[['***нет отзывов***','***no feedback***'][LANG],999,' ']};
+				this.fb_cache[uid].fb_obj=fb_obj;				
+			}
+
+			console.log('загрузили фидбэки в кэш')				
+			
+		} else {
+			fb_obj =this.fb_cache[uid].fb_obj;	
+			console.log('фидбэки из кэша ,ура')
 		}
+
+		
+		
 		var fb = Object.keys(fb_obj).map((key) => [fb_obj[key][0],fb_obj[key][1],fb_obj[key][2]]);
 		
-		//выбираем последние отзывы
+		//сортируем отзывы по дате
 		fb.sort(function(a,b) {
-			return a[1]-b[1]
-		});
+			return b[1]-a[1]
+		});	
+	
 		
-		let fb_cnt = fb.length;
-				
+		//сначала убираем все фидбэки
+		objects.feedback_records.forEach(fb=>fb.visible=false)
+
+		let prv_fb_bottom=0;
+		const fb_cnt=Math.min(fb.length,objects.feedback_records.length);
 		for (let i = 0 ; i < fb_cnt;i++) {
+			const fb_place=objects.feedback_records[i];
+			
 			let sender_name =  fb[i][2] || 'Неизв.';
-			if (sender_name.length > 10) sender_name = sender_name.substring(0, 10);			
-			objects.invite_feedback.text +=(sender_name + ': ');
-			objects.invite_feedback.text +=fb[i][0];
-			objects.invite_feedback.text +='\n';	
+			if (sender_name.length > 10) sender_name = sender_name.substring(0, 10);		
+			fb_place.set(sender_name,fb[i][0]);
+			
+			
+			const fb_height=fb_place.text.height;
+			const fb_end=prv_fb_bottom+fb_height;
+			
+			//если отзыв будет выходить за экран то больше ничего не отображаем
+			const fb_end_abs=fb_end+objects.invite_cont.y+objects.invite_feedback.y;
+			if (fb_end_abs>450) return;
+			
+			fb_place.visible=true;
+			fb_place.y=prv_fb_bottom;
+			prv_fb_bottom+=fb_place.text.height;
 		}
-		
-		console.log(objects.invite_feedback.height);
-		console.log(objects.invite_feedback.y);	
+	
 	},
 
 	close: async function() {
 
 
 		if (objects.invite_cont.visible === true)
-			this.hide_invite_dialog();
+			this.close_invite_dialog();
 		
 		if (objects.td_cont.visible === true)
 			this.close_table_dialog();
 
+		some_process.header_move=function(){};
+		objects.lobby_header.visible=false;
+		
+		chat.close();
+		objects.chat_bcg.visible=false;
 		//плавно все убираем
-		anim2.add(objects.cards_menu_header,{y:[ objects.cards_menu_header.y, -50]}, false, 0.4,'easeInCubic');
 		anim2.add(objects.cards_cont,{alpha:[1,0]}, false, 0.4,'linear');		
 		anim2.add(objects.back_button,{x:[objects.back_button.sx, 800]}, false, 0.5,'easeInCubic');
+		anim2.add(objects.chat_enter_button,{x:[objects.chat_enter_button.x,800]}, false, 0.6,'easeOutCubic');
 		anim2.add(objects.desktop,{alpha:[1,0]}, false, 0.4,'linear');
-		await anim2.add(objects.players_online,{y:[objects.players_online.y, 470]}, false, 0.5,'easeInCubic');
+		await anim2.add(objects.online_counter_cont,{y:[objects.online_counter_cont.y, 470]}, false, 0.5,'easeInCubic');
 
 		//больше ни ждем ответ ни от кого
 		pending_player="";
@@ -4359,58 +4500,19 @@ cards_menu={
 
 	},
 	
-	wheel_event: function(dir) {
+	wheel_event: function(dy) {
 		
-		if (this.pover === 0) return;
 		
-		if (dir === 1)
-			this.fb_down_down();
+		const mx=app.renderer.plugins.interaction.mouse.global.x/app.stage.scale.x;
+		if (mx<220)	
+			this.shift(dy*10)
 		else
-			this.fb_up_down();
+			chat.shift(dy*10);
 		
-	},
-	
-	fb_up_down : function() {
 		
-		//если дошли до конца
-		if (objects.invite_feedback.y - objects.invite_feedback.height  >=220)
-			return;
-		
-		//отпускаем фидбэки ниже
-		anim2.add(objects.invite_feedback,{y:[objects.invite_feedback.y, objects.invite_feedback.y+40]}, true, 0.25,'linear');
-		
-	},
-	
-	fb_down_down : function() {		
+	},	
 
-		
-		//если дошли до конца
-		if (objects.invite_feedback.y <=400)
-			return;
-		
-		//поднимаем
-		anim2.add(objects.invite_feedback,{y:[objects.invite_feedback.y, objects.invite_feedback.y-40]}, true, 0.25,'linear');
-		
-	},
-	
-	fb_my_down : async function() {
-		
-		
-		if (this._opp_data.uid !== my_data.uid || objects.feedback_cont.visible === true )
-			return;
-		
-		let fb = await feedback.show(this._opp_data.uid);
-		
-		//перезагружаем отзывы если добавили один
-		if (fb[0] === 'sent') {
-			let fb_id = irnd(0,50);			
-			await firebase.database().ref("fb/"+this._opp_data.uid+"/"+fb_id).set([fb[1], firebase.database.ServerValue.TIMESTAMP, my_data.name]);
-			this.show_feedbacks(this._opp_data.uid);			
-		}
-		
-	},
-
-	hide_invite_dialog: function() {
+	close_invite_dialog: function() {
 
 		sound.play('close');
 
@@ -4418,20 +4520,15 @@ cards_menu={
 			return;
 
 		//отправляем сообщение что мы уже не заинтересованы в игре
-		if (pending_player!=="") {
+		if (pending_player!=='') {
 			firebase.database().ref("inbox/"+pending_player).set({sender:my_data.uid,message:"INV_REM",tm:Date.now()});
-			pending_player="";
+			pending_player='';
 		}
 
-
 		anim2.add(objects.invite_cont,{x:[objects.invite_cont.x, 800]}, false, 0.15,'linear');
-		anim2.add(objects.cards_menu_header,{x:[230,objects.cards_menu_header.sx]}, true, 0.15,'linear');
-		anim2.add(objects.players_online,{x:[230,objects.players_online.sx]}, true, 0.15,'linear');
-
 	},
 
 	send_invite: async function() {
-
 
 		if (objects.invite_cont.ready===false || objects.invite_cont.visible===false)
 			return;
@@ -4441,13 +4538,13 @@ cards_menu={
 			return
 		};
 
-		if (cards_menu._opp_data.uid==="BOT")
+		if (lobby._opp_data.uid==="BOT")
 		{
 			await this.close();
 			
 			//заполняем данные бот-оппонента
 			opp_data.rating=999;
-			make_text(objects.opp_card_name,cards_menu._opp_data.name,160);
+			make_text(objects.opp_card_name,lobby._opp_data.name,160);
 			objects.opp_card_rating.text=opp_data.rating;
 			objects.opp_avatar.texture=objects.invite_avatar.texture;			
 			game.activate(OPP, sp_game , irnd(0,9999999));
@@ -4456,19 +4553,20 @@ cards_menu={
 		{
 			sound.play('click');
 			objects.invite_button_title.text=['Ждите ответ..','Waiting...'][LANG];
-			firebase.database().ref("inbox/"+cards_menu._opp_data.uid).set({sender:my_data.uid,message:"INV",tm:Date.now()});
-			pending_player=cards_menu._opp_data.uid;
+			firebase.database().ref("inbox/"+lobby._opp_data.uid).set({sender:my_data.uid,message:"INV",tm:Date.now()});
+			pending_player=lobby._opp_data.uid;
 
 		}
 
 	},
 
-	rejected_invite: function() {
-
+	rejected_invite: function(){
+	
+		this.rejected_invites[pending_player]=Date.now();
 		pending_player="";
-		cards_menu._opp_data={};
-		this.hide_invite_dialog();
-		big_message.show("Соперник отказался от игры",0);
+		lobby._opp_data={};
+		this.close_invite_dialog();
+		big_message.show(['Соперник отказался от игры. Повторить приглашение можно через 1 минуту.','The opponent refused to play. You can repeat the invitation in 1 minute'][LANG],0);
 
 	},
 
@@ -4478,21 +4576,21 @@ cards_menu={
 		req_dialog.hide();
 		
 		//устанаваем окончательные данные оппонента
-		opp_data=cards_menu._opp_data;
+		opp_data=lobby._opp_data;
 		
 		//сразу карточку оппонента
-		make_text(objects.opp_card_name,opp_data.name,160);
+		make_text(objects.opp_card_name,opp_data.name,140);
 		objects.opp_card_rating.text=opp_data.rating;
 		objects.opp_avatar.texture=objects.invite_avatar.texture;		
 
 		//закрываем меню и начинаем игру
-		await cards_menu.close();
+		await lobby.close();
 		game.activate(OPP, mp_game ,seed);
 	},
 
 	back_button_down: async function() {
 
-		if (anim2.any_on()===true) {
+		if (anim2.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -4795,7 +4893,7 @@ async function load_resources() {
 	game_res=new PIXI.Loader();
 	
 	
-	game_res.add("m2_font", git_src+"fonts/MS_Comic_Sans/font.fnt");
+	game_res.add("m2_font", git_src+"fonts/balsamic/font.fnt");
 
 	game_res.add('receive_sticker',git_src+'sounds/receive_sticker.mp3');
 	game_res.add('message',git_src+'sounds/message.mp3');
@@ -4810,6 +4908,8 @@ async function load_resources() {
 	game_res.add('card_open',git_src+'sounds/card_open.mp3');
 	game_res.add('dialog',git_src+'sounds/dialog.mp3');
 	game_res.add('keypress',git_src+'sounds/keypress.mp3');
+	game_res.add('online_message',git_src+'sounds/online_message.mp3');
+	
 	
     //добавляем из листа загрузки
     for (var i = 0; i < load_list.length; i++) {
@@ -5029,8 +5129,7 @@ async function init_game_env(env) {
 	
 	//разные события
 	window.addEventListener("wheel", (event) => {		
-		cards_menu.wheel_event(Math.sign(event.deltaY));
-		chat.wheel_event(Math.sign(event.deltaY));
+		lobby.wheel_event(-Math.sign(event.deltaY));
 	});	
 	
 	
