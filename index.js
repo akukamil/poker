@@ -3895,7 +3895,7 @@ lobby={
 		
 		const chat_bottom=objects.cards_cont.y+this.last_card_bottom;
 		const new_y=objects.cards_cont.y+dy;
-		console.log(dy);
+
 		
 		//ограничиваем движение вниз
 		if (dy>0&&new_y>30){
@@ -4426,11 +4426,11 @@ lobby={
 				this.fb_cache[uid].fb_obj=fb_obj;				
 			}
 
-			console.log('загрузили фидбэки в кэш')				
+			//console.log('загрузили фидбэки в кэш')				
 			
 		} else {
 			fb_obj =this.fb_cache[uid].fb_obj;	
-			console.log('фидбэки из кэша ,ура')
+			//console.log('фидбэки из кэша ,ура')
 		}
 
 		
