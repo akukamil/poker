@@ -21,7 +21,7 @@ class player_mini_card_class extends PIXI.Container {
 		this.visible=false;
 		this.id=id;
 		this.uid=0;
-		this.type = "single";
+		this.type = 'single';
 		this.x=x;
 		this.y=y;
 		
@@ -29,6 +29,8 @@ class player_mini_card_class extends PIXI.Container {
 		this.bcg=new PIXI.Sprite(game_res.resources.mini_player_card.texture);
 		this.bcg.width=gdata.player_card_w;
 		this.bcg.height=gdata.player_card_h;
+		this.bcg.interactive=true;
+		this.bcg.pointerdown=feedback.response_message.bind(this,this);
 		
 		this.info_button=new PIXI.Sprite(gres.info_img.texture);
 		this.info_button.interactive=true;
@@ -175,8 +177,6 @@ class chat_record_class extends PIXI.Container {
 		this.avatar.height=gdata.chat_record_avatar_h;
 		this.avatar.x=gdata.chat_record_avatar_sx;
 		this.avatar.y=gdata.chat_record_avatar_sy;
-		this.avatar.interactive=true;
-		this.avatar.pointerdown=feedback.response_message.bind(this,this);
 		this.avatar.anchor.set(0,0)
 				
 		
@@ -3084,9 +3084,9 @@ feedback = {
 	
 	response_message:function(s) {
 
-		
-		objects.feedback_msg.text = s.name.text.split(' ')[0]+', ';	
-		objects.feedback_control.text = `${objects.feedback_msg.text.length}/${feedback.MAX_SYMBOLS}`		
+		if (s.type!=='single') return;
+		objects.feedback_msg.text = s.name_text.text.split(' ')[0]+', ';	
+		objects.feedback_control.text = `${objects.feedback_msg.text.length}/${feedback.MAX_SYMBOLS}`	
 		
 	},
 	
