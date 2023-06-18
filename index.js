@@ -4456,7 +4456,7 @@ lobby={
 			fb_place.set(sender_name,fb[i][0]);
 			
 			
-			const fb_height=fb_place.text.height;
+			const fb_height=fb_place.text.textHeight*0.85;
 			const fb_end=prv_fb_bottom+fb_height;
 			
 			//если отзыв будет выходить за экран то больше ничего не отображаем
@@ -4465,7 +4465,7 @@ lobby={
 			
 			fb_place.visible=true;
 			fb_place.y=prv_fb_bottom;
-			prv_fb_bottom+=fb_place.text.height;
+			prv_fb_bottom+=fb_height;
 		}
 	
 	},
