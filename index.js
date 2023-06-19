@@ -5153,6 +5153,11 @@ async function init_game_env(env) {
 	let other_data = _other_data.val();
 	
 	
+	//блокировка чата
+	let chat_blocked=await firebase.database().ref('chat_blocked/' + my_data.uid).once('value');
+	my_data.chat_blocked = chat_blocked.val();
+	
+	
 	my_data.rating = (other_data && other_data.rating) || 100;
 	my_data.games = (other_data && other_data.games) || 0;
 	my_data.name = (other_data && other_data.name) || my_data.name;
