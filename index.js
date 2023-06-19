@@ -29,8 +29,8 @@ class player_mini_card_class extends PIXI.Container {
 		this.bcg=new PIXI.Sprite(game_res.resources.mini_player_card.texture);
 		this.bcg.width=gdata.player_card_w;
 		this.bcg.height=gdata.player_card_h;
-		//this.bcg.interactive=true;
-		//this.bcg.pointerdown=feedback.response_message.bind(this,this);
+		this.bcg.interactive=false;
+		this.bcg.pointerdown=feedback.response_message.bind(this,this);
 		
 		this.info_button=new PIXI.Sprite(gres.info_img.texture);
 		this.info_button.interactive=true;
@@ -177,6 +177,9 @@ class chat_record_class extends PIXI.Container {
 		this.avatar.height=gdata.chat_record_avatar_h;
 		this.avatar.x=gdata.chat_record_avatar_sx;
 		this.avatar.y=gdata.chat_record_avatar_sy;
+		this.avatar.interactive=true;
+		const this_card=this;
+		this.avatar.pointerdown=function(){lobby.chat_button_down(this_card)};
 		this.avatar.anchor.set(0,0)
 				
 		
@@ -3045,15 +3048,18 @@ feedback = {
 	MAX_SYMBOLS : 50,
 	uid:0,
 	
-	show : function(uid,max_symb) {
+	show : function(uid,max_symb,init_text='') {
+		
+		
 		
 		this.MAX_SYMBOLS=max_symb||50;
 		this.set_keyboard_layout(['RU','EN'][LANG]);				
 		this.uid = uid;
-		objects.feedback_msg.text ='';
-		objects.feedback_control.text = `0/${this.MAX_SYMBOLS}`
+		objects.feedback_msg.text =init_text;
+		objects.feedback_control.text = `${objects.feedback_msg.text.length}/${feedback.MAX_SYMBOLS}`
 				
-		anim2.add(objects.feedback_cont,{y:[-400, objects.feedback_cont.sy]}, true, 0.4,'easeOutBack');	
+		lobby.interactive_cards(true);
+		anim2.add(objects.feedback_cont,{y:[-400, objects.feedback_cont.sy]}, true, 0.2,'easeOutBack');	
 		return new Promise(function(resolve, reject){					
 			feedback.p_resolve = resolve;	  		  
 		});
@@ -3078,7 +3084,8 @@ feedback = {
 	
 	close : function() {
 			
-		anim2.add(objects.feedback_cont,{y:[objects.feedback_cont.y,450]}, false, 0.4,'easeInBack');		
+		lobby.interactive_cards(false);
+		anim2.add(objects.feedback_cont,{y:[objects.feedback_cont.y,450]}, false, 0.2,'easeInBack');		
 		
 	},
 	
@@ -3147,8 +3154,6 @@ feedback = {
 			key_y = inp_key[1];			
 		}
 		
-		
-		
 		//не нажата кнопка
 		if (key === -1) return;			
 				
@@ -3162,8 +3167,7 @@ feedback = {
 			objects.feedback_msg.text=objects.feedback_msg.text.slice(0, -1);
 			key ='';
 		}			
-		
-		
+				
 		if (key === 'EN' || key === 'RU') {
 			this.set_keyboard_layout(key)
 			return;	
@@ -3458,16 +3462,7 @@ chat = {
 		await anim2.add(objects.chat_cont,{y:[objects.chat_cont.y,objects.chat_cont.y-gdata.chat_record_h]}, true, 0.05,'linear');		
 		
 	},
-		
-	make_hash() {
-	  let hash = '';
-	  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	  for (let i = 0; i < 6; i++) {
-		hash += characters.charAt(Math.floor(Math.random() * characters.length));
-	  }
-	  return hash;
-	},
-	
+			
 	get_abs_top_bottom(){
 		
 		let top_y=999999;
@@ -3506,19 +3501,7 @@ chat = {
 		objects.chat_cont.y+=dy;
 		
 	},
-	
-	async open_keyboard() {
 		
-		//пишем сообщение в чат и отправляем его		
-		let fb = await feedback.show(opp_data.uid,65);		
-		if (fb[0] === 'sent') {			
-			const hash=this.make_hash();
-			const msg_index=irnd(0,50);
-			console.log('send message',msg_index)
-			await firebase.database().ref('chat/'+msg_index).set({uid:my_data.uid,name:my_data.name,msg:fb[1], tm:firebase.database.ServerValue.TIMESTAMP, hash:hash});
-		}		
-	},
-	
 	wheel_event(delta) {
 		
 		objects.chat_cont.y-=delta*gdata.chat_record_h*0.5;	
@@ -3821,7 +3804,7 @@ lobby={
 	rejected_invites:{},
 	fb_cache:{},
 	
-	activate: function () {
+	activate() {
 
 		
 		objects.desktop.interactive=true;
@@ -3891,6 +3874,10 @@ lobby={
 		}
 	},
 	
+	interactive_cards(on){
+		objects.mini_cards.forEach(card=>card.bcg.interactive=on)
+	},
+	
 	shift(dy){
 		
 		const chat_bottom=objects.cards_cont.y+this.last_card_bottom;
@@ -3935,7 +3922,7 @@ lobby={
 		
 	},
 
-	players_list_updated: function(players) {
+	players_list_updated(players) {
 
 		//если мы в игре то не обновляем карточки
 		if (state==="p" || state==="b") return;
@@ -4091,7 +4078,7 @@ lobby={
 
 	},
 
-	get_state_texture: function(s) {
+	get_state_texture(s) {
 
 	
 		switch(s) {
@@ -4115,7 +4102,7 @@ lobby={
 		}
 	},
 
-	place_table : function (params={uid1:0,uid2:0,name1: "XXX",name2: "XXX", rating1: 1400, rating2: 1400}) {
+	place_table (params={uid1:0,uid2:0,name1: "XXX",name2: "XXX", rating1: 1400, rating2: 1400}) {
 				
 		for(let i=1;i<objects.mini_cards.length;i++) {
 
@@ -4166,7 +4153,7 @@ lobby={
 		}
 	},
 
-	update_existing_card: function(params={id:0, state:"o" , rating:1400}) {
+	update_existing_card(params={id:0, state:"o" , rating:1400}) {
 
 		//устанавливаем цвет карточки в зависимости от состояния(имя и аватар не поменялись)
 		objects.mini_cards[params.id].bcg.texture=this.get_state_texture(params.state);
@@ -4177,7 +4164,7 @@ lobby={
 		objects.mini_cards[params.id].visible=true;
 	},
 
-	place_new_card: function(params={uid:0, state: "o", name: "XXX", rating: rating}) {
+	place_new_card(params={uid:0, state: "o", name: "XXX", rating: rating}) {
 
 		for(let i=1;i<objects.mini_cards.length;i++) {
 
@@ -4225,7 +4212,7 @@ lobby={
 		}
 	},
 
-	get_texture : function (pic_url) {
+	get_texture (pic_url) {
 		
 		return new Promise((resolve,reject)=>{
 			
@@ -4252,7 +4239,7 @@ lobby={
 		
 	},
 	
-	get_uid_pic_url : function (uid) {
+	get_uid_pic_url (uid) {
 		
 		return new Promise((resolve,reject)=>{
 						
@@ -4287,7 +4274,7 @@ lobby={
 		
 	},
 	
-	load_avatar2 : function (params = {uid : 0, tar_obj : 0, card_id : 0}) {
+	load_avatar2 (params = {uid : 0, tar_obj : 0, card_id : 0}) {
 		
 		//получаем pic_url
 		this.get_uid_pic_url(params.uid).then(pic_url => {
@@ -4297,7 +4284,7 @@ lobby={
 		})	
 	},
 
-	add_card_ai: function() {
+	add_card_ai() {
 
 		//убираем элементы стола так как они не нужны
 		objects.mini_cards[0].rating_text1.visible = false;
@@ -4315,7 +4302,7 @@ lobby={
 		objects.mini_cards[0].avatar.texture=game_res.resources.pc_icon.texture;
 	},
 	
-	card_down : function (card_id) {
+	card_down (card_id) {
 		
 		if (objects.mini_cards[card_id].type === 'single')
 			this.show_invite_dialog(card_id);
@@ -4325,7 +4312,7 @@ lobby={
 				
 	},
 		
-	show_table_dialog : function (card_id) {
+	show_table_dialog (card_id) {
 					
 		
 		//если какая-то анимация или открыт диалог
@@ -4350,12 +4337,12 @@ lobby={
 		
 	},
 	
-	close_table_dialog : function () {
+	close_table_dialog () {
 		sound.play('close');
 		anim2.add(objects.td_cont,{x:[objects.td_cont.x, 800]}, false, 0.1,'linear');
 	},
 
-	show_invite_dialog: function(card_id) {
+	show_invite_dialog(card_id) {
 
 		//если какая-то анимация или уже сделали запрос
 		if (anim2.any_on() || pending_player!=='') {
@@ -4406,7 +4393,7 @@ lobby={
 
 	},
 
-	show_feedbacks: async function(uid) {	
+	async show_feedbacks(uid) {	
 
 
 			
@@ -4470,7 +4457,7 @@ lobby={
 	
 	},
 
-	close: async function() {
+	async close() {
 
 
 		if (objects.invite_cont.visible === true)
@@ -4500,7 +4487,7 @@ lobby={
 
 	},
 	
-	wheel_event: function(dy) {
+	wheel_event(dy) {
 		
 		
 		const mx=app.renderer.plugins.interaction.mouse.global.x/app.stage.scale.x;
@@ -4512,7 +4499,7 @@ lobby={
 		
 	},	
 
-	close_invite_dialog: function() {
+	close_invite_dialog() {
 
 		sound.play('close');
 
@@ -4528,7 +4515,7 @@ lobby={
 		anim2.add(objects.invite_cont,{x:[objects.invite_cont.x, 800]}, false, 0.15,'linear');
 	},
 
-	send_invite: async function() {
+	async send_invite() {
 
 		if (objects.invite_cont.ready===false || objects.invite_cont.visible===false)
 			return;
@@ -4560,7 +4547,7 @@ lobby={
 
 	},
 
-	rejected_invite: function(){
+	rejected_invite(){
 	
 		this.rejected_invites[pending_player]=Date.now();
 		pending_player="";
@@ -4570,7 +4557,7 @@ lobby={
 
 	},
 
-	accepted_invite: async function(seed) {
+	async accepted_invite (seed) {
 
 		//убираем запрос на игру если он открыт
 		req_dialog.hide();
@@ -4588,7 +4575,7 @@ lobby={
 		game.activate(OPP, mp_game ,seed);
 	},
 
-	back_button_down: async function() {
+	async back_button_down() {
 
 		if (anim2.any_on()) {
 			sound.play('locked');
@@ -4600,6 +4587,31 @@ lobby={
 		await this.close();
 		main_menu.activate();
 
+	},
+	
+	make_hash() {
+	  let hash = '';
+	  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	  for (let i = 0; i < 6; i++) {
+		hash += characters.charAt(Math.floor(Math.random() * characters.length));
+	  }
+	  return hash;
+	},
+	
+	async chat_button_down(reply_object){
+		
+		let pre_text=''
+		if (reply_object) pre_text=reply_object.name.text.split(' ')[0]+', ';	
+		
+		//пишем сообщение в чат и отправляем его		
+		let fb = await feedback.show(opp_data.uid,65,pre_text);		
+		if (fb[0] === 'sent') {			
+			const hash=this.make_hash();
+			const msg_index=irnd(0,50);
+			console.log('send message',msg_index)
+			firebase.database().ref('chat/'+msg_index).set({uid:my_data.uid,name:my_data.name,msg:fb[1], tm:firebase.database.ServerValue.TIMESTAMP, hash:hash});
+		}	
+		
 	}
 
 }
