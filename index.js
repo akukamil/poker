@@ -3052,7 +3052,7 @@ feedback = {
 		
 		if (my_data.chat_blocked){
 			message.add('Заблокировано')
-			return;
+			return ['blocked'];
 		}
 		
 		this.MAX_SYMBOLS=max_symb||50;
