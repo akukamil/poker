@@ -4079,7 +4079,6 @@ lobby={
 	},
 
 	get_state_texture(s) {
-
 	
 		switch(s) {
 
@@ -4292,6 +4291,7 @@ lobby={
 		objects.mini_cards[0].avatar1.visible = false;
 		objects.mini_cards[0].avatar2.visible = false;
 		objects.mini_cards[0].table_frame.visible = false;
+		objects.mini_cards[0].bcg.texture=gres.mini_player_card_ai.texture;
 
 		objects.mini_cards[0].visible=true;
 		objects.mini_cards[0].uid="BOT";
