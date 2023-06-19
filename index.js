@@ -3050,7 +3050,10 @@ feedback = {
 	
 	show : function(uid,max_symb,init_text='') {
 		
-		
+		if (my_data.chat_blocked){
+			message.add('Заблокировано')
+			return;
+		}
 		
 		this.MAX_SYMBOLS=max_symb||50;
 		this.set_keyboard_layout(['RU','EN'][LANG]);				
