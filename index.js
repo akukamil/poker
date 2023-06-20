@@ -3462,7 +3462,7 @@ chat = {
 		this.last_record_end += gdata.chat_record_h;			
 		
 		//смещаем на одно сообщение
-		await anim2.add(objects.chat_cont,{y:[objects.chat_cont.y,objects.chat_cont.y-gdata.chat_record_h]}, true, 0.05,'linear');		
+		await anim2.add(objects.chat_cont,{y:[objects.chat_cont.y,objects.chat_cont.y-gdata.chat_record_h]}, objects.chat_cont.visible, 0.05,'linear');		
 		
 	},
 			
