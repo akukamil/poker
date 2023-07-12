@@ -3286,6 +3286,7 @@ chat = {
 	
 	activate() {		
 
+		objects.chat_enter_button.visible = !my_data.blocked;
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
 		objects.desktop.texture=gres.desktop.texture;
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.4,'linear');
