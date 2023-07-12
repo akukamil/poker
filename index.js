@@ -1003,7 +1003,7 @@ big_message = {
 		this.show_time = Date.now();
 		this.feedback_on = feedback_on;
 				
-		objects.feedback_button.visible = feedback_on;
+		objects.feedback_button.visible = feedback_on&&!my_data.blocked;
 		objects.big_message_text.text = t1;
 		anim2.add(objects.big_message_cont,{y:[600,objects.big_message_cont.sy]}, true, 0.6,'easeOutBack');		
 				
