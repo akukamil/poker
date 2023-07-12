@@ -1942,7 +1942,7 @@ bet_dialog = {
 		objects.slider_button.x = this.slider_min_max_x[0];		
 		
 		
-		anim2.add(objects.bet_dialog_cont,{y:[600,objects.bet_dialog_cont.sy]}, true, 0.6,'easeOutBack');	
+		anim2.add(objects.bet_dialog_cont,{alpha:[0,1]}, true, 0.25,'linear');	
 	
 		return new Promise(function(resolve, reject){
 			bet_dialog.p_resolve = resolve;			
@@ -1989,7 +1989,7 @@ bet_dialog = {
 	
 	close : function() {
 		
-		anim2.add(objects.bet_dialog_cont,{y:[objects.bet_dialog_cont.y, 600]}, false, 0.6,'easeInBack');	
+		anim2.add(objects.bet_dialog_cont,{alpha:[1, 0]}, false, 0.25,'linear');	
 		
 	},
 
