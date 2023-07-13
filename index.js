@@ -4441,6 +4441,18 @@ lobby={
 		objects.inst_msg_cont.tm=Date.now();
 	},
 		
+	fb_delete_down(){
+		
+		objects.fb_delete_button.visible=false;
+		firebase.database().ref('fb/' + my_data.uid).remove();
+		this.fb_cache[my_data.uid].fb_obj={0:[['***нет отзывов***','***no feedback***'][LANG],999,' ']};
+		this.fb_cache[my_data.uid].tm=Date.now();
+		objects.feedback_records.forEach(fb=>fb.visible=false);
+		
+		message.add(['Отзывы удалены','Feedbacks are removed'][LANG])
+		
+	},
+		
 	process(){
 		
 		const tm=Date.now();
