@@ -205,7 +205,7 @@ class chat_record_class extends PIXI.Container {
 		if (msg_data.name.length > 15) msg_data.name = msg_data.name.substring(0, 15);	
 		
 		//бэкграунд сообщения в зависимости от длины
-		if (msg_data.msg.length>30){
+		if (msg_data.msg.length>28){
 			this.msg_bcg.texture=gres.msg_bcg_long.texture
 			this.msg_tm.x=505;		
 		}else{
