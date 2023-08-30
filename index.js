@@ -287,13 +287,21 @@ class player_card_class extends PIXI.Container {
 
 	}
 	
-	show_action(action,amount){		
+	show_action(event){		
 	
-		if(action==='FOLD') amount='';
+		
+		
+		const action=event.data;
+		
 		objects.action_info.x=this.x+70;
 		objects.action_info.y=this.y+130;
-		objects.action_info.t_info.text=action;
-		if (amount) objects.action_info.t_info.text+=' '+amount;			
+		objects.action_info.t_info.text=event.data;
+		
+		
+		let in_money=event.bet_raise||event.chips;
+		if(action==='FOLD') in_money=0;
+		
+		if (in_money) objects.action_info.t_info.text+=' '+in_money;			
 		anim2.add(objects.action_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
 	
 		if (this.uid!==my_data.uid){
@@ -1146,8 +1154,10 @@ game={
 		const num_of_winner=event.winners.length;
 		event.winners.forEach(p=>{
 			const card=this.uid_to_pcards[p];
-			card.show_as_winner();
-			card.change_balance(~~((objects.t_bank.amount||0)/num_of_winner));
+			if(card){
+				card.show_as_winner();
+				card.change_balance(~~((objects.t_bank.amount||0)/num_of_winner));				
+			}
 		})
 		
 		//воспроизводим звук
@@ -1202,22 +1212,27 @@ game={
 		
 		if (event.data){			
 			const pcard=this.uid_to_pcards[event.uid];	
-			pcard.show_action(event.data,event.amount);
-					
+			pcard.show_action(event);					
 		}		
-		
+				
 		if (event.data==='FOLD'){
 			const pcard=this.uid_to_pcards[event.uid];	
 			pcard.open_cards();
-			pcard.alpha=0.5;
-			
+			pcard.alpha=0.5;			
 			if (event.uid===my_data.uid)
 				objects.message.set('Admin: ',['Вы скинули карты, ждите начало следующей партии','You fold, wait next round...'][LANG])
 		}
+				
+		//если игрок делает какую-либо ставку
+		let in_money=0;
+		if(event.data==='BET'||event.data==='RAISE')
+			in_money=event.bet_raise;
+		if(event.data==='CALL')
+			in_money=event.chips;
 		
-		if(event.amount&&event.data!=='FOLD'){
-			this.update_bank(event.amount);					
-			this.uid_to_pcards[event.uid].change_balance(-event.amount);
+		if(in_money){
+			this.update_bank(in_money);					
+			this.uid_to_pcards[event.uid].change_balance(-in_money);
 		}
 
 		
@@ -1227,15 +1242,15 @@ game={
 		this.show_player_to_move(event.next_uid);	
 		
 		if (event.next_uid===my_data.uid)
-			this.make_bet(event.resp_to,event.amount);
+			this.make_bet(event.resp_to,event.bet_raise);
 		
 	},
 	
 	async make_bet(resp_to, amount){			
 		if (!this.iam_in_game) return;
 		bet_data = await bet_dialog.show(resp_to, amount, 0);
-		const val=bet_data.value;
-		const bet_obj={player:my_data.uid,type:bet_data.action,amount:val,tm:Date.now()};
+		const chips=bet_data.chips;
+		const bet_obj={player:my_data.uid,type:bet_data.action,chips,tm:Date.now()};
 		console.log(bet_obj)
 		fbs.ref('players_actions').set(bet_obj)
 	},
@@ -1787,7 +1802,7 @@ bet_dialog = {
 		}
 		
 		sound.play('click');	
-		this.p_resolve({action:objects.call_title.text, value:this.bet_amount})		
+		this.p_resolve({action:objects.call_title.text, chips:this.bet_amount})		
 		this.close();
 	},
 			
@@ -1819,7 +1834,7 @@ bet_dialog = {
 		}
 		
 		sound.play('click');	
-		this.p_resolve({action:'FOLD', value:0})				
+		this.p_resolve({action:'FOLD', chips:0})				
 		this.close();
 	},
 	
@@ -3798,9 +3813,9 @@ async function check_blocked(){
 async function init_game_env(env) {
 			
 
-	document.body.style.backgroundColor = "black";
-	document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
-	return;
+	//document.body.style.backgroundColor = "black";
+	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
+	//return;
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
@@ -3937,6 +3952,9 @@ async function init_game_env(env) {
 	my_data.rating = (other_data && other_data.rating) || 100;
 	my_data.games = (other_data && other_data.games) || 0;
 	my_data.name = (other_data && other_data.name) || my_data.name;
+	
+	
+	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.name];
 	
 	//проверяем блокировку
 	check_blocked();
