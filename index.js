@@ -2316,8 +2316,8 @@ main_menu= {
 			let res2 = await ad.show2();
 			if (res2 !== 'err' || game_platform === 'GOOGLE_PLAY' || game_platform === 'DEBUG' || game_platform === 'GM' || game_platform === 'RUSTORE') {
 				sound.play("confirm_dialog");
-				my_data.rating+=100;
-				fbs.ref('player/'+my_data.rating).set(my_data.rating);
+				my_data.rating=100;
+				fbs.ref('player/'+my_data.uid+'/rating').set(my_data.rating);
 			} else {
 				sound.play('locked')
 			}
