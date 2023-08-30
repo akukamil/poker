@@ -809,6 +809,11 @@ game={
 			game.show_pending_players(data.val());	
 		})
 		
+		if(my_data.rating<100){
+			objects.message.set('Admin: ',['Нужно иметь минимум 100$ для игры.','You need at least 100$ to play.'][LANG],0xff0000)
+			
+		}
+		
 		//показываем окошко статуса
 		anim2.add(objects.table_status_cont,{y:[450,objects.table_status_cont.sy]}, true, 0.2,'linear');	
 	},
@@ -862,7 +867,7 @@ game={
 		for (let uid in this.uid_to_pcards){			
 			await this.update_players_cache_data(uid);	
 			const pcard=this.uid_to_pcards[uid];
-			pcard.name.text=players_cache[uid].name;
+			pcard.name.text=players_cache[uid].name.substring(0, 10);
 			this.load_avatar({uid,tar_obj:pcard.avatar})
 		}
 			
