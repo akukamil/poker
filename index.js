@@ -298,7 +298,7 @@ class player_card_class extends PIXI.Container {
 		objects.action_info.t_info.text=event.data;
 		
 		
-		let in_money=event.bet_raise||event.chips;
+		let in_money=event.chips||event.bet_raise;
 		if(action==='FOLD') in_money=0;
 		
 		if (in_money) objects.action_info.t_info.text+=' '+in_money;			
