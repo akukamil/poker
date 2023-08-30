@@ -289,12 +289,23 @@ class player_card_class extends PIXI.Container {
 	
 	show_action(action,amount){		
 	
+		if(action==='FOLD') amount='';
 		objects.action_info.x=this.x+70;
 		objects.action_info.y=this.y+130;
 		objects.action_info.t_info.text=action;
 		if (amount) objects.action_info.t_info.text+=' '+amount;			
 		anim2.add(objects.action_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
 	
+		if (this.uid!==my_data.uid){
+			if(action==='CHECK'||action==='CALL')
+				sound.play('check')
+			if(action==='BET'||action==='RAISE' )
+				sound.play('raise')	
+			if(action==='FOLD' )
+				sound.play('fold')	
+		}
+
+		
 	}
 			
 	set_cards(cards){
@@ -876,8 +887,9 @@ game={
 		//обновляем деньги
 		for (let uid in this.uid_to_pcards){
 			let s=await fbs.ref('players/'+uid+'/rating').once('value');
-			this.uid_to_pcards[uid].t_rating.text=s.val();
-			this.uid_to_pcards[uid].rating=s.val();
+			const rating=s.val();
+			this.uid_to_pcards[uid].t_rating.text=rating;
+			this.uid_to_pcards[uid].rating=rating;
 		}
 	},
 			
@@ -954,7 +966,28 @@ game={
 
 		//кнопка выхода
 		objects.exit_game_button.visible=true;		
-								
+					
+		//записываем в аватарки значения карт
+		let i=0;
+		this.players_in_game.forEach(player=>{							
+			const pcard=objects.pcards[i];		
+			pcard.close_cards();
+			pcard.alpha=1;
+			pcard.set_cards(player.cards);
+			
+			//анте
+			pcard.change_balance(-20);
+			i++;
+		})
+		
+		//раскидываем общие карты
+		for (let card of objects.cen_cards) {		
+			sound.play('card');
+			card.set_shirt();
+			await anim2.add(card,{angle:[irnd(-45,45),0],x:[-200, card.sx],y:[225, card.sy]}, true, 0.2,'linear');	
+		}	
+
+					
 		//определяем меня
 		this.my_card=this.uid_to_pcards[my_data.uid];
 		if (!this.my_card){
@@ -971,30 +1004,11 @@ game={
 		//показываем мои большие карты
 		objects.my_cards[0].open(this.my_card.card0.card_index);
 		objects.my_cards[1].open(this.my_card.card1.card_index);
-						
-		//записываем в аватарки значения карт
-		let i=0;
-		this.players_in_game.forEach(player=>{							
-			const pcard=objects.pcards[i];		
-			pcard.close_cards();
-			pcard.alpha=1;
-			pcard.set_cards(player.cards);
-			
-			//анте
-			pcard.change_balance(-20);
-
-			i++;
-		})			
+							
 			
 		//записываем мой баланс после анте
 		fbs.ref('player/'+my_data.rating).set(my_data.rating);
 		
-		//раскидываем общие карты
-		for (let card of objects.cen_cards) {		
-			sound.play('card');
-			card.set_shirt();
-			await anim2.add(card,{angle:[irnd(-45,45),0],x:[-200, card.sx],y:[225, card.sy]}, true, 0.2,'linear');	
-		}		
 		
 		//сразу проверяем мою комбинацию которая пока только 2 карты		
 		this.update_my_combination();			
@@ -1189,6 +1203,7 @@ game={
 		if (event.data){			
 			const pcard=this.uid_to_pcards[event.uid];	
 			pcard.show_action(event.data,event.amount);
+					
 		}		
 		
 		if (event.data==='FOLD'){
@@ -1198,7 +1213,6 @@ game={
 			
 			if (event.uid===my_data.uid)
 				objects.message.set('Admin: ',['Вы скинули карты, ждите начало следующей партии','You fold, wait next round...'][LANG])
-			
 		}
 		
 		if(event.amount&&event.data!=='FOLD'){
@@ -3657,7 +3671,8 @@ async function load_resources() {
 	game_res.add("m2_font", git_src+"fonts/MS_Comic_Sans/font.fnt");
 
 	game_res.add('receive_sticker',git_src+'sounds/receive_sticker.mp3');
-	game_res.add('message',git_src+'sounds/message.mp3');
+	game_res.add('check',git_src+'sounds/check.mp3');
+	game_res.add('raise',git_src+'sounds/raise.mp3');
 	game_res.add('lose',git_src+'sounds/lose.mp3');
 	game_res.add('win',git_src+'sounds/win.mp3');
 	game_res.add('click',git_src+'sounds/click.mp3');
@@ -3665,12 +3680,11 @@ async function load_resources() {
 	game_res.add('locked',git_src+'sounds/locked.mp3');
 	game_res.add('clock',git_src+'sounds/clock.mp3');
 	game_res.add('card',git_src+'sounds/card.mp3');
-	game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
 	game_res.add('card_open',git_src+'sounds/card_open.mp3');
 	game_res.add('dialog',git_src+'sounds/dialog.mp3');
 	game_res.add('keypress',git_src+'sounds/keypress.mp3');
 	game_res.add('inst_msg',git_src+'sounds/inst_msg.mp3');
-	game_res.add('online_message',git_src+'sounds/online_message.mp3');
+	game_res.add('fold',git_src+'sounds/fold.mp3');
 	
     //добавляем из листа загрузки
     for (var i = 0; i < load_list.length; i++) {
