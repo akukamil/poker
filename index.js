@@ -1201,7 +1201,7 @@ game={
 			
 		}
 		
-		if(event.amount){
+		if(event.amount&&event.data!=='FOLD'){
 			this.update_bank(event.amount);					
 			this.uid_to_pcards[event.uid].change_balance(-event.amount);
 		}
