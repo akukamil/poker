@@ -2317,7 +2317,7 @@ main_menu= {
 			if (res2 !== 'err' || game_platform === 'GOOGLE_PLAY' || game_platform === 'DEBUG' || game_platform === 'GM' || game_platform === 'RUSTORE') {
 				sound.play("confirm_dialog");
 				my_data.rating=100;
-				fbs.ref('player/'+my_data.uid+'/rating').set(my_data.rating);
+				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 			} else {
 				sound.play('locked')
 			}
