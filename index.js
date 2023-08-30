@@ -3797,8 +3797,9 @@ async function check_blocked(){
 
 async function init_game_env(env) {
 			
+
 	document.body.style.backgroundColor = "black";
-	document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 24px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
+	document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
 	return;
 			
 	await define_platform_and_language(env);
