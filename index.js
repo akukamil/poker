@@ -240,7 +240,7 @@ class player_card_class extends PIXI.Container {
 		this.name.y=23;
 		this.name.tint=0xFFFF00;
 						
-		this.t_rating=new PIXI.BitmapText('$11230', {fontName: 'mfont', fontSize :24});
+		this.t_rating=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :24});
 		this.t_rating.x=90;
 		this.t_rating.y=95;
 		this.t_rating.tint=0xffffff;
@@ -292,7 +292,7 @@ class player_card_class extends PIXI.Container {
 		objects.action_info.x=this.x+70;
 		objects.action_info.y=this.y+130;
 		objects.action_info.t_info.text=action;
-		if (amount) objects.action_info.t_info.text+=' $'+amount;			
+		if (amount) objects.action_info.t_info.text+=' '+amount;			
 		anim2.add(objects.action_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
 	
 	}
@@ -330,7 +330,7 @@ class player_card_class extends PIXI.Container {
 
 		
 		this.rating+=amount;
-		this.t_rating.text='$'+this.rating;		
+		this.t_rating.text=this.rating;		
 		
 	}
 	
@@ -809,8 +809,8 @@ game={
 			game.show_pending_players(data.val());	
 		})
 		
-		if(my_data.rating<100){
-			objects.message.set('Admin: ',['Нужно иметь минимум 100$ для игры.','You need at least 100$ to play.'][LANG],0xff0000)
+		if(my_data.rating<1){
+			objects.message.set('Admin: ',['Нужно иметь минимум 100 фишек для игры.','You need at least 100 chips to play.'][LANG],0xff0000)
 			
 		}
 		
@@ -850,7 +850,9 @@ game={
 		if(!players) return;
 		
 		//сначала убираем все карточки
-		objects.pcards.forEach(c=>c.visible=false);
+		objects.pcards.forEach(c=>{c.visible=false;c.uid='xxx'});
+		
+		this.uid_to_pcards={};
 		
 		//сразу заполняем карточки айдишками игроков
 		let i=0;
@@ -874,7 +876,7 @@ game={
 		//обновляем деньги
 		for (let uid in this.uid_to_pcards){
 			let s=await fbs.ref('players/'+uid+'/rating').once('value');
-			this.uid_to_pcards[uid].t_rating.text='$'+s.val();
+			this.uid_to_pcards[uid].t_rating.text=s.val();
 			this.uid_to_pcards[uid].rating=s.val();
 		}
 	},
@@ -960,7 +962,7 @@ game={
 			return;
 		}
 		
-		objects.message.set('Admin: ',['Начинаем новую партию, анте 20$','Starting new round, ante 20$'][LANG])
+		objects.message.set('Admin: ',['Начинаем новую партию, анте 20','Starting new round, ante 20'][LANG])
 		
 		anim2.add(objects.control_buttons_cont,{x:[-150,0]}, true, 0.2,'linear');	
 		
@@ -1068,7 +1070,7 @@ game={
 	
 	update_bank(amount){
 		objects.t_bank.amount+=amount;
-		objects.t_bank.text=['Банк','Pot'][LANG]+': $'+objects.t_bank.amount;	
+		objects.t_bank.text=['Банк','Pot'][LANG]+': '+objects.t_bank.amount;	
 	},
 	
 	exit_button_down(){
