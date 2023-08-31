@@ -299,6 +299,12 @@ class player_card_class extends PIXI.Container {
 		
 		
 		let in_money=event.chips||event.bet_raise;
+		if (event.bet_raise!=null)
+			in_money=event.bet_raise;
+		
+		if (event.chips!=null)
+			in_money=event.chips;
+		
 		if(action==='FOLD') in_money=0;
 		
 		if (in_money) objects.action_info.t_info.text+=' '+in_money;			
@@ -1012,12 +1018,10 @@ game={
 		//показываем мои большие карты
 		objects.my_cards[0].open(this.my_card.card0.card_index);
 		objects.my_cards[1].open(this.my_card.card1.card_index);
-							
 			
 		//записываем мой баланс после анте
 		fbs.ref('player/'+my_data.rating).set(my_data.rating);
-		
-		
+				
 		//сразу проверяем мою комбинацию которая пока только 2 карты		
 		this.update_my_combination();			
 	},
@@ -3691,6 +3695,7 @@ async function load_resources() {
 	game_res.add('lose',git_src+'sounds/lose.mp3');
 	game_res.add('win',git_src+'sounds/win.mp3');
 	game_res.add('click',git_src+'sounds/click.mp3');
+	game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
 	game_res.add('close',git_src+'sounds/close.mp3');
 	game_res.add('locked',git_src+'sounds/locked.mp3');
 	game_res.add('clock',git_src+'sounds/clock.mp3');
