@@ -783,7 +783,8 @@ game={
 		//keep-alive для стола		
 		fbs.ref('table1/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 		this.pending_timer=setInterval(function(){
-			fbs.ref('table1/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
+			if(!document.hidden)
+				fbs.ref('table1/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 		},15000)
 						
 		objects.t_bank.amount=0;
@@ -1001,17 +1002,17 @@ game={
 			await anim2.add(card,{angle:[irnd(-45,45),0],x:[-200, card.sx],y:[225, card.sy]}, true, 0.2,'linear');	
 		}	
 
-					
+		anim2.add(objects.control_buttons_cont,{x:[-150,0]}, true, 0.2,'linear');	
+		
 		//определяем меня
 		this.my_card=this.uid_to_pcards[my_data.uid];
 		if (!this.my_card){
-			objects.message.set('Admin: ',['Нет свободного места или у вас мало фишек.','No place or you do not have enough chips.'][LANG],0xff0000)
+			objects.message.set('Admin: ',['Нет свободного места.Приоритет игрокам с большим количеством фишек.','No place or you do not have enough chips.'][LANG],0xff0000)
 			return;
 		}
 		
 		objects.message.set('Admin: ',['Начинаем новую партию, анте 20','Starting new round, ante 20'][LANG])
 		
-		anim2.add(objects.control_buttons_cont,{x:[-150,0]}, true, 0.2,'linear');	
 		
 		this.iam_in_game=1;
 		
@@ -3652,9 +3653,9 @@ function vis_change() {
 
 	if (document.hidden === true){
 		
-		sound.stop_all();
 		game.sound_switch_down(0);
-		hidden_state_start = Date.now();				
+		hidden_state_start = Date.now();
+		fbs.ref('table1/pending/'+my_data.uid).remove();	
 	}
 	
 	if (document.hidden === false){
@@ -3818,9 +3819,9 @@ async function check_blocked(){
 async function init_game_env(env) {
 			
 
-	//document.body.style.backgroundColor = "black";
-	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
-	//return;
+	document.body.style.backgroundColor = "black";
+	document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
+	return;
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
@@ -3959,7 +3960,7 @@ async function init_game_env(env) {
 	my_data.name = (other_data && other_data.name) || my_data.name;
 	
 	
-	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.name];
+	my_data.rating=0;
 	
 	//проверяем блокировку
 	check_blocked();
