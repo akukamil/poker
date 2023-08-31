@@ -7,6 +7,7 @@ const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["
 const suit_num_to_txt = ['h','d','s','c'];
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const comb_to_text = {HIGH_CARD : ['СТАРШАЯ КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
+const table_id='table1';
 
 irnd = function(min,max) {	
     min = Math.ceil(min);
@@ -350,6 +351,7 @@ class player_card_class extends PIXI.Container {
 		if(this.uid===my_data.uid){
 			
 			my_data.rating+=amount;		
+			if(my_data.rating<0)my_data.rating=0;
 			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);
 		}
 
@@ -776,15 +778,15 @@ game={
 	activate(){
 		
 		//текущее состояние стола
-		fbs.ref('table1').once('value',function(s){			
+		fbs.ref(table_id).once('value',function(s){			
 			game.analyse_table(s.val());			
 		})
 							
 		//keep-alive для стола		
-		fbs.ref('table1/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
+		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 		this.pending_timer=setInterval(function(){
 			if(!document.hidden)
-				fbs.ref('table1/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
+				fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 		},15000)
 						
 		objects.t_bank.amount=0;
@@ -798,9 +800,9 @@ game={
 		objects.avatars_cont.visible=true;
 		objects.cen_cards_cont.visible=true;			
 		
-		fbs.ref('table1/pending/'+my_data.uid).onDisconnect().remove();
+		fbs.ref(table_id+'/pending/'+my_data.uid).onDisconnect().remove();
 		
-		fbs.ref('table1/events').on('value',function(s){
+		fbs.ref(table_id+'/events').on('value',function(s){
 			
 			if (game.first_event){
 				game.first_event=0;
@@ -831,7 +833,7 @@ game={
 	show_status_window(){
 		
 		//сразу сколько игроков есть в pending
-		fbs.ref('table1/pending').on('value',data=>{
+		fbs.ref(table_id+'/pending').on('value',data=>{
 			game.show_pending_players(data.val());	
 		})
 		
@@ -847,13 +849,15 @@ game={
 	close_status_window(){
 		
 		//сразу сколько игроков есть в pending
-		fbs.ref('table1/pending').off();
+		fbs.ref(table_id+'/pending').off();
 		
 		//показываем окошко статуса
 		anim2.add(objects.table_status_cont,{y:[objects.table_status_cont.y,450]}, false, 0.2,'linear');		
 	},
 		
 	show_pending_players(players){
+		
+		if(!players) return;
 		
 		const num_of_players=Object.keys(players).length;
 		objects.t_table_status1.text=['Игроков онлайн: ','Players online: '][LANG]+num_of_players;
@@ -963,7 +967,7 @@ game={
 		this.players_in_game=event.players;		
 				
 		//отключаем проверку количества игроков
-		fbs.ref('table1/pending').off();
+		fbs.ref(table_id+'/pending').off();
 				
 		//убираем диалог если 
 		if (objects.bet_dialog_cont.visible)
@@ -1007,7 +1011,7 @@ game={
 		//определяем меня
 		this.my_card=this.uid_to_pcards[my_data.uid];
 		if (!this.my_card){
-			objects.message.set('Admin: ',['Нет свободного места.Приоритет игрокам с большим количеством фишек.','No place or you do not have enough chips.'][LANG],0xff0000)
+			objects.message.set('Admin: ',['Нет мест! Приоритет игрокам с большим количеством фишек.','No place or you do not have enough chips.'][LANG],0xff0000)
 			return;
 		}
 		
@@ -1090,7 +1094,7 @@ game={
 		
 		let msg_data = await feedback.show();
 		if (msg_data[0] === 'sent')			
-			fbs.ref('table1/events').set({name:my_data.name,type:'chat',tm:Date.now(),data:msg_data[1]});	
+			fbs.ref(table_id+'/events').set({name:my_data.name,type:'chat',tm:Date.now(),data:msg_data[1]});	
 		
 		this.message_time=Date.now();
 	},
@@ -1164,6 +1168,9 @@ game={
 				card.change_balance(~~((objects.t_bank.amount||0)/num_of_winner));				
 			}
 		})
+		
+		//добавляем данные в ожидание
+		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 		
 		//воспроизводим звук
 		if(this.iam_in_game){			
@@ -1271,8 +1278,8 @@ game={
 		objects.exit_game_button.visible=false;
 		some_process.timer_bar=function(){};
 		clearInterval(this.pending_timer);
-		fbs.ref('table1/events').off();
-		fbs.ref('table1/pending/'+my_data.uid).remove();
+		fbs.ref(table_id+'/events').off();
+		fbs.ref(table_id+'/pending/'+my_data.uid).remove();
 	}
 		
 }
@@ -3655,7 +3662,7 @@ function vis_change() {
 		
 		game.sound_switch_down(0);
 		hidden_state_start = Date.now();
-		fbs.ref('table1/pending/'+my_data.uid).remove();	
+		fbs.ref(table_id+'/pending/'+my_data.uid).remove();	
 	}
 	
 	if (document.hidden === false){
@@ -3819,9 +3826,9 @@ async function check_blocked(){
 async function init_game_env(env) {
 			
 
-	document.body.style.backgroundColor = "black";
-	document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
-	return;
+	//document.body.style.backgroundColor = "black";
+	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
+	//return;
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
@@ -3959,8 +3966,7 @@ async function init_game_env(env) {
 	my_data.games = (other_data && other_data.games) || 0;
 	my_data.name = (other_data && other_data.name) || my_data.name;
 	
-	
-	my_data.rating=0;
+	//my_data.rating=100;
 	
 	//проверяем блокировку
 	check_blocked();
