@@ -1264,7 +1264,7 @@ game={
 		const chips=bet_data.chips;
 		const bet_obj={player:my_data.uid,type:bet_data.action,chips,tm:Date.now()};
 		console.log(bet_obj)
-		fbs.ref('players_actions').set(bet_obj)
+		fbs.ref(table_id+'/players_actions').set(bet_obj)
 	},
 	
 	close(){
@@ -3947,14 +3947,7 @@ async function init_game_env(env) {
 
 	//устанавливаем фотки в попап и другие карточки
 	objects.id_avatar.texture = loader.resources.my_avatar.texture;
-	
-	//разные события
-	window.addEventListener("wheel", (event) => {		
-		lobby.wheel_event(Math.sign(event.deltaY));
-		chat.wheel_event(Math.sign(event.deltaY));
-	});	
-	
-	
+		
 	window.addEventListener('keydown', function(event) { feedback.key_down(event.key)});
 	document.addEventListener("visibilitychange", vis_change);
 		
