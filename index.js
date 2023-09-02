@@ -1025,7 +1025,7 @@ game={
 		objects.my_cards[1].open(this.my_card.card1.card_index);
 			
 		//записываем мой баланс после анте
-		fbs.ref('player/'+my_data.rating).set(my_data.rating);
+		fbs.ref('players/'+my_data.rating).set(my_data.rating);
 				
 		//сразу проверяем мою комбинацию которая пока только 2 карты		
 		this.update_my_combination();			
