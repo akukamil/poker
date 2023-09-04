@@ -7,7 +7,7 @@ const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["
 const suit_num_to_txt = ['h','d','s','c'];
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const comb_to_text = {HIGH_CARD : ['СТ.КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
-const table_id='table1';
+const table_id='table2';
 
 irnd = function(min,max) {	
     min = Math.ceil(min);
@@ -1287,15 +1287,7 @@ game={
 		
 		//добавляем данные в ожидание
 		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
-		
-		//воспроизводим звук
-		if(this.iam_in_game){			
-			if(event.winners.includes(my_data.uid))
-				sound.play('win');					
-			else
-				sound.play('lose');		
-		}
-		
+				
 		//я больше не в игре
 		this.iam_in_game=0;		
 		
