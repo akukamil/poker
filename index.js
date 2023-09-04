@@ -1225,11 +1225,11 @@ game={
 		//выход если не делал ход
 		if (objects.bet_dialog_cont.visible){			
 			objects.bet_dialog_cont.visible=false;	
-			if (event.data==='FOLD'&&event.uid===my_data.uid){		
+			/*if (event.data==='FOLD'&&event.uid===my_data.uid){		
 				this.close();
 				main_menu.activate();
 				return;				
-			}		
+			}*/	
 		}
 
 		
@@ -4170,8 +4170,6 @@ async function init_game_env(env) {
 	
 	//устанавлием мое имя в карточки
 	make_text(objects.id_name,my_data.name,150);
-	
-	
 	
 
 	//отключение от игры и удаление не нужного
