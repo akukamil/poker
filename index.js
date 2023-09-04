@@ -6,7 +6,7 @@ opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=
 const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["h",0,8],["h",0,9],["h",0,10],["h",0,11],["h",0,12],["h",0,13],["h",0,14],["d",1,2],["d",1,3],["d",1,4],["d",1,5],["d",1,6],["d",1,7],["d",1,8],["d",1,9],["d",1,10],["d",1,11],["d",1,12],["d",1,13],["d",1,14],["s",2,2],["s",2,3],["s",2,4],["s",2,5],["s",2,6],["s",2,7],["s",2,8],["s",2,9],["s",2,10],["s",2,11],["s",2,12],["s",2,13],["s",2,14],["c",3,2],["c",3,3],["c",3,4],["c",3,5],["c",3,6],["c",3,7],["c",3,8],["c",3,9],["c",3,10],["c",3,11],["c",3,12],["c",3,13],["c",3,14]]
 const suit_num_to_txt = ['h','d','s','c'];
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-const comb_to_text = {HIGH_CARD : ['СТАРШАЯ КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
+const comb_to_text = {HIGH_CARD : ['СТ.КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
 const table_id='table1';
 
 irnd = function(min,max) {	
@@ -60,11 +60,12 @@ class chat_record_class extends PIXI.Container {
 	
 	constructor() {
 		
-		super();		
-		this.text=new PIXI.BitmapText('Николай: хорошая игра', {lineSpacing:50,fontName: 'mfont',fontSize:30}); 
+		super();	
+		this.resolver=0;
+		this.text=new PIXI.BitmapText('***', {lineSpacing:50,fontName: 'mfont',fontSize:30}); 
 		this.text.tint=0xFFFF00;
 		
-		this.name_text=new PIXI.BitmapText('Николай:', {fontName: 'mfont',fontSize: 30}); 
+		this.name_text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize: 30}); 
 		this.name_text.tint=0xFFFFFF;
 				
 		this.addChild(this.text,this.name_text)
@@ -79,7 +80,25 @@ class chat_record_class extends PIXI.Container {
 		this.name_text.text=name+':';
 		this.name_text.tint=color||0xFFFFFF;	
 		this.visible=true;
-		anim2.add(this,{alpha:[0,1]}, false, 7,'easeBridge',false);		
+		
+		if (this.resolver!==0)
+			this.resolver('forced');
+		
+		anim2.add(this,{alpha:[0,1]}, true, 0.25,'linear',false);
+		const m_this=this;
+		let res = await new Promise(resolve => {
+				m_this.resolver = resolve;
+				setTimeout(resolve, 10000)
+			}
+		);
+		
+		this.resolver=0;
+		
+		if (res==='forced')
+			return;		
+		
+		anim2.add(this,{alpha:[1,0]}, false, 0.25,'linear',false);
+		
 	}	
 	
 	hide(){
@@ -246,6 +265,12 @@ class player_card_class extends PIXI.Container {
 		this.t_rating.y=95;
 		this.t_rating.tint=0xffffff;
 		this.t_rating.anchor.set(0.5,0.5);
+		
+		this.my_card_icon=new PIXI.Sprite(gres.my_card_icon_img.texture);
+		this.my_card_icon.width=this.my_card_icon.height=40;
+		this.my_card_icon.x=5;
+		this.my_card_icon.y=5;
+		this.my_card_icon.visible=true;
 					
 		this.card0=new mini_cards_calss();
 		this.card0.x=87;
@@ -260,21 +285,28 @@ class player_card_class extends PIXI.Container {
 		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:40});
 		this.t_comb.x=75;
 		this.t_comb.y=110;
-		this.t_comb.tint=0xff00ff;
+		this.t_comb.tint=0xff33ff;
 		this.t_comb.anchor.set(0.5,0);
 		this.t_comb.maxWidth=160
 		this.t_comb.visible=false;	
 
-		this.t_winner=new PIXI.BitmapText(['ПОБЕДИТЕЛЬ','WINNER'][LANG], {fontName: 'mfont', fontSize :20,align:'center'});
-		this.t_winner.x=75;
-		this.t_winner.y=this.t_winner.sy=150;
-		this.t_winner.tint=0xffffff;
-		this.t_winner.anchor.set(0.5,0.5);
-		this.t_winner.visible=false;	
+		this.t_won=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :28,align:'center'});
+		this.t_won.x=75;
+		this.t_won.y=this.t_won.sy=150;
+		this.t_won.tint=0xffffff;
+		this.t_won.anchor.set(0.5,0.5);
+		this.t_won.visible=false;	
+		
+		this.added_chips=0;
+		this.hand_value=0;
+		this.in_game=0;
+		this.bank=0;
+		this.place=-1;
+		this.my_pot=0;
 			
 		this.visible=false;
 		
-		this.addChild(this.bcg,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_rating,this.t_comb,this.t_winner);
+		this.addChild(this.bcg,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
 		
 	}	
 	
@@ -283,9 +315,11 @@ class player_card_class extends PIXI.Container {
 		anim2.add(this.t_comb,{alpha:[1,0]}, true, 3,'linear');				
 	}
 	
-	async show_as_winner(){		
-		anim2.add(this.t_winner,{y:[this.t_winner.sy-50,this.t_winner.sy],alpha:[0,1]}, false, 5,'easeBridge',false);
-
+	async show_income(income){	
+		this.t_won.text='+'+income;
+		anim2.add(this.t_won,{y:[this.t_won.sy-50,this.t_won.sy],alpha:[0,1]}, true, 0.25,'linear',false);
+		await new Promise((resolve, reject) => {setTimeout(resolve, 8000);});
+		anim2.add(this.t_won,{y:[this.t_won.y,this.t_won.sy-50],alpha:[1,0]}, false, 0.25,'linear',false);
 	}
 	
 	show_action(event){		
@@ -348,13 +382,15 @@ class player_card_class extends PIXI.Container {
 	
 	change_balance(amount){
 		
-		if(this.uid===my_data.uid){
-			
+		
+		
+		
+		if(this.uid===my_data.uid){			
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
 			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);
 		}
-
+		
 		
 		this.rating+=amount;
 		this.t_rating.text=this.rating;		
@@ -382,6 +418,9 @@ class player_card_class extends PIXI.Container {
 
 		const comb=hand_check.check(it_cards);
 		const kickers=comb.data.map(d=>value_num_to_txt[d.value])
+		
+		this.hand_value=hand_check.get_total_value(comb);
+				
 		anim2.kill_anim(this.t_comb)
 		this.t_comb.text=comb_to_text[comb.name][LANG]+'\n'+kickers.join('-');	
 		this.t_comb.visible=true;
@@ -890,6 +929,13 @@ game={
 			const pcard=objects.pcards[i];
 			pcard.uid=player.uid;	
 			pcard.visible=true;
+			pcard.in_game=1;
+			pcard.place=-1;
+			pcard.bank=0;
+			pcard.added_chips=20;
+			pcard.my_pot=0;
+			pcard.my_card_icon.visible=player.uid===my_data.uid;
+			pcard.hand_value=0;
 			pcard.set_cards(player.cards)
 			this.uid_to_pcards[player.uid]=pcard;
 			i++;
@@ -982,6 +1028,7 @@ game={
 		//начальный банк из анте всех игроков
 		objects.t_bank.amount=0;
 		this.update_bank(20*this.players_in_game.length);	
+		objects.t_my_bank.text='';
 
 		//кнопка выхода
 		objects.exit_game_button.visible=true;		
@@ -1152,22 +1199,91 @@ game={
 		
 	},
 	
+	get_eligible_pot_for_player(player){
+		
+		if(!player) return 0;
+		
+		const player_added_chips=player.added_chips;		
+		let my_pot=0;
+		const cards_in_game=objects.pcards.filter(c=>c.visible===true);
+		cards_in_game.forEach(p=>{		
+			const added_chips=p.added_chips;				
+			if (added_chips>player_added_chips&&p.in_game)
+				my_pot+=player_added_chips;
+			else
+				my_pot+=added_chips;
+		})			
+		return my_pot;
+		
+	},
+	
+	player_action_event(event){
+		
+		console.log('player_action_event',event);	
+		
+
+		//выход если не делал ход
+		if (objects.bet_dialog_cont.visible){			
+			objects.bet_dialog_cont.visible=false;	
+			if (event.data==='FOLD'&&event.uid===my_data.uid){		
+				this.close();
+				main_menu.activate();
+				return;				
+			}		
+		}
+
+		
+		if (event.data){			
+			const pcard=this.uid_to_pcards[event.uid];	
+			pcard.show_action(event);					
+		}		
+				
+				
+				
+				
+		if (event.data==='FOLD'){
+						
+			const pcard=this.uid_to_pcards[event.uid];	
+			pcard.open_cards();
+			pcard.alpha=0.5;	
+			pcard.in_game=0;
+			if (event.uid===my_data.uid)
+				objects.message.set('Admin: ',['Вы скинули карты, ждите начало следующей партии','You fold, wait next round...'][LANG])
+		}
+				
+		//если игрок делает какую-либо ставку
+		let in_money=0;
+		if(event.data==='BET'||event.data==='RAISE')
+			in_money=event.bet_raise;
+		if(event.data==='CALL')
+			in_money=event.chips;
+		
+
+		this.update_bank(in_money);					
+		this.uid_to_pcards[event.uid].change_balance(-in_money);
+		this.uid_to_pcards[event.uid].added_chips+=in_money;
+			
+		//определяем размер банка который я могу взять
+		let my_pot=this.get_eligible_pot_for_player(this.my_card);
+		objects.t_my_bank.text=['Мой банк: ','My Pot: '][LANG]+my_pot;	
+		
+		
+		if (event.street_fin)
+			return;		
+				
+		this.show_player_to_move(event.next_uid);	
+		
+		if (event.next_uid===my_data.uid)
+			this.make_bet(event.resp_to,event.bet_raise);
+		
+	},
+			
 	street_fin_event(event){
 						
 		console.log('FIN event type');
-		console.log(event.winners);
 		
 		objects.timer_bar.scale_x=0;
 		objects.control_buttons_cont.visible=false;
-		
-		const num_of_winner=event.winners.length;
-		event.winners.forEach(p=>{
-			const card=this.uid_to_pcards[p];
-			if(card){
-				card.show_as_winner();
-				card.change_balance(~~((objects.t_bank.amount||0)/num_of_winner));				
-			}
-		})
 		
 		//добавляем данные в ожидание
 		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
@@ -1183,14 +1299,104 @@ game={
 		//я больше не в игре
 		this.iam_in_game=0;		
 		
-		//Убираем окно статуса
+		//Показываем окно статуса
 		this.show_status_window();			
 		
-		//открываем карты остальных игроков
+		//открываем карты игроков и создем массив для проверки
+		let players=[],all_players=[];
 		objects.pcards.forEach(p=>{
-			if(p.visible)
-				p.open_cards();				
+			if(p.visible){
+				p.open_cards();
+				if (p.in_game)
+					players.push(p)
+				all_players.push(p);
+			}			
 		})		
+						
+		//определяем размер банка для каждого игрока только которые он имеет право взять
+		let players_num=players.length;
+		for (let p=0;p<players_num;p++){
+			const player=players[p];
+			player.my_pot=this.get_eligible_pot_for_player(player);
+			console.log('ELIG:',player.uid,player.my_pot);
+		}			
+		
+		
+		//сортируем по правомочным банкам
+		players=players.sort((a,b)=>a.my_pot-b.my_pot);
+		
+		//массив рук по убыванию, сначала самая крутая
+		let hands=players.map(p=>p.hand_value);
+		hands=hands.sort((a,b)=>{return b-a});
+		const hands_len=hands.length;
+			
+		let start_player=0
+		let place=1;
+		for (let i=0;i<hands_len;i++){
+			const hand_value=hands[i];
+			
+			let any_found=0;
+			for (let p=start_player;p<players_num;p++){
+				
+				player=players[p];
+				
+				if(player.hand_value===hand_value){
+					any_found=1
+					player.place=place;
+					start_player=p+1
+				}
+			}
+			if(any_found)
+				place=place+1
+		}
+		
+		//убираем тех кто не участвует в раздаче общего банка
+		players=players.filter(p=>p.place!==-1)
+		
+		//определяем общие банки
+		players_num=players.length;	
+		for (let p=0;p<players_num;p++){
+			
+			const cur_player=players[p];
+			let pot_share=[];
+			for (let n=p;n<players_num;n++){
+				
+				const next_player=players[n];
+				if (cur_player.place===next_player.place)
+					pot_share.push(next_player.uid)
+			}	
+			cur_player.pot_share=pot_share;
+		}	
+		
+		let spent_pot=0;
+		for (let p=0;p<players_num;p++){
+			
+			const cur_player=players[p];
+			const shared_pot_players_num=cur_player.pot_share.length;
+			const my_pot=cur_player.my_pot-spent_pot;
+			for (let i=0;i<shared_pot_players_num;i++){			
+				const player_uid=cur_player.pot_share[i];
+				const s_player=players.find(p=>p.uid===player_uid);
+				s_player.bank+=~~(my_pot/shared_pot_players_num);
+			}
+			spent_pot+=my_pot;		
+
+		}	
+		
+		players.forEach(p=>{
+			
+			console.log({name:players_cache[p.uid].name,place:p.place,h_value:p.hand_value,bank:p.bank})
+		})
+		
+		//обновляем	банки
+		players.forEach(p=>{
+			if (p.bank>0){
+				p.show_income(p.bank);
+				p.change_balance(p.bank);				
+			}
+		})
+
+				
 	},
 	
 	async open_cen_cards(table_card_indexes,cards_values){		
@@ -1212,49 +1418,6 @@ game={
 		const comb=hand_check.check(opened_cards.map(c=>c.card_index));
 		const kickers=comb.data.map(d=>value_num_to_txt[d.value])
 		objects.my_combination.text=comb_to_text[comb.name][LANG]+' ('+kickers.join('-')+')';	
-		
-	},
-	
-	player_action_event(event){
-		
-		console.log('player_action_event',event);	
-		
-		if (objects.bet_dialog_cont.visible)
-			objects.bet_dialog_cont.visible=false;
-		
-		if (event.data){			
-			const pcard=this.uid_to_pcards[event.uid];	
-			pcard.show_action(event);					
-		}		
-				
-		if (event.data==='FOLD'){
-			const pcard=this.uid_to_pcards[event.uid];	
-			pcard.open_cards();
-			pcard.alpha=0.5;			
-			if (event.uid===my_data.uid)
-				objects.message.set('Admin: ',['Вы скинули карты, ждите начало следующей партии','You fold, wait next round...'][LANG])
-		}
-				
-		//если игрок делает какую-либо ставку
-		let in_money=0;
-		if(event.data==='BET'||event.data==='RAISE')
-			in_money=event.bet_raise;
-		if(event.data==='CALL')
-			in_money=event.chips;
-		
-		if(in_money){
-			this.update_bank(in_money);					
-			this.uid_to_pcards[event.uid].change_balance(-in_money);
-		}
-
-		
-		if (event.street_fin)
-			return;		
-				
-		this.show_player_to_move(event.next_uid);	
-		
-		if (event.next_uid===my_data.uid)
-			this.make_bet(event.resp_to,event.bet_raise);
 		
 	},
 	
@@ -1297,6 +1460,18 @@ hand_check = {
 		
 	},
 	
+	get_total_value(check_result){
+		
+		const mult=[50625,3375,225,15,1];
+		const comb_name=check_result.name;
+		let sum=this.comb_value[comb_name]*759375;
+		for (let c=0;c<check_result.data.length;c++)
+			sum+=(check_result.data[c].value*mult[c]);			
+
+		return sum;	
+		
+	},
+			
 	check_winner : function(my_res, opp_res) {
 				
 		if (my_res.name === opp_res.name) {		
@@ -3686,7 +3861,7 @@ async function load_resources() {
 	document.getElementById("m_progress").style.display = 'flex';
 
 	let git_src="https://akukamil.github.io/poker/"
-	//git_src=""
+	git_src=""
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
@@ -3958,9 +4133,8 @@ async function init_game_env(env) {
 	my_data.rating = (other_data && other_data.rating) || 100;
 	my_data.games = (other_data && other_data.games) || 0;
 	my_data.name = (other_data && other_data.name) || my_data.name;
-	
-	//my_data.rating=100;
-	
+		
+	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//проверяем блокировку
 	check_blocked();
 	
@@ -3997,6 +4171,8 @@ async function init_game_env(env) {
 	//устанавлием мое имя в карточки
 	make_text(objects.id_name,my_data.name,150);
 	
+	
+	
 
 	//отключение от игры и удаление не нужного
 	//fbs.ref("inbox/"+my_data.uid).onDisconnect().remove();
@@ -4025,8 +4201,7 @@ async function init_game_env(env) {
 
 	//показыаем основное меню
 	main_menu.activate();
-	
-	//game.activate();
+
 	
 }
 
