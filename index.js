@@ -2961,7 +2961,7 @@ function vis_change() {
 	
 	if (document.hidden === false){
 
-		sound.on=1;
+		//sound.on=1;
 		hidden_state_start = Date.now();				
 	}
 	
