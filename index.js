@@ -1375,10 +1375,12 @@ game={
 		}	
 		
 		//звук если я что-то получил
-		if (this.my_card.bank>0)
-			sound.play('money')
-		else
-			sound.play('lose')
+		if (this.my_card){
+			if (this.my_card.bank>0)
+				sound.play('money')
+			else
+				sound.play('lose')			
+		}
 		
 		//обновляем	банки
 		players.forEach(p=>{
