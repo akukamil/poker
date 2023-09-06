@@ -3287,11 +3287,6 @@ async function init_game_env(env) {
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=my_data.rating;
 
-	//обновляем почтовый ящик
-	fbs.ref("inbox/"+my_data.uid).set({sender:"-",message:"-",tm:"-",data:{x1:0,y1:0,x2:0,y2:0,board_state:0}});
-
-	//подписываемся на новые сообщения
-	//fbs.ref("inbox/"+my_data.uid).on('value', s => { process_new_message(s.val());});
 	
 	//обновляем базовые данные в файербейс так могло что-то поменяться
 	fbs.ref("players/"+my_data.uid+"/name").set(my_data.name);
@@ -3306,11 +3301,6 @@ async function init_game_env(env) {
 	//устанавлием мое имя в карточки
 	make_text(objects.id_name,my_data.name,150);
 	
-
-	//отключение от игры и удаление не нужного
-	//fbs.ref("inbox/"+my_data.uid).onDisconnect().remove();
-	//fbs.ref(room_name+"/"+my_data.uid).onDisconnect().remove();
-
 	//keep-alive сервис
 	setInterval(function()	{keep_alive()}, 40000);
 
