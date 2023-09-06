@@ -1,6 +1,6 @@
 var M_WIDTH=800, M_HEIGHT=450;
 var app,chat_path,gdata={}, game_res, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "",
-hidden_state_start=0,room_name = 'states2',fbs=null, pending_player='', opponent={}, my_data={opp_id : ''}, players_cache={},
+hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''}, players_cache={},
 opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
 
 const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["h",0,8],["h",0,9],["h",0,10],["h",0,11],["h",0,12],["h",0,13],["h",0,14],["d",1,2],["d",1,3],["d",1,4],["d",1,5],["d",1,6],["d",1,7],["d",1,8],["d",1,9],["d",1,10],["d",1,11],["d",1,12],["d",1,13],["d",1,14],["s",2,2],["s",2,3],["s",2,4],["s",2,5],["s",2,6],["s",2,7],["s",2,8],["s",2,9],["s",2,10],["s",2,11],["s",2,12],["s",2,13],["s",2,14],["c",3,2],["c",3,3],["c",3,4],["c",3,5],["c",3,6],["c",3,7],["c",3,8],["c",3,9],["c",3,10],["c",3,11],["c",3,12],["c",3,13],["c",3,14]]
@@ -270,7 +270,7 @@ class player_card_class extends PIXI.Container {
 		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:32});
 		this.t_comb.x=75;
 		this.t_comb.y=110;
-		this.t_comb.tint=0xff33ff;
+		this.t_comb.tint=0xFFD966;
 		this.t_comb.anchor.set(0.5,0);
 		this.t_comb.maxWidth=160
 		this.t_comb.visible=false;	
@@ -3270,6 +3270,8 @@ async function init_game_env(env) {
 	my_data.name = (other_data && other_data.name) || my_data.name;
 		
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
+	//my_data.rating=0;
+	
 	//проверяем блокировку
 	check_blocked();
 	
@@ -3279,10 +3281,6 @@ async function init_game_env(env) {
 	//получаем информацию о стране
 	const country =  (other_data && other_data.country) || await auth2.get_country_code();
 				
-	//номер комнаты
-	room_name= 'states';
-	
-	chat_path='chat';
 	
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=my_data.rating;
