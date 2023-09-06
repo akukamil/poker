@@ -1266,13 +1266,11 @@ game={
 		console.log('player_action_event',event);	
 		
 		//выход если не делал ход
-		if (objects.bet_dialog_cont.visible){			
+		if (event.data==='FOLD'&&event.uid===my_data.uid&&objects.bet_dialog_cont.visible&&objects.bet_dialog_cont.ready){	
 			objects.bet_dialog_cont.visible=false;	
-			/*if (event.data==='FOLD'&&event.uid===my_data.uid){		
-				this.close();
-				main_menu.activate();
-				return;				
-			}*/	
+			this.close();
+			main_menu.activate();
+			return;				
 		}
 
 		
