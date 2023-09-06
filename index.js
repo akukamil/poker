@@ -62,12 +62,14 @@ class chat_record_class extends PIXI.Container {
 		
 		super();	
 		this.resolver=0;
-		this.text=new PIXI.BitmapText('***', {lineSpacing:50,fontName: 'mfont',fontSize:30}); 
+		this.text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize:25,lineSpacing:39}); 
 		this.text.tint=0xFFFF00;
+		this.text.maxWidth=290;
 		
-		this.name_text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize: 30}); 
+		this.name_text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize: 25}); 
 		this.name_text.tint=0xFFFFFF;
-				
+		
+		this.visible=false;
 		this.addChild(this.text,this.name_text)
 		
 	}
@@ -80,24 +82,8 @@ class chat_record_class extends PIXI.Container {
 		this.name_text.text=name+':';
 		this.name_text.tint=color||0xFFFFFF;	
 		this.visible=true;
-		
-		if (this.resolver!==0)
-			this.resolver('forced');
-		
-		anim2.add(this,{alpha:[0,1]}, true, 0.25,'linear',false);
-		const m_this=this;
-		let res = await new Promise(resolve => {
-				m_this.resolver = resolve;
-				setTimeout(resolve, 10000)
-			}
-		);
-		
-		this.resolver=0;
-		
-		if (res==='forced')
-			return;		
-		
-		anim2.add(this,{alpha:[1,0]}, false, 0.25,'linear',false);
+
+
 		
 	}	
 	
@@ -135,12 +121,11 @@ class playing_cards_class extends PIXI.Container {
 		this.suit_img.width=90;
 		this.suit_img.height=110;
 		
-		this.t_value = new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 50});
+		this.t_value = new PIXI.BitmapText('', {fontName: 'cards_font',fontSize: 50});
 		this.t_value.anchor.set(0.5,0.5);
-		this.t_value.x=0;
+		this.t_value.x=3;
 		this.t_value.y=-22;
 		this.t_value.tint=0x000000;
-	
 						
 						
 		this.addChild(this.bcg, this.suit_img, this.t_value);
@@ -282,7 +267,7 @@ class player_card_class extends PIXI.Container {
 		this.card1.y=60;
 		this.card1.angle=10;		
 						
-		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:40});
+		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:32});
 		this.t_comb.x=75;
 		this.t_comb.y=110;
 		this.t_comb.tint=0xff33ff;
@@ -508,6 +493,40 @@ class mini_cards_calss extends PIXI.Container{
 	
 }
 
+chat={
+	
+	bottom:0,
+	cont_total_shift:0,
+	
+	add_message(name,text){
+		
+		const oldest=this.get_old_message();
+		oldest.y=this.bottom;
+		oldest.set(name,text,0xffffff);
+		oldest.visible=true;
+		const message_height=oldest.text.textHeight-6;
+		this.bottom+=message_height;
+		this.cont_total_shift-=message_height;
+		anim2.add(objects.chat_cont,{y:[objects.chat_cont.y, objects.chat_cont.sy+this.cont_total_shift]}, true, 0.15,'linear');
+		
+		
+	},
+	
+	get_old_message(){
+		
+		const res=objects.messages.find(msg => msg.visible===false);
+		if(res) return res;
+		
+		return objects.messages.reduce((oldest, msg) => {
+			return oldest.y < msg.y ? oldest : msg;
+		});		
+	}
+	
+	
+	
+	
+}
+
 confirm_dialog = {
 	
 	p_resolve : 0,
@@ -652,7 +671,7 @@ anim2 = {
 	
 	shake : function(x) {
 		
-		return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+		return Math.sin(x*Math.PI*2);
 		
 		
 	},	
@@ -678,7 +697,7 @@ anim2 = {
 				}
 				
 				//для возвратных функцие конечное значение равно начальному
-				if (func === 'ease2back')
+				if (func === 'ease2back' || func === 'shake')
 					for (let key in params)
 						params[key][1]=params[key][0];					
 					
@@ -836,6 +855,7 @@ game={
 		//показываем окошко статуса
 		this.show_status_window();
 		
+		objects.chat_cont.visible=true;
 		objects.avatars_cont.visible=true;
 		objects.cen_cards_cont.visible=true;			
 		
@@ -854,7 +874,7 @@ game={
 				game.game_start_event(event);			
 			
 			if(event.type==='chat')
-				objects.message.set(event.name,event.data);	
+				chat.add_message(event.name,event.data);	
 			
 			if(event.type==='player_action')
 				game.player_action_event(event);	
@@ -877,7 +897,7 @@ game={
 		})
 		
 		if(my_data.rating<1){
-			objects.message.set('Admin: ',['Нужно иметь минимум 100 фишек для игры.','You need at least 100 chips to play.'][LANG],0xff0000)
+			objects.game_info.text=['Нужно иметь минимум 100 фишек для игры.','You need at least 100 chips to play.'][LANG];
 			
 		}
 		
@@ -1018,6 +1038,9 @@ game={
 		//убираем диалог если 
 		if (objects.bet_dialog_cont.visible)
 			objects.bet_dialog_cont.visible=false;
+		
+		
+		//objects.desktop.texture=gres.stylish_bcg.texture;
 				
 		//Убираем окно статуса
 		this.close_status_window();			
@@ -1058,11 +1081,11 @@ game={
 		//определяем меня
 		this.my_card=this.uid_to_pcards[my_data.uid];
 		if (!this.my_card){
-			objects.message.set('Admin: ',['Нет мест! Приоритет игрокам с большим количеством фишек.','No place or you do not have enough chips.'][LANG],0xff0000)
+			objects.game_info.text=['Нет мест! Приоритет игрокам с большим количеством фишек.','No place or you do not have enough chips.'][LANG];
 			return;
 		}
 		
-		objects.message.set('Admin: ',['Начинаем новую партию, анте 20','Starting new round, ante 20'][LANG])
+		objects.game_info.text=['НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ 20','STARTING NEW ROUND, ANTE 20'][LANG];
 		
 		
 		this.iam_in_game=1;
@@ -1084,8 +1107,12 @@ game={
 		if (objects.timer_bar.scale_x>0)
 			objects.timer_bar.scale_x=time_left/15;
 		
-		if (objects.table_status_cont.visible)
-			objects.table_status_circle.rotation+=0.2;			
+		if (objects.table_status_cont.visible){
+			
+			objects.table_status_circle.rotation+=0.2;				
+			objects.table_status_pic.scale_y=Math.sin(game_tick)*0.666;
+		}
+		
 		
 	},
 	
@@ -1128,7 +1155,9 @@ game={
 		this.recent_msg = this.recent_msg.filter(d =>cur_dt-d<60000);
 				
 		if (this.recent_msg.length>2){
-			objects.message.set('Admin',['Подождите 1 минуту','Wait 1 minute'][LANG],0xff0000);	
+			anim2
+			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
+			objects.game_info.text=['Подождите 1 минуту','Wait 1 minute'][LANG];
 			return;
 		}		
 		
@@ -1221,7 +1250,6 @@ game={
 		
 		console.log('player_action_event',event);	
 		
-
 		//выход если не делал ход
 		if (objects.bet_dialog_cont.visible){			
 			objects.bet_dialog_cont.visible=false;	
@@ -1237,10 +1265,7 @@ game={
 			const pcard=this.uid_to_pcards[event.uid];	
 			pcard.show_action(event);					
 		}		
-				
-				
-				
-				
+								
 		if (event.data==='FOLD'){
 						
 			const pcard=this.uid_to_pcards[event.uid];	
@@ -1248,7 +1273,7 @@ game={
 			pcard.alpha=0.5;	
 			pcard.in_game=0;
 			if (event.uid===my_data.uid)
-				objects.message.set('Admin: ',['Вы скинули карты, ждите начало следующей партии','You fold, wait next round...'][LANG])
+				objects.game_info.text=['ВЫ СКИНУЛИ КАРТЫ, ЖДИТЕ НАЧАЛО СЛЕДУЮЩЕЙ ПАРТИИ','YOU FOLD, WAIT NEXT ROUND...'][LANG];
 		}
 				
 		//если игрок делает какую-либо ставку
@@ -1256,8 +1281,7 @@ game={
 		if(event.data==='BET'||event.data==='RAISE')
 			in_money=event.bet_raise;
 		if(event.data==='CALL')
-			in_money=event.chips;
-		
+			in_money=event.chips;		
 
 		this.update_bank(in_money);					
 		this.uid_to_pcards[event.uid].change_balance(-in_money);
@@ -1411,7 +1435,7 @@ game={
 
 		const comb=hand_check.check(opened_cards.map(c=>c.card_index));
 		const kickers=comb.data.map(d=>value_num_to_txt[d.value])
-		objects.my_combination.text=comb_to_text[comb.name][LANG]+' ('+kickers.join('-')+')';	
+		objects.my_combination.text=comb_to_text[comb.name][LANG]+'\n('+kickers.join('-')+')';	
 		
 	},
 	
@@ -1428,9 +1452,11 @@ game={
 		game.first_event=1;
 		this.iam_in_game=0;
 		
+		objects.bet_dialog_cont.visible=false;
 		objects.control_buttons_cont.visible=false;
 		objects.table_status_cont.visible=false;
 		objects.avatars_cont.visible=false;
+		objects.chat_cont.visible=false;
 		objects.cen_cards_cont.visible=false;		
 		objects.exit_game_button.visible=false;
 		some_process.timer_bar=function(){};
@@ -1862,7 +1888,7 @@ bet_dialog = {
 	min_max_vals : [0,0],
 	min_max_opts : ['',''],
 	dragging : 0,
-	slider_min_max_x : [40,280],
+	slider_min_max_x : [40,300],
 	
 	async show(opp_action, min_bet, no_rasing) {
 	
@@ -1887,19 +1913,19 @@ bet_dialog = {
 								
 		//можно колировать или поднять (мин-макс)	
 		if (opp_action === 'INIT_BET')
-			objects.bet_title0.text = ['Сделайте первую ставку (CALL) размером большого блайнда или больше (RAISE)','Make a first bet (CALL) size of big blind or more (RAISE)'][LANG];
+			objects.game_info.text = ['СДЕЛАЙТЕ ПЕРВУЮ СТАВКУ (CALL) РАЗМЕРОМ БОЛЬШОГО БЛАЙНДА ИЛИ БОЛЬШЕ (RAISE)','MAKE A FIRST BET (CALL) SIZE OF BIG BLIND OR MORE (RAISE)'][LANG];
 		if (opp_action === 'RAISE')
-			objects.bet_title0.text = ['Соперник поднял ставку (RAISE), нужно ответить (CALL), поднять (RAISE) или сдаться (FOLD)','Opponent raised bet, you can CALL, RAISE or FOLD'][LANG];
+			objects.game_info.text = ['СОПЕРНИК ПОДНЯЛ СТАВКУ (RAISE), НУЖНО ОТВЕТИТЬ (CALL), ПОДНЯТЬ (RAISE) ИЛИ СДАТЬСЯ (FOLD)','OPPONENT RAISED BET, YOU CAN CALL, RAISE OR FOLD'][LANG];
 		if (opp_action === 'BET')
-			objects.bet_title0.text = ['Соперник сделал ставку (BET), нужно ответить (CALL), поднять (RAISE) или сдаться (FOLD)','Opponent made a BET, you can CALL, RAISE or FOLD'][LANG];
+			objects.game_info.text = ['СОПЕРНИК СДЕЛАЛ СТАВКУ (BET), НУЖНО ОТВЕТИТЬ (CALL), ПОДНЯТЬ (RAISE) ИЛИ СДАТЬСЯ (FOLD)','OPPONENT MADE A BET, YOU CAN CALL, RAISE OR FOLD'][LANG];
 		if (opp_action === 'CHECK')
-			objects.bet_title0.text = ['Соперник не сделал ставку (CHECK), можно тоже пропустить (CHECK) или сделать ее (BET)','Opponent CHECK, you can also CHECK or make a BET'][LANG];					
+			objects.game_info.text = ['СОПЕРНИК НЕ СДЕЛАЛ СТАВКУ (CHECK), МОЖНО ТОЖЕ ПРОПУСТИТЬ (CHECK) ИЛИ СДЕЛАТЬ ЕЕ (BET)','OPPONENT CHECK, YOU CAN ALSO CHECK OR MAKE A BET'][LANG];					
 		if (opp_action === 'INIT_CHECK')
-			objects.bet_title0.text = ['Делайте ставку (BET), но можно и пропустить (CHECK)','You can make a BET or CHECK'][LANG];	
+			objects.game_info.text = ['ДЕЛАЙТЕ СТАВКУ (BET), НО МОЖНО И ПРОПУСТИТЬ (CHECK)','YOU CAN MAKE A BET OR CHECK'][LANG];	
 		if (opp_action === 'CALL')
-			objects.bet_title0.text = ['Соперник сделал ставку, можно пропустить (CHECK), поднять (RAISE) или сдаться (FOLD)','Opponent made a bet, you can CHECK, RAISE or FOLD'][LANG];
+			objects.game_info.text = ['СОПЕРНИК СДЕЛАЛ СТАВКУ, МОЖНО ПРОПУСТИТЬ (CHECK), ПОДНЯТЬ (RAISE) ИЛИ СДАТЬСЯ (FOLD)','OPPONENT MADE A BET, YOU CAN CHECK, RAISE OR FOLD'][LANG];
 		if (no_rasing === true)
-			objects.bet_title0.text = ['Соперник поднял ставку (RAISE), можно только ответить (CALL), поднять нельзя','Opponent raised a bet, you can CALL or FOLD'][LANG];	
+			objects.game_info.text = ['СОПЕРНИК ПОДНЯЛ СТАВКУ (RAISE), МОЖНО ТОЛЬКО ОТВЕТИТЬ (CALL), ПОДНЯТЬ НЕЛЬЗЯ','OPPONENT RAISED A BET, YOU CAN CALL OR FOLD'][LANG];	
 				
 		//определяем максимальную ставку
 		let min_rating =  Math.min(opp_data.rating, my_data.rating);
@@ -1950,11 +1976,10 @@ bet_dialog = {
 		
 		this.bet_amount = this.min_max_vals[0];
 		objects.call_title.text = this.min_max_opts[0];
-		objects.bet_title1.text = this.min_max_vals[0];
+		objects.bet_amount.text = this.min_max_vals[0];
 		
 		//устанаваем слайдер на минимальное значение
 		objects.slider_button.x = this.slider_min_max_x[0];		
-		
 		
 		anim2.add(objects.bet_dialog_cont,{alpha:[0,1]}, true, 0.25,'linear');	
 	
@@ -1963,18 +1988,7 @@ bet_dialog = {
 		})		
 		
 	},
-		
-	hard_close : function() {
-		
-		
-		if (this.p_resolve!==null)
-			this.p_resolve({action:'CLOSE', value:0})
-		
-		if (objects.bet_dialog_cont.visible === true)
-			this.close();
-		
-	},
-	
+			
 	ok_down : function () {
 		
 		if (objects.bet_dialog_cont.ready === false) {
@@ -2003,6 +2017,7 @@ bet_dialog = {
 	
 	close : function() {
 		
+		objects.game_info.text='';
 		anim2.add(objects.bet_dialog_cont,{alpha:[1, 0]}, false, 0.25,'linear');	
 		
 	},
@@ -2053,7 +2068,7 @@ bet_dialog = {
 			}
 			
 			
-			objects.bet_title1.text = this.bet_amount;
+			objects.bet_amount.text = this.bet_amount;
 
 			
 		}		
@@ -2990,6 +3005,7 @@ async function load_resources() {
 	
 	
 	game_res.add("m2_font", git_src+"fonts/MS_Comic_Sans/font.fnt");
+	game_res.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
 
 	game_res.add('check',git_src+'sounds/check.mp3');
 	game_res.add('raise',git_src+'sounds/raise.mp3');
