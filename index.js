@@ -7,7 +7,8 @@ const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["
 const suit_num_to_txt = ['h','d','s','c'];
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const comb_to_text = {HIGH_CARD : ['СТ.КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
-const table_id='table1';
+let table_id='table1';
+let cards_suit_texture=''
 
 irnd = function(min,max) {	
     min = Math.ceil(min);
@@ -114,12 +115,12 @@ class playing_cards_class extends PIXI.Container {
 		this.bcg = new PIXI.Sprite(gres.pcard_bcg.texture);
 		this.bcg.anchor.set(0.5,0.5);	
 		this.bcg.width=90;
-		this.bcg.height=110;
+		this.bcg.height=120;
 							
 		this.suit_img = new PIXI.Sprite();
 		this.suit_img.anchor.set(0.5,0.5);
 		this.suit_img.width=90;
-		this.suit_img.height=110;
+		this.suit_img.height=120;
 		
 		this.t_value = new PIXI.BitmapText('', {fontName: 'cards_font',fontSize: 50});
 		this.t_value.anchor.set(0.5,0.5);
@@ -155,7 +156,7 @@ class playing_cards_class extends PIXI.Container {
 		//return
 		this.opened=0;
 		this.t_value.visible = false;
-		this.suit_img.texture = gres.cards_shirt.texture;		
+		this.suit_img.texture = cards_suit_texture;		
 		
 	}
 		
@@ -277,7 +278,7 @@ class player_card_class extends PIXI.Container {
 
 		this.t_won=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :28,align:'center'});
 		this.t_won.x=75;
-		this.t_won.y=this.t_won.sy=150;
+		this.t_won.y=this.t_won.sy=160;
 		this.t_won.tint=0xffffff;
 		this.t_won.anchor.set(0.5,0.5);
 		this.t_won.visible=false;	
@@ -850,7 +851,11 @@ game={
 		objects.t_bank.amount=0;
 		
 		//процессинг таймера ходов
+		objects.timer_bar.scale_x=0;
 		some_process.timer_bar=this.process.bind(this);
+		
+		//скрываем карты посередине
+		objects.cen_cards.forEach(c=>c.visible=false);
 		
 		//показываем окошко статуса
 		this.show_status_window();
@@ -891,6 +896,8 @@ game={
 	
 	show_status_window(){
 		
+		objects.t_table_status1.text='...';
+		
 		//сразу сколько игроков есть в pending
 		fbs.ref(table_id+'/pending').on('value',data=>{
 			game.show_pending_players(data.val());	
@@ -924,7 +931,11 @@ game={
 		
 	analyse_table(data){
 		
+		
 		if (data.state==='off'){
+			//сначала убираем все карточки
+			objects.pcards.forEach(c=>{c.visible=false;c.uid='xxx'});
+			
 			objects.t_table_status0.text=['Ждем игроков...','Waiting other players...'][LANG]	
 		}
 
@@ -1039,6 +1050,10 @@ game={
 		if (objects.bet_dialog_cont.visible)
 			objects.bet_dialog_cont.visible=false;
 		
+		if (table_id==='table1')
+			cards_suit_texture=gres.cards_shirt.texture;
+		else
+			cards_suit_texture=gres.cards_shirt2.texture;
 		
 		//objects.desktop.texture=gres.stylish_bcg.texture;
 				
@@ -1463,6 +1478,7 @@ game={
 		clearInterval(this.pending_timer);
 		fbs.ref(table_id+'/events').off();
 		fbs.ref(table_id+'/pending/'+my_data.uid).remove();
+		fbs.ref(table_id+'/pending').off();
 	}
 		
 }
@@ -2458,6 +2474,70 @@ feedback = {
 	
 }
 
+tables_menu={
+	
+	activate(){
+		
+		
+		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
+		anim2.add(objects.table2_data_cont,{x:[850,objects.table2_data_cont.sx]}, true, 0.25,'linear');
+		
+		fbs.ref('table1/pending').on('value',function(data){			
+			tables_menu.table_data_updated(objects.t_table1_players_num,data.val())
+		})
+		
+		/*fbs.ref('table2/pending').on('value',function(data){			
+			tables_menu.table_data_updated(objects.t_table2_players_num,data.val())
+		})*/
+		
+		objects.t_table2_players_num.text=['Закрыто','Closed'][LANG];
+		
+	},
+	
+	table_data_updated(table_players_num,data){
+
+		let num_of_players=0;
+		if (data) num_of_players=Object.keys(data).length;
+		
+		table_players_num.text=['Игроков: ','Players: '][LANG]+num_of_players+'/6';
+		
+	},
+	
+	table_down(table){
+		
+		if (anim2.any_on()===true) {
+			sound.play('locked');
+			return
+		};
+		
+		if(table==='table2'){
+			anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.sx,objects.table2_data_cont.sx+5]}, true, 0.25,'shake');
+			sound.play('locked');
+			return;
+		}
+		
+		table_id=table;
+		game.activate();
+		this.close();
+		
+	},	
+	
+	close(){
+		
+		fbs.ref('table1/pending').off();
+		fbs.ref('table2/pending').off();	
+		
+		anim2.add(objects.table1_data_cont,{x:[objects.table1_data_cont.x,-50]}, false, 0.25,'linear');
+		anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.x,850]}, false, 0.25,'linear');
+		
+	}
+	
+	
+	
+	
+	
+}
+
 main_menu= {
 
 	activate: async function() {
@@ -2493,7 +2573,7 @@ main_menu= {
 		sound.play('click');
 
 		await this.close();
-		game.activate();
+		tables_menu.activate();
 
 	},
 	
