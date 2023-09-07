@@ -1496,7 +1496,7 @@ hand_check = {
 	
 	get_total_value(check_result){
 		
-		const mult=[50625,3375,225,15,1];
+		const mult=[50625,3375,225,15,1,0,0,0];
 		const comb_name=check_result.name;
 		let sum=this.comb_value[comb_name]*759375;
 		for (let c=0;c<check_result.data.length;c++)
@@ -1674,9 +1674,10 @@ hand_check = {
 				counter[card.suit_txt].push({value : card.value_num});
 		}	
 		
-		for (let card of  Object.keys(counter))
+		for (let card of Object.keys(counter))
 			if (counter[card].length >= 5)
-				return {check:1, name:'FLUSH',  data : counter[card].sort(function(a, b) {return b.value - a.value })};
+				return {check:1, name:'FLUSH',  data : counter[card].sort(function(a, b) {return b.value - a.value })};			
+
 			
 		return {check:0};		
 		
@@ -3423,6 +3424,39 @@ async function init_game_env(env) {
 	//показыаем основное меню
 	main_menu.activate();
 
+	
+}
+
+function check_combinations(){
+	
+	//это колода карт
+	var deck=[];
+	for(let i=0;i<52;i++)
+		deck.push([i,0])
+	deck.forEach(c =>c[1]=Math.random());
+	deck = deck.sort((a, b)=>{return a[1] - b[1]});
+	
+	let res=[];
+	for (let i=0;i<5;i++){
+		
+		let cards=[deck[i*7][0],deck[i*7+1][0],deck[i*7+2][0],deck[i*7+3][0],deck[i*7+4][0],deck[i*7+5][0],deck[i*7+6][0]]
+		let comb=hand_check.check(cards);
+		let hand_value=hand_check.get_total_value(comb);	
+		res.push([comb,hand_value,cards])
+	}
+
+	res=res.sort((a,b)=>{return a[1]-b[1]});
+	
+	
+	
+	for (let p of res){
+		if (isNaN(p[1]))
+			console.log('NAN',p)
+		console.log(p[0],p[1])
+		
+	}
+	
+	
 	
 }
 
