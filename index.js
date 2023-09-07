@@ -2478,7 +2478,7 @@ tables_menu={
 	
 	activate(){
 		
-		objects.table_manu_info.visible=false;
+		objects.table_menu_info.visible=false;
 		objects.buy_chips_button.visible=false;
 		
 		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
@@ -2520,9 +2520,9 @@ tables_menu={
 	buy_chips_down(){
 		
 		this.payments.purchase({ id: 'chips1000' }).then(purchase => {
-			objects.table_manu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
+			objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
 		}).catch(err => {
-			objects.table_manu_info.text=['Ошибка при покупке!','Error!'][LANG];
+			objects.table_menu_info.text=['Ошибка при покупке!','Error!'][LANG];
 		})
 		
 	},
