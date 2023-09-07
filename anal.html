@@ -136,7 +136,7 @@
   
 
 
-<body onload="show_last()">
+<body onload="update_room_quick_stat()">
 
 </body>
 </html>
@@ -165,18 +165,15 @@ async function update_room_quick_stat() {
 	console.timeEnd();
 	
 
-	firebase.database().ref('table1').on('value').then((snapshot) => {
+	firebase.database().ref('table1/pending').on('value',snapshot => {
 		document.getElementById("but_ref1").textContent = Object.keys(snapshot.val()).length;
 	})
 	
-	firebase.database().ref('states2').once('value').then((snapshot) => {
-		document.getElementById("but_ref2").textContent = Object.keys(snapshot.val()).length;
+	firebase.database().ref('table2/pending').on('value',snapshot => {
+		document.getElementById("but_ref1").textContent = Object.keys(snapshot.val()).length;
 	})
 	
-	firebase.database().ref('states3').once('value').then((snapshot) => {
-		document.getElementById("but_ref3").textContent = Object.keys(snapshot.val()).length;
-	})
-
+	
 }
 
 async function show_last() {
