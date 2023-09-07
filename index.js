@@ -278,7 +278,7 @@ class player_card_class extends PIXI.Container {
 
 		this.t_won=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :28,align:'center'});
 		this.t_won.x=75;
-		this.t_won.y=this.t_won.sy=160;
+		this.t_won.y=this.t_won.sy=155;
 		this.t_won.tint=0xffffff;
 		this.t_won.anchor.set(0.5,0.5);
 		this.t_won.visible=false;	
@@ -2474,8 +2474,12 @@ feedback = {
 
 tables_menu={
 	
+	payments:null,
+	
 	activate(){
 		
+		objects.table_manu_info.visible=false;
+		objects.buy_chips_button.visible=false;
 		
 		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table2_data_cont,{x:[850,objects.table2_data_cont.sx]}, true, 0.25,'linear');
@@ -2484,11 +2488,12 @@ tables_menu={
 			tables_menu.table_data_updated(objects.t_table1_players_num,data.val())
 		})
 		
-		/*fbs.ref('table2/pending').on('value',function(data){			
+		fbs.ref('table2/pending').on('value',function(data){			
 			tables_menu.table_data_updated(objects.t_table2_players_num,data.val())
-		})*/
-		
-		objects.t_table2_players_num.text=['Закрыто','Closed'][LANG];
+		})
+
+		objects.table_menu_info.text=''
+		this.init_payments();
 		
 	},
 	
@@ -2501,6 +2506,27 @@ tables_menu={
 		
 	},
 	
+	init_payments(){
+		
+		if(this.payments) return;
+		
+		ysdk.getPayments({ signed: true }).then(_payments => {
+			tables_menu.payments = _payments;
+			}).catch(err => {
+		})			
+		
+	},
+	
+	buy_chips_down(){
+		
+		this.payments.purchase({ id: 'chips1000' }).then(purchase => {
+			objects.table_manu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
+		}).catch(err => {
+			objects.table_manu_info.text=['Ошибка при покупке!','Error!'][LANG];
+		})
+		
+	},
+	
 	table_down(table){
 		
 		if (anim2.any_on()===true) {
@@ -2508,11 +2534,11 @@ tables_menu={
 			return
 		};
 		
-		if(table==='table2'){
+		/*if(table==='table2'){
 			anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.sx,objects.table2_data_cont.sx+5]}, true, 0.25,'shake');
 			sound.play('locked');
 			return;
-		}
+		}*/
 		
 		table_id=table;
 		game.activate();
@@ -2529,10 +2555,6 @@ tables_menu={
 		anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.x,850]}, false, 0.25,'linear');
 		
 	}
-	
-	
-	
-	
 	
 }
 
