@@ -64,11 +64,11 @@ class chat_record_class extends PIXI.Container {
 		super();	
 		this.resolver=0;
 		this.text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize:25,lineSpacing:39}); 
-		this.text.tint=0xFFFF00;
+		this.text.tint=0x55bbdd;
 		this.text.maxWidth=290;
 		
 		this.name_text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize: 25}); 
-		this.name_text.tint=0xFFFFFF;
+		this.name_text.tint=0xbbff00;
 		
 		this.visible=false;
 		this.addChild(this.text,this.name_text)
