@@ -3368,7 +3368,7 @@ async function init_game_env(env) {
 		
 	my_data.rating = (other_data && other_data.rating) || 100;
 	my_data.games = (other_data && other_data.games) || 0;
-	my_data.name = (other_data && other_data.name) || my_data.name;
+	my_data.name = my_data?.name||other_data?.name||'no_name';
 		
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
