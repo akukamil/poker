@@ -1105,7 +1105,7 @@ game={
 		objects.my_cards[1].open(this.my_card.card1.card_index);
 			
 		//записываем мой баланс после анте
-		fbs.ref('players/'+my_data.rating).set(my_data.rating);
+		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 				
 		//сразу проверяем мою комбинацию которая пока только 2 карты		
 		this.update_my_combination();			
@@ -2509,7 +2509,7 @@ tables_menu={
 		this.payments.purchase({ id: 'chips1000' }).then(purchase => {
 			objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
 			my_data.rating+=1000;
-			fbs.ref('players/'+my_data.rating).set(my_data.rating);
+			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 			
 		}).catch(err => {
 			objects.table_menu_info.text=['Ошибка при покупке!','Error!'][LANG];
