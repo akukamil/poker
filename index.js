@@ -2484,7 +2484,7 @@ tables_menu={
 		if (data) num_of_players=Object.keys(data).length;	
 		
 		//если это вторая комната то добавляем бота
-		//if(bot_on) num_of_players=Math.max(num_of_players,1);
+		if(bot_on) num_of_players=Math.max(num_of_players,1);
 		
 		table_players_num.text=['Игроков: ','Players: '][LANG]+num_of_players+'/6';
 		
