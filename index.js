@@ -2800,7 +2800,7 @@ rules = {
 		anim2.add(objects.rules_back_button,{x:[800, objects.rules_back_button.sx]}, true, 0.5,'easeOutCubic');
 		anim2.add(objects.rules_text,{alpha:[0, 1]}, true, 1,'linear');
 				
-		objects.rules_text.text = ['Добро пожаловать в карточную игру Покер (онлайн дуэль)!\n\nВ игре участвуют до 6 игроков. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк (pot). Также можно выиграть банк если соперники откажутся продолжать партию (скинут карты). Выиграть можно также вводя соперников в заблуждение величиной ставок (блеф) и тем самым заставляя их скидывать карты.\n\nУдачной игры!','Welcome to the Poker card game (online)!\n\n The game involves up to 6 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\nHave a good game!'][LANG];
+		objects.rules_text.text = ['Добро пожаловать в карточную игру Покер (онлайн дуэль)!\n\nВ игре участвуют до 6 игроков. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк. Также можно выиграть банк, если соперники откажутся продолжать партию (скинут карты). Выиграть можно также вводя соперников в заблуждение величиной ставок (блеф) и тем самым заставляя их скидывать карты.\n\nУдачной игры!','Welcome to the Poker card game (online)!\n\n The game involves up to 6 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\nHave a good game!'][LANG];
 	},
 	
 	back_button_down : async function() {
@@ -3416,39 +3416,6 @@ async function init_game_env(env) {
 	//показыаем основное меню
 	main_menu.activate();
 
-	
-}
-
-function check_combinations(){
-	
-	//это колода карт
-	var deck=[];
-	for(let i=0;i<52;i++)
-		deck.push([i,0])
-	deck.forEach(c =>c[1]=Math.random());
-	deck = deck.sort((a, b)=>{return a[1] - b[1]});
-	
-	let res=[];
-	for (let i=0;i<5;i++){
-		
-		let cards=[deck[i*7][0],deck[i*7+1][0],deck[i*7+2][0],deck[i*7+3][0],deck[i*7+4][0],deck[i*7+5][0],deck[i*7+6][0]]
-		let comb=hand_check.check(cards);
-		let hand_value=hand_check.get_total_value(comb);	
-		res.push([comb,hand_value,cards])
-	}
-
-	res=res.sort((a,b)=>{return a[1]-b[1]});
-	
-	
-	
-	for (let p of res){
-		if (isNaN(p[1]))
-			console.log('NAN',p)
-		console.log(p[0],p[1])
-		
-	}
-	
-	
 	
 }
 
