@@ -461,10 +461,10 @@ class mini_cards_calss extends PIXI.Container{
 		const value_txt = value_num_to_txt[value_num];
 		const suit_txt = suit_num_to_txt[suit_num];		
 		
-		if (this.suit_txt === 'h' || this.suit_txt === 'd')
+		/*if (suit_txt === 'h' || suit_txt === 'd')
 			this.t_value.tint = 0xff0000;
 		else
-			this.t_value.tint = 0x000000;
+			this.t_value.tint = 0x000000;*/
 		
 		this.bcg.texture=gres.mini_card_bcg_opened.texture;		
 		
@@ -3092,7 +3092,7 @@ async function load_resources() {
 	document.getElementById("m_progress").style.display = 'flex';
 
 	let git_src="https://akukamil.github.io/poker/"
-	//git_src=""
+	git_src=""
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
