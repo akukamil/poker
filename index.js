@@ -2461,10 +2461,7 @@ tables_menu={
 	payments:null,
 	
 	activate(){
-		
-		//objects.table_menu_info.visible=true;
-		//objects.buy_chips_button.visible=false;
-		
+				
 		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table2_data_cont,{x:[850,objects.table2_data_cont.sx]}, true, 0.25,'linear');
 		
@@ -2494,6 +2491,12 @@ tables_menu={
 	},
 	
 	init_payments(){
+		
+		if (game_platform==='YANDEX')
+			objects.table_menu_info.visible=objects.buy_chips_button.visible=true;
+		else
+			objects.table_menu_info.visible=objects.buy_chips_button.visible=false;
+
 		
 		if(this.payments) return;
 		
