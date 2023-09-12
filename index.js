@@ -7,6 +7,7 @@ const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["
 const suit_num_to_txt = ['h','d','s','c'];
 const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const comb_to_text = {HIGH_CARD : ['СТ.КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
+const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['КОЛЛ','CALL'],FOLD:['ФОЛД','FOLD'],BET:['БЭТ','BET']};
 let table_id='table1';
 let cards_suit_texture=''
 
@@ -311,11 +312,10 @@ class player_card_class extends PIXI.Container {
 	show_action(event){		
 		
 		const action=event.data;
-		const trasl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['КОЛЛ','CALL'],FOLD:['ФОЛД','FOLD'],BET:['БЭТ','BET']};
-		
+				
 		objects.action_info.x=this.x+70;
 		objects.action_info.y=this.y+130;
-		objects.action_info.t_info.text=trasl_action[event.data][LANG];
+		objects.action_info.t_info.text=transl_action[event.data][LANG];
 				
 		let in_money=event.chips||event.bet_raise;
 		if (event.bet_raise!=null)
@@ -1973,7 +1973,9 @@ bet_dialog = {
 		}
 		
 		this.bet_amount = this.min_max_vals[0];
-		objects.call_title.text = this.min_max_opts[0];
+		
+		objects.call_title.action=this.min_max_opts[0];
+		objects.call_title.text = transl_action[this.min_max_opts[0]][LANG];
 		objects.bet_amount.text = this.min_max_vals[0];
 		
 		//устанаваем слайдер на минимальное значение
@@ -1995,7 +1997,7 @@ bet_dialog = {
 		}
 		
 		sound.play('click');	
-		this.p_resolve({action:objects.call_title.text, chips:this.bet_amount})		
+		this.p_resolve({action:objects.call_title.action, chips:this.bet_amount})		
 		this.close();
 	},
 			
@@ -2049,7 +2051,8 @@ bet_dialog = {
 			this.bet_amount = Math.round((frac_pos_x * (this.min_max_vals[1] - this.min_max_vals[0]) + this.min_max_vals[0]));
 						
 			
-			objects.call_title.text = this.min_max_opts[1];	
+			objects.call_title.action=this.min_max_opts[1];
+			objects.call_title.text = transl_action[objects.call_title.action][LANG];		
 			
 			if (objects.slider_button.x >= this.slider_min_max_x[1]) {
 				
@@ -2060,8 +2063,9 @@ bet_dialog = {
 			
 			if (objects.slider_button.x <= this.slider_min_max_x[0]) {
 				
-				objects.slider_button.x = this.slider_min_max_x[0];				
-				objects.call_title.text = this.min_max_opts[0];		
+				objects.slider_button.x = this.slider_min_max_x[0];		
+				objects.call_title.action=this.min_max_opts[0];
+				objects.call_title.text = transl_action[objects.call_title.action][LANG];		
 				this.bet_amount = this.min_max_vals[0];
 			}
 			
