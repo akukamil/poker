@@ -1,6 +1,6 @@
 var M_WIDTH=800, M_HEIGHT=450;
 var app,chat_path,gdata={}, game_res, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "",
-hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''}, players_cache={},
+hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''}, players_cache={BOT:{name:'Victoria',pic_url:'https://akukamil.github.io/poker/res/girl_pic.jpg'}},
 opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
 
 const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["h",0,8],["h",0,9],["h",0,10],["h",0,11],["h",0,12],["h",0,13],["h",0,14],["d",1,2],["d",1,3],["d",1,4],["d",1,5],["d",1,6],["d",1,7],["d",1,8],["d",1,9],["d",1,10],["d",1,11],["d",1,12],["d",1,13],["d",1,14],["s",2,2],["s",2,3],["s",2,4],["s",2,5],["s",2,6],["s",2,7],["s",2,8],["s",2,9],["s",2,10],["s",2,11],["s",2,12],["s",2,13],["s",2,14],["c",3,2],["c",3,3],["c",3,4],["c",3,5],["c",3,6],["c",3,7],["c",3,8],["c",3,9],["c",3,10],["c",3,11],["c",3,12],["c",3,13],["c",3,14]]
@@ -309,20 +309,17 @@ class player_card_class extends PIXI.Container {
 	}
 	
 	show_action(event){		
-	
-		
 		
 		const action=event.data;
+		const trasl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['КОЛЛ','CALL'],FOLD:['ФОЛД','FOLD'],BET:['БЭТ','BET']};
 		
 		objects.action_info.x=this.x+70;
 		objects.action_info.y=this.y+130;
-		objects.action_info.t_info.text=event.data;
-		
-		
+		objects.action_info.t_info.text=trasl_action[event.data][LANG];
+				
 		let in_money=event.chips||event.bet_raise;
 		if (event.bet_raise!=null)
-			in_money=event.bet_raise;
-		
+			in_money=event.bet_raise;		
 		if (event.chips!=null)
 			in_money=event.chips;
 		
@@ -367,17 +364,13 @@ class player_card_class extends PIXI.Container {
 	}
 	
 	change_balance(amount){
-		
-		
-		
-		
+				
 		if(this.uid===my_data.uid){			
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
 			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);
 		}
-		
-		
+				
 		this.rating+=amount;
 		this.t_rating.text=this.rating;		
 		
@@ -522,9 +515,7 @@ chat={
 			return oldest.y < msg.y ? oldest : msg;
 		});		
 	}
-	
-	
-	
+		
 	
 }
 
@@ -969,8 +960,9 @@ game={
 			pcard.hand_value=0;
 			pcard.set_cards(player.cards)
 			this.uid_to_pcards[player.uid]=pcard;
-			i++;
+			i++;			
 		}
+			
 
 		//теперь другие данные которые нужно загружать
 		for (let uid in this.uid_to_pcards){			
@@ -983,7 +975,7 @@ game={
 		//обновляем деньги
 		for (let uid in this.uid_to_pcards){
 			let s=await fbs.ref('players/'+uid+'/rating').once('value');
-			const rating=s.val();
+			const rating=s?.val()||100;
 			this.uid_to_pcards[uid].t_rating.text=rating;
 			this.uid_to_pcards[uid].rating=rating;
 		}
@@ -1071,7 +1063,7 @@ game={
 		//кнопка выхода
 		objects.exit_game_button.visible=true;		
 					
-		//записываем в аватарки значения карт
+		//записываем в аватарки значения карт и убираем анте из всех
 		let i=0;
 		this.players_in_game.forEach(player=>{							
 			const pcard=objects.pcards[i];		
@@ -1102,7 +1094,10 @@ game={
 		
 		objects.game_info.text=['НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ 20','STARTING NEW ROUND, ANTE 20'][LANG];
 		
-		
+		//приветствие от бота
+		if (this.players_in_game.some(p=>p.uid==='BOT'))
+			chat.add_message('Victoria',['Привет! Удачной игры!','Hello and good luck'][LANG])
+				
 		this.iam_in_game=1;
 		
 		//показываем мои большие карты
@@ -1159,11 +1154,18 @@ game={
 	
 	async send_message_down(){
 		
+		
 		if(anim2.any_on()||!this.iam_in_game){
 			sound.play('locked')
 			return;			
 		}
 		
+		if(my_data.blocked){
+			objects.game_info.text=['ЗАБЛОКИРОВАНО!','YOU ARE BLOCKED!'][LANG];
+			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
+			sound.play('locked')
+			return;			
+		}
 		
 		//убираем метки старых сообщений
 		const cur_dt=Date.now();
@@ -1916,9 +1918,7 @@ bet_dialog = {
 			'RAISE':'CALL_RAISE',
 			'CHECK':'CHECK_BET',
 			'BET':'CALL_RAISE',
-			'INIT_BET':'CALL_RAISE',
 			'INIT_CHECK':'CHECK_BET',
-			'CALL':'CHECK_RAISE'
 		};	
 				
 		//конвертируем ход соперника
@@ -1927,20 +1927,16 @@ bet_dialog = {
 		this.bet_amount = min_bet;										
 								
 		//можно колировать или поднять (мин-макс)	
-		if (opp_action === 'INIT_BET')
-			objects.game_info.text = ['СДЕЛАЙТЕ ПЕРВУЮ СТАВКУ (CALL) РАЗМЕРОМ БОЛЬШОГО БЛАЙНДА ИЛИ БОЛЬШЕ (RAISE)','MAKE A FIRST BET (CALL) SIZE OF BIG BLIND OR MORE (RAISE)'][LANG];
 		if (opp_action === 'RAISE')
-			objects.game_info.text = ['СОПЕРНИК ПОДНЯЛ СТАВКУ (RAISE), НУЖНО ОТВЕТИТЬ (CALL), ПОДНЯТЬ (RAISE) ИЛИ СДАТЬСЯ (FOLD)','OPPONENT RAISED BET, YOU CAN CALL, RAISE OR FOLD'][LANG];
+			objects.game_info.text = ['СОПЕРНИК ПОДНЯЛ СТАВКУ (РЕЙЗ), НУЖНО ОТВЕТИТЬ (КОЛЛ), ПОДНЯТЬ (РЕЙЗ) ИЛИ СДАТЬСЯ (ФОЛД)','OPPONENT RAISED BET, YOU CAN CALL, RAISE OR FOLD'][LANG];
 		if (opp_action === 'BET')
-			objects.game_info.text = ['СОПЕРНИК СДЕЛАЛ СТАВКУ (BET), НУЖНО ОТВЕТИТЬ (CALL), ПОДНЯТЬ (RAISE) ИЛИ СДАТЬСЯ (FOLD)','OPPONENT MADE A BET, YOU CAN CALL, RAISE OR FOLD'][LANG];
+			objects.game_info.text = ['СОПЕРНИК СДЕЛАЛ СТАВКУ (БЭТ), НУЖНО ОТВЕТИТЬ (КОЛЛ), ПОДНЯТЬ (РЕЙЗ) ИЛИ СДАТЬСЯ (ФОЛД)','OPPONENT MADE A BET, YOU CAN CALL, RAISE OR FOLD'][LANG];
 		if (opp_action === 'CHECK')
-			objects.game_info.text = ['СОПЕРНИК НЕ СДЕЛАЛ СТАВКУ (CHECK), МОЖНО ТОЖЕ ПРОПУСТИТЬ (CHECK) ИЛИ СДЕЛАТЬ ЕЕ (BET)','OPPONENT CHECK, YOU CAN ALSO CHECK OR MAKE A BET'][LANG];					
+			objects.game_info.text = ['СОПЕРНИК НЕ СДЕЛАЛ СТАВКУ (ЧЕК), МОЖНО ТОЖЕ ПРОПУСТИТЬ (ЧЕК) ИЛИ СДЕЛАТЬ ЕЕ (БЭТ)','OPPONENT CHECK, YOU CAN ALSO CHECK OR MAKE A BET'][LANG];					
 		if (opp_action === 'INIT_CHECK')
-			objects.game_info.text = ['ДЕЛАЙТЕ СТАВКУ (BET), НО МОЖНО И ПРОПУСТИТЬ (CHECK)','YOU CAN MAKE A BET OR CHECK'][LANG];	
-		if (opp_action === 'CALL')
-			objects.game_info.text = ['СОПЕРНИК СДЕЛАЛ СТАВКУ, МОЖНО ПРОПУСТИТЬ (CHECK), ПОДНЯТЬ (RAISE) ИЛИ СДАТЬСЯ (FOLD)','OPPONENT MADE A BET, YOU CAN CHECK, RAISE OR FOLD'][LANG];
+			objects.game_info.text = ['ДЕЛАЙТЕ СТАВКУ (БЭТ), НО МОЖНО И ПРОПУСТИТЬ (ЧЕК)','YOU CAN MAKE A BET OR CHECK'][LANG];	
 		if (no_rasing === true)
-			objects.game_info.text = ['СОПЕРНИК ПОДНЯЛ СТАВКУ (RAISE), МОЖНО ТОЛЬКО ОТВЕТИТЬ (CALL), ПОДНЯТЬ НЕЛЬЗЯ','OPPONENT RAISED A BET, YOU CAN CALL OR FOLD'][LANG];	
+			objects.game_info.text = ['СОПЕРНИК ПОДНЯЛ СТАВКУ (РЕЙЗ), МОЖНО ТОЛЬКО ОТВЕТИТЬ (КОЛЛ), ПОДНЯТЬ НЕЛЬЗЯ','OPPONENT RAISED A BET, YOU CAN CALL OR FOLD'][LANG];	
 				
 		//определяем максимальную ставку
 		let min_rating =  Math.min(opp_data.rating, my_data.rating);
@@ -1963,20 +1959,7 @@ bet_dialog = {
 			}
 			
 		}
-		
-		//это возможность большого блайнда на префлопе
-		if (action === 'CHECK_RAISE') {	
-			
-			if (my_data.rating === 0) {
-				this.min_max_vals = [my_data.rating, my_data.rating];			
-				this.min_max_opts = ['CHECK', 'CHECK'];
-			} else {
-				this.min_max_vals = [0, Math.min(max_bet,my_data.rating)];			
-				this.min_max_opts = ['CHECK', 'RAISE'];				
-			}			
-			
-		}
-		
+				
 		if (action === 'CHECK_BET') {
 			
 			if (my_data.rating === 0) {
@@ -2490,7 +2473,7 @@ tables_menu={
 		})
 		
 		fbs.ref('table2/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.t_table2_players_num,data.val())
+			tables_menu.table_data_updated(objects.t_table2_players_num,data.val(),1)
 		})
 
 		objects.table_menu_info.text=''
@@ -2498,10 +2481,13 @@ tables_menu={
 		
 	},
 	
-	table_data_updated(table_players_num,data){
+	table_data_updated(table_players_num,data,bot_on){
 
 		let num_of_players=0;
-		if (data) num_of_players=Object.keys(data).length;
+		if (data) num_of_players=Object.keys(data).length;	
+		
+		//если это вторая комната то добавляем бота
+		//if(bot_on) num_of_players=Math.max(num_of_players,1);
 		
 		table_players_num.text=['Игроков: ','Players: '][LANG]+num_of_players+'/6';
 		
