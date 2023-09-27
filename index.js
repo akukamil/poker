@@ -1488,14 +1488,7 @@ hand_check = {
 	
 	comb_kickers :{'HIGH_CARD':5, 'PAIR':4,'TWO_PAIRS':3,'SET':3,'STRAIGHT':1,'FLUSH':5,'FULL_HOUSE':2,'KARE':2,'STRAIGHT_FLUSH':1,'ROYAL_FLUSH':1},
 	comb_value :{'HIGH_CARD':0, 'PAIR':1,'TWO_PAIRS':2,'SET':3,'STRAIGHT':4,'FLUSH':5,'FULL_HOUSE':6,'KARE':7,'STRAIGHT_FLUSH':8,'ROYAL_FLUSH':9},
-	compare : function(r1,r2) {
-		
-		if (r1 > r2) return 0;
-		if (r1 < r2) return 1;
-		return -1;	
-		
-	},
-	
+
 	get_total_value(check_result){
 		
 		const mult=[50625,3375,225,15,1,0,0,0];
@@ -1507,31 +1500,8 @@ hand_check = {
 		return sum;	
 		
 	},
-			
-	check_winner : function(my_res, opp_res) {
-				
-		if (my_res.name === opp_res.name) {		
-			let data = [];
-			let num_of_kickers = this.comb_kickers[my_res.name];
-
-			let my_kickers = '';
-			let opp_kickers = '';
-			
-			for (let k = 0 ; k < num_of_kickers;k++) {
-				let comp = this.compare(my_res.data[k].value, opp_res.data[k].value)
-				my_kickers = my_kickers + value_num_to_txt[my_res.data[k].value] + ' ';
-				opp_kickers = opp_kickers + value_num_to_txt[opp_res.data[k].value] + ' ';
-				if (comp!== -1) return [comp,my_kickers,opp_kickers];					
-			}
-			return [-1,my_kickers,opp_kickers];
-		} else {
-			
-			return [this.compare(this.comb_value[my_res.name],this.comb_value[opp_res.name]),'',''];
-			
-		}
-	},
-
-	check : function(in_cards) {
+		
+	check (in_cards) {
 		
 		//конвертируем карты в объекты
 		let cards=[];
@@ -1569,11 +1539,11 @@ hand_check = {
 		
 	},
 		
-	check_flush_royal : function(cards) {
+	check_flush_royal(cards) {
 
 		let hand = '';
 		for (let card of cards) {			
-			let s = card.value_txt + card.suit_txt;
+			let s = value_num_to_txt[card.value_num] + card.suit_txt;
 			hand += s;
 		}		
 		
@@ -1590,11 +1560,11 @@ hand_check = {
 		
 	},
 	
-	check_street_flush : function(cards) {
+	check_street_flush (cards) {
 		
 		let hand = '';
 		for (let card of cards) {			
-			let s = card.value_txt + card.suit_txt;			
+			let s = value_num_to_txt[card.value_num] + card.suit_txt;			
 			hand += s;
 		}	
 		//console.log(hand);
@@ -1620,7 +1590,7 @@ hand_check = {
 
 	},
 	
-	check_kare : function(cards) {		
+	check_kare (cards) {		
 		
 		//считаем сколько значений но сначала самые большие
 		let counter = new Array(15).fill().map(() => { return {count : 0, rang : 0, value :0 }});	
@@ -1650,7 +1620,7 @@ hand_check = {
 		return {check:1, name:'KARE', data : [counter[0],counter[1]] };	
 	},
 		
-	check_full_house : function(cards) {
+	check_full_house (cards) {
 		
 		//считаем сколько значений но сначала самые большие
 		let counter = [0,0,0,0,0,0,0,0,0,0,0,0,0];		
@@ -1666,7 +1636,7 @@ hand_check = {
 		
 	},
 	
-	check_flush : function(cards) {
+	check_flush (cards) {
 		
 		let counter = {};		
 		for (let card of cards) {			
@@ -1685,7 +1655,7 @@ hand_check = {
 		
 	},
 	
-	check_street : function(cards) {
+	check_street(cards) {
 		
 		let hand = [];
 		for (let card of cards)		
@@ -1708,7 +1678,7 @@ hand_check = {
 		return {check:0};			
 	},
 	
-	check_tripple : function(cards) {
+	check_tripple(cards) {
 		
 		//считаем сколько значений но сначала самые большие
 		let counter = new Array(15).fill().map(() => { return {count : 0, rang : 0, value : 0}});	
@@ -1738,7 +1708,7 @@ hand_check = {
 		return {check:1, name : 'SET', data : [counter[0],counter[1],counter[2]] };	
 	},
 	
-	check_two_pair : function(cards) {
+	check_two_pair(cards) {
 		
 		//считаем сколько значений но сначала самые большие
 		let counter = new Array(15).fill().map(() => { return {count : 0, rang : 0, value :0 }});	
@@ -1770,7 +1740,7 @@ hand_check = {
 		
 	},
 	
-	check_pair : function(cards) {
+	check_pair (cards) {
 		
 		//считаем сколько значений но сначала самые большие
 		let counter = new Array(15).fill().map(() => { return {count : 0, rang : 0, value :0 }});	
@@ -1801,7 +1771,7 @@ hand_check = {
 		
 	},
 	
-	check_high_card : function(cards) {
+	check_high_card (cards) {
 		
 		//считаем сколько значений но сначала самые большие
 		let counter = new Array(15).fill().map(() => { return {count : 0, rang : 0, value :0 }});	
