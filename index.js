@@ -2915,7 +2915,7 @@ auth2 = {
 			
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GM_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
 			
 		}
 				
@@ -2935,7 +2935,7 @@ auth2 = {
 			my_data.pic_url = _player.getPhoto('medium');
 			
 			if (my_data.pic_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
-				my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';
+				my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;	
 			
 			if (my_data.name === '')
 				my_data.name = this.get_random_name(my_data.uid);
@@ -2968,7 +2968,7 @@ auth2 = {
 
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GP_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
 			return;
 		}
 		
@@ -2976,36 +2976,25 @@ auth2 = {
 
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('RS_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
 			return;
 		}
 		
 		if (game_platform === 'DEBUG') {		
 
 			my_data.name = my_data.uid = 'debug' + prompt('Отладка. Введите ID', 100);
-			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';		
+			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;			
 			return;
 		}
 		
-		if (game_platform === 'CRAZYGAMES') {
-			
-			let country_code = await this.get_country_code();
-			try {await this.load_script('https://sdk.crazygames.com/crazygames-sdk-v1.js')} catch (e) {alert(e)};			
-			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('CG_');
-			my_data.name = this.get_random_name(my_data.uid) + ' (' + country_code + ')';
-			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
-			let crazysdk = window.CrazyGames.CrazySDK.getInstance();
-			crazysdk.init();			
-			return;
-		}
-		
+	
 		if (game_platform === 'UNKNOWN') {
 			
 			//если не нашли платформу
 			alert('Неизвестная платформа. Кто Вы?')
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('LS_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://avatars.dicebear.com/api/adventurer/' + my_data.uid + '.svg';	
+			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
 		}
 	
 		
