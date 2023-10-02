@@ -123,35 +123,15 @@ class playing_cards_class extends PIXI.Container {
 		this.suit_img.width=90;
 		this.suit_img.height=120;
 		
-		this.t_value = new PIXI.BitmapText('', {fontName: 'cards_font',fontSize: 50});
+		this.t_value = new PIXI.BitmapText('', {fontName: 'cards_font',fontSize: 55});
 		this.t_value.anchor.set(0.5,0.5);
-		this.t_value.x=3;
+		this.t_value.x=0;
 		this.t_value.y=-22;
 		this.t_value.tint=0x000000;
 						
 						
 		this.addChild(this.bcg, this.suit_img, this.t_value);
 	}	
-		
-	set (card_data) {
-		
-		this.value_num = card_data[0];
-		this.suit_num = card_data[1];
-		
-		//текстовые значения
-		this.value_txt = value_num_to_txt[this.value_num];
-		this.suit_txt = suit_num_to_txt[this.suit_num];
-		
-		
-		this.suit_img.texture = gres[this.suit_txt+'_bcg'].texture;
-		this.t_value.text = this.value_txt;		
-		
-		if (this.suit_txt === 'h' || this.suit_txt === 'd')
-			this.t_value.tint = 0xff0000;
-		else
-			this.t_value.tint = 0x000000;
-		
-	}
 	
 	set_shirt () {
 		//return
@@ -178,7 +158,7 @@ class playing_cards_class extends PIXI.Container {
 		if (this.suit_txt === 'h' || this.suit_txt === 'd')
 			this.t_value.tint = 0xff0000;
 		else
-			this.t_value.tint = 0x000000;
+			this.t_value.tint = 0x2D3133;
 		
 		this.t_value.text = this.value_txt;	
 				
@@ -243,7 +223,7 @@ class player_card_class extends PIXI.Container {
 				
 		this.name=new PIXI.BitmapText('13525', {fontName: 'mfont', fontSize :22});
 		this.name.anchor.set(0.5,0.5);
-		this.name.x=80;
+		this.name.x=70;
 		this.name.y=23;
 		this.name.tint=0xFFFF00;
 						
@@ -256,7 +236,7 @@ class player_card_class extends PIXI.Container {
 		this.my_card_icon=new PIXI.Sprite(gres.my_card_icon_img.texture);
 		this.my_card_icon.width=this.my_card_icon.height=40;
 		this.my_card_icon.x=5;
-		this.my_card_icon.y=5;
+		this.my_card_icon.y=80;
 		this.my_card_icon.visible=true;
 					
 		this.card0=new mini_cards_calss();
@@ -269,7 +249,7 @@ class player_card_class extends PIXI.Container {
 		this.card1.y=60;
 		this.card1.angle=10;		
 						
-		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:32});
+		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:45});
 		this.t_comb.x=75;
 		this.t_comb.y=110;
 		this.t_comb.tint=0xFFD966;
@@ -968,7 +948,7 @@ game={
 		for (let uid in this.uid_to_pcards){			
 			await this.update_players_cache_data(uid);	
 			const pcard=this.uid_to_pcards[uid];
-			pcard.name.text=players_cache[uid].name.substring(0, 10);
+			make_text(pcard.name,players_cache[uid].name,110);
 			this.load_avatar({uid,tar_obj:pcard.avatar})
 		}
 			
@@ -1959,7 +1939,7 @@ bet_dialog = {
 		
 	},
 			
-	ok_down : function () {
+	ok_down() {
 		
 		if (objects.bet_dialog_cont.ready === false) {
 			sound.play('locked')
@@ -1971,13 +1951,13 @@ bet_dialog = {
 		this.close();
 	},
 			
-	no_time : function () {
+	no_time() {
 		
 		this.p_resolve({action:'NOTIME', value:0})		
 		this.close();
 	},
 	
-	no_connection : function () {
+	no_connection(){
 		
 		if (this.p_resolve === null) return;
 		this.p_resolve({action:'NOCONN', value:0})		
@@ -1985,14 +1965,14 @@ bet_dialog = {
 		
 	},
 	
-	close : function() {
+	close(){
 		
 		objects.game_info.text='';
 		anim2.add(objects.bet_dialog_cont,{alpha:[1, 0]}, false, 0.25,'linear');	
 		
 	},
 
-	fold_down : function () {
+	fold_down(){
 		
 		if (objects.bet_dialog_cont.ready === false) {
 			sound.play('locked')
@@ -2004,11 +1984,11 @@ bet_dialog = {
 		this.close();
 	},
 	
-	slider_down : function(e) {		
+	slider_down(e){		
 		this.dragging = 1;		
 	},
 	
-	slider_move : function(e) {
+	slider_move(e){
 				
 		if (this.dragging === 1) {		
 
@@ -2046,9 +2026,53 @@ bet_dialog = {
 		}		
 	},	
 	
-	slider_up : function(e) {		
+	slider_up(e){		
 		this.dragging = 0;		
 	},	
+	
+	change_scale_down(){
+		
+		const vis=objects.slider_line.visible;
+
+		objects.slider_line.visible=!vis;
+		objects.slider_button.visible=!vis;
+		objects.numeric_scale_line.visible=vis;		
+		
+	},
+	
+	numeric_scale_down(e){
+		const p=[-999,60,110,165,218,270,999];		
+		const c=[-1000,-500,-100,100,500,1000];
+		
+		let mx = e.data.global.x/app.stage.scale.x - objects.numeric_scale_line.x - objects.bet_dialog_cont.x;
+		
+		for (let i=0;i<p.length-1;i++){
+			if (mx>p[i]&&mx<p[i+1]){
+				this.bet_amount+=c[i];				
+				break;
+			}			
+		}
+		
+					
+		this.bet_amount = Math.min(this.bet_amount,this.min_max_vals[1]);
+		this.bet_amount = Math.max(this.bet_amount,this.min_max_vals[0]);
+		
+		if (this.bet_amount>this.min_max_vals[0])
+			objects.call_title.action=this.min_max_opts[1];
+		else
+			objects.call_title.action=this.min_max_opts[0];
+		
+		
+		objects.call_title.text = transl_action[objects.call_title.action][LANG];
+		
+		
+		objects.bet_amount.text = this.bet_amount;
+		
+		frac_pos_x=(this.bet_amount - this.min_max_vals[0])/(this.min_max_vals[1] - this.min_max_vals[0]);		
+		objects.slider_button.x=this.slider_min_max_x[0]+frac_pos_x*(this.slider_min_max_x[1] - this.slider_min_max_x[0]);		
+
+		
+	}
 	
 	
 }
@@ -2244,7 +2268,7 @@ feedback = {
 	MAX_SYMBOLS : 50,
 	uid:0,
 	
-	show : function(uid,max_symbols) {
+	show(uid,max_symbols) {
 			
 		if (this.p_resolve!==0){
 			this.p_resolve([0]);
@@ -2284,13 +2308,13 @@ feedback = {
 		
 	},
 	
-	close : function() {
+	close () {
 			
 		anim2.add(objects.feedback_cont,{y:[objects.feedback_cont.y,450]}, false, 0.4,'easeInBack');		
 		
 	},
 	
-	response_message:function(uid, name) {
+	response_message(uid, name) {
 
 		
 		objects.feedback_msg.text = name.split(' ')[0]+', ';	
@@ -2306,7 +2330,7 @@ feedback = {
 		return gres.hl_key0.texture;
 	},
 	
-	key_down : function(key) {
+	key_down (key) {
 		
 		
 		if (objects.feedback_cont.visible === false || objects.feedback_cont.ready === false) return;
@@ -2327,7 +2351,7 @@ feedback = {
 		
 	},
 	
-	pointerdown : function(e, inp_key) {
+	pointerdown (e, inp_key) {
 		
 		let key = -1;
 		let key_x = 0;
@@ -2738,7 +2762,7 @@ lb = {
 					if (players_array[i]!== undefined) {
 						
 						let fname=players_array[i][0];
-						make_text(objects.lb_cards[i-3].name,fname,180);
+						make_text(objects.lb_cards[i-3].name,fname,150);
 						objects.lb_cards[i-3].rating.text=players_array[i][1];
 						loader.add('leaders_avatar_'+i, players_array[i][2],{loadType: PIXI.LoaderResource.LOAD_TYPE.IMAGE});						
 					} 
@@ -3060,7 +3084,7 @@ async function load_resources() {
 	game_res=new PIXI.Loader();
 	
 	
-	game_res.add("m2_font", git_src+"fonts/MS_Comic_Sans/font.fnt");
+	game_res.add("m2_font", git_src+"fonts/Bahnschrift/font.fnt");
 	game_res.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
 
 	game_res.add('check',git_src+'sounds/check.mp3');
