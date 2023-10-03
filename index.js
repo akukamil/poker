@@ -1604,15 +1604,25 @@ hand_check = {
 		
 		//считаем сколько значений но сначала самые большие
 		let counter = [0,0,0,0,0,0,0,0,0,0,0,0,0];		
-		for (let card of cards)	counter[14 - card.value_num] ++;
+		for (let card of cards)
+			counter[14-card.value_num]++;
 		
-		//ищем самые большие позиции
-		let pos_of_3 = counter.findIndex(v=>v===3);
-		let pos_of_2 = counter.findIndex(v=>v===2);
+		//ищем значения которых 3
+		const fh_flag1=counter.findIndex(a=>a==3);
+		if (fh_flag1===-1) return {check:0};	
 		
-		if (pos_of_3 !== -1 && pos_of_2 !== -1)
-			return {check:1, name : 'FULL_HOUSE', data : [{value : 14 - pos_of_3}, { value : 14 - pos_of_2}]};				
-		return {check:0};		
+		//ищем другие карты которых больше 1
+		let fh_flag2=-1;		
+		for (let i=0;i<13;i++){			
+			if (counter[i]>1&&i!==fh_flag1){
+				fh_flag2=i				
+				break;
+			}			
+		}	
+		
+		if (fh_flag2===-1) return {check:0};
+		
+		return {check:1, name : 'FULL_HOUSE', data : [{value : 14-fh_flag1}, { value : 14-fh_flag2}]};				
 		
 	},
 	
@@ -1780,7 +1790,7 @@ timer = {
 	time_left : 0,
 	disconnect_time : 0,
 	
-	start : function(player, t) {
+	start(player, t) {
 		
 		this.clear();
 		this.disconnect_time = 0;
@@ -1798,20 +1808,20 @@ timer = {
 				
 	},
 	
-	stop : function() {
+	stop() {
 			
 		anim2.add(objects.timer_cont,{scale_x:[1, 0]}, false, 0.2,'linear');	
 		this.clear();
 		
 	},
 	
-	clear : function() {
+	clear() {
 
 		clearTimeout(this.id);
 		
 	},
 	
-	check : function() {
+	check () {
 		
 		this.time_left--;
 		
@@ -1839,7 +1849,7 @@ timer = {
 		
 	},
 	
-	reset : function() {
+	reset() {
 		
 				
 		
