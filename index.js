@@ -1436,7 +1436,13 @@ game={
 	
 	async make_bet(resp_to, amount){			
 		if (!this.iam_in_game) return;
-		bet_data = await bet_dialog.show(resp_to, amount, 0);
+		let bet_data='';
+		try{
+			bet_data = await bet_dialog.show(resp_to, amount, 0);			
+		}catch(e){
+			fbs.ref('err').push(e);			
+		}
+
 		const chips=bet_data.chips;
 		const bet_obj={player:my_data.uid,type:bet_data.action,chips,tm:Date.now()};
 		console.log(bet_obj)
