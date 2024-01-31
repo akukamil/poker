@@ -2768,7 +2768,7 @@ keyboard={
 		key = key.toUpperCase();
 		
 		if(key==='BACKSPACE') key ='<';
-		if(key==='ENTER') key ='ОТПРАВИТЬ';
+		if(key==='ENTER') {this.layout===this.ru_keys?key ='ОТПРАВИТЬ':key='SEND'};
 		if(key==='ESCAPE') key ='ЗАКРЫТЬ';
 		
 		var key2 = this.layout.find(k => {return k[4] === key})			
