@@ -2899,9 +2899,8 @@ tables_menu={
 		anim2.add(objects.table2_data_cont,{x:[-50,objects.table2_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table3_data_cont,{x:[-50,objects.table3_data_cont.sx]}, true, 0.25,'linear');
 				
-		objects.table_exit_button.visible=true;
-		objects.goto_chat_button.visible=true;
-		objects.table_menu_info.visible=true;
+		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
+
 		
 		fbs.ref('table1/pending').on('value',function(data){			
 			tables_menu.table_data_updated(objects.t_table1_players_num,data.val())
@@ -2984,6 +2983,11 @@ tables_menu={
 	
 	chat_button_down(){
 		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
 		this.close();
 		chat.activate();
 		
@@ -3011,10 +3015,7 @@ tables_menu={
 		anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.x,850]}, false, 0.25,'linear');
 		anim2.add(objects.table3_data_cont,{x:[objects.table3_data_cont.x,850]}, false, 0.25,'linear');
 		
-		objects.table_exit_button.visible=false;
-		objects.goto_chat_button.visible=false;
-		objects.table_menu_info.visible=false;
-		objects.buy_chips_button.visible=false;
+		anim2.add(objects.table_buttons_cont,{x:[objects.table_buttons_cont.sx,400]}, false, 0.5,'linear');	
 	}
 	
 }
@@ -3024,8 +3025,8 @@ main_menu= {
 	activate: async function() {
 
 		some_process.main_menu = this.process;
-		anim2.add(objects.mb_cont,{x:[800,objects.mb_cont.sx]}, true, 1,'easeInOutCubic');
-		anim2.add(objects.game_title,{y:[-300,objects.game_title.sy]}, true, 1,'easeInOutCubic');
+		anim2.add(objects.mb_cont,{y:[400,objects.mb_cont.sy]}, true, 0.5,'linear');
+		anim2.add(objects.game_title,{y:[-300,objects.game_title.sy]}, true, 0.5,'easeInOutCubic');
 		objects.desktop.texture = gres.desktop.texture;
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');
 	},
@@ -3039,8 +3040,8 @@ main_menu= {
 		//some_process.main_menu = function(){};
 		objects.mb_cont.visible=false;
 		some_process.main_menu_process = function(){};
-		anim2.add(objects.mb_cont,{x:[objects.mb_cont.x,800]}, true, 1,'easeInOutCubic');
-		anim2.add(objects.game_title,{y:[objects.game_title.y,-300]}, true, 1,'linear');
+		anim2.add(objects.mb_cont,{y:[objects.mb_cont.y,400]}, false, 0.5,'linear');
+		anim2.add(objects.game_title,{y:[objects.game_title.y,-300]}, false, 0.5,'linear');
 		//await anim2.add(objects.desktop,{alpha:[1,0]}, false, 0.6,'linear');	
 	},
 
