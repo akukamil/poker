@@ -167,12 +167,14 @@ class chat_record_class extends PIXI.Container {
 		//получаем pic_url из фб
 		this.avatar.texture=PIXI.Texture.WHITE;
 				
-		await this.update_avatar(msg_data.uid, this.avatar);
-
 		this.uid=msg_data.uid;
 		this.tm = msg_data.tm;			
 		this.hash = msg_data.hash;
-		this.index = msg_data.index;
+		this.index = msg_data.index;		
+		
+		await this.update_avatar(msg_data.uid, this.avatar);
+
+
 		
 		
 		this.name.set2(msg_data.name,110)
