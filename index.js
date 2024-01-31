@@ -1486,7 +1486,7 @@ game={
 		objects.game_info.text=['НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ 20','STARTING NEW ROUND, ANTE 20'][LANG];
 		
 		//приветствие от бота
-		if (this.players_in_game.some(p=>p.uid==='bot'))
+		if (this.players_in_game.some(p=>p.uid==='BOT'))
 			table_chat.add_message('Victoria',['Привет! Удачной игры!','Hello and good luck'][LANG])
 				
 		this.iam_in_game=1;
@@ -3800,13 +3800,13 @@ async function init_game_env(env) {
 	objects.id_avatar.texture=players_cache.players[my_data.uid].texture;
 	objects.id_name.set2(my_data.name,150);
 		
-		//также сразу включаем его в кэш
-		if(!players_cache.players.bot){
-			players_cache.players.bot={};
-			players_cache.players.bot.name=['Бот','Bot'][LANG];
-			players_cache.players.bot.rating=1400;
-			players_cache.players.bot.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
-		}
+	//также сразу включаем его в кэш
+	if(!players_cache.players.BOT){
+		players_cache.players.BOT={};
+		players_cache.players.BOT.name=['Бот','Bot'][LANG];
+		players_cache.players.BOT.rating=1400;
+		players_cache.players.BOT.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
+	}
 		
 	//событие ролика мыши в карточном меню и нажатие кнопки
 	window.addEventListener("wheel", (event) => {chat.wheel_event(Math.sign(event.deltaY))});	
