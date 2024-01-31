@@ -1362,49 +1362,7 @@ game={
 		}
 
 	},
-			
-	async update_players_cache_data(uid){
-		if (players_cache[uid]){
-			if (!players_cache[uid].name){
-				let t=await fbs.ref('players/' + uid + '/name').once('value');
-				players_cache[uid].name=t.val()||'***';
-			}
-							
-			if (!players_cache[uid].pic_url){
-				let t=await fbs.ref('players/' + uid + '/pic_url').once('value');
-				players_cache[uid].pic_url=t.val()||null;
-			}
-			
-		}else{
-			
-			players_cache[uid]={};
-			let t=await fbs.ref('players/' + uid).once('value');
-			t=t.val();
-			players_cache[uid].name=t.name||'***';
-			players_cache[uid].pic_url=t.pic_url||'';
-		}		
-	},
-	
-	async get_texture(pic_url) {
-		
-		if (!pic_url) PIXI.Texture.WHITE;
-		
-		//меняем адрес который невозможно загрузить
-		if (pic_url==="https://vk.com/images/camera_100.png")
-			pic_url = "https://i.ibb.co/fpZ8tg2/vk.jpg";	
-				
-		if (PIXI.utils.TextureCache[pic_url]===undefined || PIXI.utils.TextureCache[pic_url].width===1) {
 					
-			let loader=new PIXI.Loader();
-			loader.add('pic', pic_url,{loadType: PIXI.LoaderResource.LOAD_TYPE.IMAGE, timeout: 5000});			
-			await new Promise((resolve, reject)=> loader.load(resolve))	
-			return loader.resources.pic.texture||PIXI.Texture.WHITE;
-
-		}		
-		
-		return PIXI.utils.TextureCache[pic_url];		
-	},
-		
 	async load_avatar (params = {uid : 0, tar_obj : 0}) {
 		
 		await players_cache.update_avatar(params.uid);
@@ -3092,8 +3050,9 @@ main_menu= {
 
 	chips_button_down : async function() {
 		
+		return;
 		if (my_data.rating > 50) {
-			
+					
 			let res = await confirm_dialog.show(['Получить фишки можно только если у вас их меньше 50. Хотите все равно посмотреть рекламу?','You can only get chips if you have less than 50 of them. Do you want to watch the ad anyway?'][LANG]);
 			if (res === 'ok')	await ad.show2();			
 			return;
