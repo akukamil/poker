@@ -365,6 +365,7 @@ class player_card_class extends PIXI.Container {
 		this.bank=0;
 		this.place=-1;
 		this.my_pot=0;
+		this.rating=0;
 			
 		this.visible=false;
 		
@@ -443,7 +444,8 @@ class player_card_class extends PIXI.Container {
 		if(this.uid===my_data.uid){			
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
-			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);
+			if(amount)
+				fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);
 		}
 				
 		this.rating+=amount;
@@ -1338,13 +1340,13 @@ game={
 			pcard.bank=0;
 			pcard.added_chips=20;
 			pcard.my_pot=0;
+			pcard.rating=0;
 			pcard.my_card_icon.visible=player.uid===my_data.uid;
 			pcard.hand_value=0;
 			pcard.set_cards(player.cards)
 			this.uid_to_pcards[player.uid]=pcard;
 			i++;			
-		}
-			
+		}	
 
 
 		//теперь другие данные которые нужно загружать
@@ -1352,17 +1354,11 @@ game={
 
 			await players_cache.update(uid);			
 			const pcard=this.uid_to_pcards[uid];
-			pcard.name.set2(players_cache.players[uid].name,110);			
+			pcard.name.set2(players_cache.players[uid].name,110);	
+			pcard.rating=pcard.t_rating.text=players_cache.players[uid].rating;
 			this.load_avatar({uid,tar_obj:pcard.avatar})
 		}
-			
-		//обновляем деньги
-		for (let uid in this.uid_to_pcards){
-			let s=await fbs.ref('players/'+uid+'/rating').once('value');
-			const rating=s?.val()||100;
-			this.uid_to_pcards[uid].t_rating.text=rating;
-			this.uid_to_pcards[uid].rating=rating;
-		}
+
 	},
 			
 	async update_players_cache_data(uid){
@@ -1434,8 +1430,6 @@ game={
 			cards_suit_texture=gres.cards_shirt2.texture;
 		if (table_id==='table3')
 			cards_suit_texture=gres.cards_shirt3.texture;
-		
-		//objects.desktop.texture=gres.stylish_bcg.texture;
 				
 		//Убираем окно статуса
 		this.close_status_window();			
@@ -2549,7 +2543,9 @@ players_cache={
 		for (let param in params) player[param]=params[param];
 		
 		if (!player.name) player.name=await fbs_once('players/'+uid+'/name');
-		if (!player.rating) player.rating=await fbs_once('players/'+uid+'/rating');
+		
+		//рейтинг проверяем всегда
+		player.rating=await fbs_once('players/'+uid+'/rating');
 	},
 	
 	async update_avatar(uid){
