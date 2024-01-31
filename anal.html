@@ -172,7 +172,10 @@ async function update_room_quick_stat() {
 	firebase.database().ref('table2/pending').on('value',snapshot => {
 		document.getElementById("but_ref2").textContent = Object.keys(snapshot.val()).length;
 	})
-	
+
+	firebase.database().ref('table3/pending').on('value',snapshot => {
+		document.getElementById("but_ref3").textContent = Object.keys(snapshot.val()).length;
+	})
 	
 }
 
