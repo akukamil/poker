@@ -1419,7 +1419,7 @@ game={
 			
 	async game_start_event(event){
 		
-		console.log('INIT event type',event.players);
+		//console.log('INIT event type',event.players);
 		
 		this.players_in_game=event.players;		
 				
@@ -1607,7 +1607,7 @@ game={
 	
 	new_round_event(event){
 		
-		console.log('new_round_event',event);
+		//console.log('new_round_event',event);
 			
 		if (event.round==='preflop'){	
 			//this.update_my_combination();
@@ -1652,7 +1652,7 @@ game={
 	
 	player_action_event(event){
 		
-		console.log('player_action_event',event);	
+		//console.log('player_action_event',event);	
 		
 		//выход если не делал ход
 		if (event.data==='FOLD'&&event.uid===my_data.uid&&objects.bet_dialog_cont.visible&&objects.bet_dialog_cont.ready){	
@@ -1706,7 +1706,7 @@ game={
 			
 	street_fin_event(event){
 						
-		console.log('FIN event type');
+		//console.log('FIN event type');
 		
 		objects.timer_bar.scale_x=0;
 		objects.control_buttons_cont.visible=false;
@@ -1736,7 +1736,7 @@ game={
 		for (let p=0;p<players_num;p++){
 			const player=players[p];
 			player.my_pot=this.get_eligible_pot_for_player(player);
-			console.log('ELIG:',player.uid,player.my_pot);
+			//console.log('ELIG:',player.uid,player.my_pot);
 		}			
 				
 		//сортируем по правомочным банкам
