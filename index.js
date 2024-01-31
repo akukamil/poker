@@ -3482,7 +3482,7 @@ async function load_resources() {
 	document.getElementById("m_progress").style.display = 'flex';
 
 	let git_src="https://akukamil.github.io/poker/"
-	git_src=""
+	//git_src=""
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
@@ -3512,13 +3512,9 @@ async function load_resources() {
 	game_res.add('money',git_src+'sounds/money.mp3');
 	
     //добавляем из листа загрузки
-    for (var i = 0; i < load_list.length; i++) {
+    for (var i = 0; i < load_list.length; i++)
         if (load_list[i].class === "sprite" || load_list[i].class === "image" )
             game_res.add(load_list[i].name, git_src+'res/'+lang_pack + '/' + load_list[i].name + "." +  load_list[i].image_format);
-        if (load_list[i].class === "asprite" )
-            game_res.add(load_list[i].name, git_src+"gifs/" + load_list[i].res_name);
-	}
-
 
 	game_res.onProgress.add(progress);
 	function progress(loader, resource) {
