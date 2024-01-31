@@ -1843,7 +1843,7 @@ game={
 
 		const chips=bet_data.chips;
 		const bet_obj={player:my_data.uid,type:bet_data.action,chips,tm:Date.now()};
-		console.log(bet_obj)
+		//console.log(bet_obj)
 		fbs.ref(table_id+'/players_actions').set(bet_obj)
 	},
 	
@@ -3014,6 +3014,7 @@ tables_menu={
 		objects.table_exit_button.visible=false;
 		objects.goto_chat_button.visible=false;
 		objects.table_menu_info.visible=false;
+		objects.buy_chips_button.visible=false;
 	}
 	
 }
