@@ -908,9 +908,9 @@ confirm_dialog = {
 	
 	p_resolve : 0,
 		
-	show: function(msg) {
+	show(msg) {
 								
-		if (objects.confirm_cont.visible === true) {
+		if (objects.confirm_cont.visible) {
 			sound.play('locked')
 			return;			
 		}		
@@ -2553,7 +2553,7 @@ ad = {
 	
 	prv_show : -9999,
 		
-	show : function() {
+	show() {
 		
 		if ((Date.now() - this.prv_show) < 100000 )
 			return;
@@ -2598,7 +2598,7 @@ ad = {
 	
 	},
 	
-	show2 : async function() {
+	async show2() {
 		
 		
 		if (game_platform ==="YANDEX") {
@@ -3048,21 +3048,31 @@ main_menu= {
 
 	},
 
-	chips_button_down : async function() {
+	async chips_button_down() {
 		
-		return;
-		if (my_data.rating > 50) {
-					
-			let res = await confirm_dialog.show(['Получить фишки можно только если у вас их меньше 50. Хотите все равно посмотреть рекламу?','You can only get chips if you have less than 50 of them. Do you want to watch the ad anyway?'][LANG]);
-			if (res === 'ok')	await ad.show2();			
+		if(game_platform==='YANDEX'){			
+			confirm_dialog.show(['Вы можете купить фишки на странице выбора столов.','You can only buy chips.'][LANG]);
+			return;
+		}
+		
+		if (my_data.rating > 100) {
+			confirm_dialog.show(['У вас уже есть более 100 фишек.','You already have more than 100 chips.'][LANG]);			
 			return;
 		}
 		
 		let res = await confirm_dialog.show(['Получить 100 фишек за просмотр рекламы?','Get 100 chips (reward video)?'][LANG]);
 		if (res === 'ok') {
 			
-			let res2 = await ad.show2();
-			if (res2 !== 'err' || game_platform === 'GOOGLE_PLAY' || game_platform === 'DEBUG' || game_platform === 'GM' || game_platform === 'RUSTORE') {
+			let res2='';
+			if (game_platform==='VK')
+				res2 = await ad.show2();
+			if (game_platform==='GOOGLE_PLAY'){
+				res2='';
+				ad.show();				
+			}
+
+			
+			if (res2 !== 'err' || game_platform === 'GM' || game_platform === 'RUSTORE') {
 				sound.play("confirm_dialog");
 				my_data.rating=100;
 				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
