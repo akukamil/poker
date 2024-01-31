@@ -1,6 +1,6 @@
 var M_WIDTH=800, M_HEIGHT=450;
 var app, gdata={}, game_res, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, chat_path='chat', connected = 1, client_id =0, h_state = 0, game_platform = "",
-hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''}, players_cache={BOT:{name:'Victoria',pic_url:'https://akukamil.github.io/poker/res/girl_pic.jpg'}},
+hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''},
 opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
 
 const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["h",0,8],["h",0,9],["h",0,10],["h",0,11],["h",0,12],["h",0,13],["h",0,14],["d",1,2],["d",1,3],["d",1,4],["d",1,5],["d",1,6],["d",1,7],["d",1,8],["d",1,9],["d",1,10],["d",1,11],["d",1,12],["d",1,13],["d",1,14],["s",2,2],["s",2,3],["s",2,4],["s",2,5],["s",2,6],["s",2,7],["s",2,8],["s",2,9],["s",2,10],["s",2,11],["s",2,12],["s",2,13],["s",2,14],["c",3,2],["c",3,3],["c",3,4],["c",3,5],["c",3,6],["c",3,7],["c",3,8],["c",3,9],["c",3,10],["c",3,11],["c",3,12],["c",3,13],["c",3,14]]
@@ -1486,7 +1486,7 @@ game={
 		objects.game_info.text=['НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ 20','STARTING NEW ROUND, ANTE 20'][LANG];
 		
 		//приветствие от бота
-		if (this.players_in_game.some(p=>p.uid==='BOT'))
+		if (this.players_in_game.some(p=>p.uid==='bot'))
 			table_chat.add_message('Victoria',['Привет! Удачной игры!','Hello and good luck'][LANG])
 				
 		this.iam_in_game=1;
@@ -3794,9 +3794,19 @@ async function init_game_env(env) {
 	await players_cache.update_avatar(my_data.uid);
 
 
+
+
 	//устанавливаем фотки в попап
 	objects.id_avatar.texture=players_cache.players[my_data.uid].texture;
 	objects.id_name.set2(my_data.name,150);
+		
+		//также сразу включаем его в кэш
+		if(!players_cache.players.bot){
+			players_cache.players.bot={};
+			players_cache.players.bot.name=['Бот','Bot'][LANG];
+			players_cache.players.bot.rating=1400;
+			players_cache.players.bot.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
+		}
 		
 	//событие ролика мыши в карточном меню и нажатие кнопки
 	window.addEventListener("wheel", (event) => {chat.wheel_event(Math.sign(event.deltaY))});	
