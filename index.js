@@ -469,9 +469,19 @@ class player_card_class extends PIXI.Container {
 		
 		this.card0.open();
 		this.card1.open();	
-			
+							
+		anim2.kill_anim(this.t_comb)
+		this.t_comb.visible=true;
+		this.update_comb_data();
+		
+	}
+	
+	update_comb_data(){
+		
+		if(!this.t_comb.visible) return;
+		
 		//определяем комбинацию
-		const cen_cards_opened=objects.cen_cards.filter(c=>c.opened===1)||[];
+		const cen_cards_opened=objects.cen_cards.filter(c=>c.opened)||[];
 		const it_cards=[this.card0.card_index, this.card1.card_index,...cen_cards_opened.map(c=>c.card_index)];
 
 		const comb=hand_check.check(it_cards);
@@ -479,11 +489,9 @@ class player_card_class extends PIXI.Container {
 		
 		this.hand_value=hand_check.get_total_value(comb);
 				
-		anim2.kill_anim(this.t_comb)
 		this.t_comb.text=comb_to_text[comb.name][LANG]+'\n'+kickers.join('-');	
 		this.t_comb.visible=true;
-		this.t_comb.alpha=1;
-		
+		this.t_comb.alpha=1;		
 	}
 	
 	close_cards(){
@@ -1380,16 +1388,12 @@ game={
 		fbs.ref(table_id+'/pending').off();
 				
 		//убираем диалог если 
-		if (objects.bet_dialog_cont.visible)
-			objects.bet_dialog_cont.visible=false;
+		if (objects.bet_dialog_cont.visible) objects.bet_dialog_cont.visible=false;
 		
 		//определяем рубашку		
-		if (table_id==='table1')
-			cards_suit_texture=gres.cards_shirt.texture;
-		if (table_id==='table2')
-			cards_suit_texture=gres.cards_shirt2.texture;
-		if (table_id==='table3')
-			cards_suit_texture=gres.cards_shirt3.texture;
+		if (table_id==='table1') cards_suit_texture=gres.cards_shirt.texture;
+		if (table_id==='table2') cards_suit_texture=gres.cards_shirt2.texture;
+		if (table_id==='table3') cards_suit_texture=gres.cards_shirt3.texture;
 				
 		//Убираем окно статуса
 		this.close_status_window();			
@@ -1565,7 +1569,7 @@ game={
 		}		
 		
 		if (event.round==='flop'){			
-			this.open_cen_cards([0,1,2],event.cards);
+			this.open_cen_cards([0,1,2],event.cards);			
 		}
 		
 		if (event.round==='turn'){			
@@ -1775,6 +1779,7 @@ game={
 		for(let c=0;c<table_card_indexes.length;c++)
 			await objects.cen_cards[table_card_indexes[c]].open(cards_values[c])
 		this.update_my_combination();	
+		this.update_folded_players();
 		
 	},
 	
@@ -1789,6 +1794,16 @@ game={
 		const comb=hand_check.check(opened_cards.map(c=>c.card_index));
 		const kickers=comb.data.map(d=>value_num_to_txt[d.value])
 		objects.my_combination.text=comb_to_text[comb.name][LANG]+'\n('+kickers.join('-')+')';	
+		
+	},
+	
+	update_folded_players(){
+		
+		//обновляем информацию по скинутым игрокам посмотреть чтобы было
+		for (let uid in this.uid_to_pcards){		
+			const pcard=this.uid_to_pcards[uid];
+			pcard.update_comb_data();
+		}
 		
 	},
 	
