@@ -392,7 +392,10 @@ class player_card_class extends PIXI.Container {
 		const action=event.data;
 				
 		objects.action_info.x=this.x+70;
-		objects.action_info.y=this.y+130;
+		if (this.t_comb.visible)
+			objects.action_info.y=this.y+160;
+		else
+			objects.action_info.y=this.y+130;
 		objects.action_info.t_info.text=transl_action[event.data][LANG];
 				
 		let in_money=event.chips||event.bet_raise;
@@ -1618,10 +1621,7 @@ game={
 		}
 
 		
-		if (event.data){			
-			const pcard=this.uid_to_pcards[event.uid];	
-			pcard.show_action(event);					
-		}		
+	
 								
 		if (event.data==='FOLD'){
 						
@@ -1632,6 +1632,11 @@ game={
 			if (event.uid===my_data.uid)
 				objects.game_info.text=['ВЫ СКИНУЛИ КАРТЫ, ЖДИТЕ НАЧАЛО СЛЕДУЮЩЕЙ ПАРТИИ','YOU FOLD, WAIT NEXT ROUND...'][LANG];
 		}
+		
+		if (event.data){			
+			const pcard=this.uid_to_pcards[event.uid];	
+			pcard.show_action(event);					
+		}			
 				
 		//если игрок делает какую-либо ставку
 		let in_money=0;
