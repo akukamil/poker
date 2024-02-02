@@ -1260,12 +1260,16 @@ game={
 		
 		fbs.ref(table_id+'/events').on('value',function(s){
 			
+			
+			
 			if (game.first_event){
 				game.first_event=0;
 				return;
 			}
 			
 			const event=s.val();
+			
+			//console.log('event',event);	
 		
 			if(event.type==='game_start')
 				game.game_start_event(event);			
@@ -1372,7 +1376,7 @@ game={
 			await players_cache.update(uid);			
 			const pcard=this.uid_to_pcards[uid];
 			pcard.name.set2(players_cache.players[uid].name,110);	
-			pcard.rating=pcard.t_rating.text=players_cache.players[uid].rating;
+			pcard.rating=pcard.t_rating.text=players_cache.players[uid].rating;			
 			this.load_avatar({uid,tar_obj:pcard.avatar})
 		}
 
@@ -1613,7 +1617,7 @@ game={
 	
 	player_action_event(event){
 		
-		//console.log('player_action_event',event);	
+		
 		
 		//выход если не делал ход
 		if (event.data==='FOLD'&&event.uid===my_data.uid&&objects.bet_dialog_cont.visible&&objects.bet_dialog_cont.ready){	
@@ -2516,6 +2520,7 @@ players_cache={
 	
 	async update(uid,params={}){
 				
+		if(uid==='BOT') return;
 		//если игрока нет в кэше то создаем его
 		if (!this.players[uid]) this.players[uid]={}
 							
@@ -3784,8 +3789,8 @@ async function init_game_env(env) {
 	//также сразу включаем его в кэш
 	if(!players_cache.players.BOT){
 		players_cache.players.BOT={};
-		players_cache.players.BOT.name=['Бот','Bot'][LANG];
-		players_cache.players.BOT.rating=1400;
+		players_cache.players.BOT.name='Victoria';
+		players_cache.players.BOT.rating=100;
 		players_cache.players.BOT.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
 	}
 		
