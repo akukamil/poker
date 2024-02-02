@@ -3631,14 +3631,10 @@ async function define_platform_and_language(env) {
 
 }
 
-async function check_blocked(){
+var kill_game = function() {
 	
-	//загружаем остальные данные из файербейса
-	let _block_data = await fbs.ref("blocked/" + my_data.uid).once('value');
-	let block_data = _block_data.val();
-	
-	if (block_data) my_data.blocked=1;
-	
+	firebase.app().delete();
+	document.body.innerHTML = 'CLIENT TURN OFF';
 }
 
 async function init_game_env(env) {
@@ -3795,15 +3791,21 @@ async function init_game_env(env) {
 	my_data.rating = (other_data && other_data.rating) || 100;
 	my_data.games = (other_data && other_data.games) || 0;
 	my_data.name = my_data?.name||other_data?.name||'no_name';
+	my_data.blocked=await fbs_once('blocked/'+my_data.uid);
 		
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
 	
-	//проверяем блокировку
-	check_blocked();
 	
-	//идентификатор клиента
+	//сообщение для дубликатов
 	client_id = irnd(10,999999);
+	fbs.ref('inbox/'+my_data.uid).set({message:'CLIEND_ID',tm:Date.now(),client_id});
+	firebase.database().ref('inbox/'+my_data.uid).on('value', data => {
+		data=data.val();
+		if(data.message==='CLIEND_ID'&&data.client_id!==client_id)
+			kill_game();		
+	});
+				
 				
 	//получаем информацию о стране
 	const country =  (other_data && other_data.country) || await auth2.get_country_code();
