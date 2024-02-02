@@ -3202,7 +3202,7 @@ lb={
 		for (let place in top){
 			const target=top[place];
 			const leader=leaders_array[place];
-			target.t_name.set2(leader.name,place>2?190:130);
+			target.t_name.set2(leader.name,place>2?180:130);
 			target.t_rating.text=leader.rating;			
 		}
 		
@@ -3769,8 +3769,6 @@ async function init_game_env(env) {
 	//загружаем мои данные в кэш
 	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url});
 	await players_cache.update_avatar(my_data.uid);
-
-
 
 
 	//устанавливаем фотки в попап
