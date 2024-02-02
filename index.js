@@ -1556,8 +1556,7 @@ game={
 	
 	show_player_to_move(uid){
 		
-		if (!uid)
-			return;
+		if (!uid||uid===-1) return;
 				
 		//сначала отключаем
 		objects.pcards.forEach(card=>card.set_on_turn(false));
