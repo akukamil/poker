@@ -446,15 +446,19 @@ class player_card_class extends PIXI.Container {
 	
 	change_balance(amount){
 				
+		if(!amount) return;
+		
+		this.rating+=amount;
+		this.t_rating.text=this.rating;				
+		
 		if(this.uid===my_data.uid){			
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
-			if(amount)
-				fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);
+			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
+			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);				
 		}
 				
-		this.rating+=amount;
-		this.t_rating.text=this.rating;		
+
 		
 	}
 	
@@ -2954,6 +2958,8 @@ tables_menu={
 			sound.play('locked');
 			return;
 		}*/
+		
+		//table='table4'
 		
 		table_id=table;
 		game.activate();
