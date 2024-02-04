@@ -2521,6 +2521,7 @@ players_cache={
 	async update(uid,params={}){
 				
 		if(uid==='BOT') return;
+		
 		//если игрока нет в кэше то создаем его
 		if (!this.players[uid]) this.players[uid]={}
 							
@@ -2528,12 +2529,20 @@ players_cache={
 		const player=this.players[uid];
 		
 		//заполняем параметры которые дали
-		for (let param in params) player[param]=params[param];
+		for (let param in params) player[param]=params[param];		
 		
-		if (!player.name) player.name=await fbs_once('players/'+uid+'/name');
+		if (!player.country||!player.name){
+			let data=await fbs_once('players/'+uid);
+			player.name=data.name;
+			player.rating=data.rating;
+			player.pic_url=data.pic_url;			
+			player.country=data.country||'';
+			return;			
+		}
 		
-		//рейтинг проверяем всегда
+		//рейтинг всегда обновляем
 		player.rating=await fbs_once('players/'+uid+'/rating');
+
 	},
 	
 	async update_avatar(uid){
@@ -3277,7 +3286,7 @@ rules = {
 
 auth2 = {
 		
-	load_script : function(src) {
+	load_script(src) {
 	  return new Promise((resolve, reject) => {
 		const script = document.createElement('script')
 		script.type = 'text/javascript'
@@ -3288,14 +3297,14 @@ auth2 = {
 	  })
 	},
 			
-	get_random_char : function() {		
+	get_random_char() {		
 		
 		const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 		return chars[irnd(0,chars.length-1)];
 		
 	},
 	
-	get_random_uid_for_local : function(prefix) {
+	get_random_uid_for_local(prefix) {
 		
 		let uid = prefix;
 		for ( let c = 0 ; c < 12 ; c++ )
@@ -3310,7 +3319,7 @@ auth2 = {
 		
 	},
 	
-	get_random_name : function(uid) {
+	get_random_name(uid) {
 		
 		const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 		const rnd_names = ['Gamma','Chime','Dron','Perl','Onyx','Asti','Wolf','Roll','Lime','Cosy','Hot','Kent','Pony','Baker','Super','ZigZag','Magik','Alpha','Beta','Foxy','Fazer','King','Kid','Rock'];
@@ -3332,7 +3341,7 @@ auth2 = {
 		}	
 	},	
 	
-	get_country_code : async function() {
+	async get_country_code() {
 
 		let country_code = ''
 		try {
@@ -3345,7 +3354,20 @@ auth2 = {
 		
 	},
 	
-	search_in_local_storage : function() {
+	async get_country_code2() {
+
+		let country_code = ''
+		try {
+			let resp1 = await fetch("https://api.ipgeolocation.io/ipgeo?apiKey=1efc1ba695434f2ab24129a98a72a1d4");
+			let resp2 = await resp1.json();			
+			country_code = resp2.country_code2 || '';			
+		} catch(e){}
+
+		return country_code;
+		
+	},
+	
+	search_in_local_storage() {
 		
 		//ищем в локальном хранилище
 		let local_uid = null;
@@ -3360,7 +3382,7 @@ auth2 = {
 		
 	},
 	
-	init : async function() {	
+	async init() {	
 				
 		if (game_platform === 'GM') {
 			
@@ -3652,8 +3674,7 @@ var kill_game = function() {
 	document.body.innerHTML = 'CLIENT TURN OFF';
 }
 
-async function init_game_env(env) {
-			
+async function init_game_env(env) {			
 
 	//document.body.style.backgroundColor = "black";
 	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
@@ -3803,10 +3824,11 @@ async function init_game_env(env) {
 	let _other_data = await fbs.ref("players/" + my_data.uid).once('value');
 	let other_data = _other_data.val();
 		
-	my_data.rating = (other_data && other_data.rating) || 100;
-	my_data.games = (other_data && other_data.games) || 0;
+	my_data.rating = other_data?.rating || 100;
+	my_data.games = other_data?.games || 0;
 	my_data.name = my_data?.name||other_data?.name||'no_name';
 	my_data.blocked=await fbs_once('blocked/'+my_data.uid);
+	my_data.country = other_data?.country || await auth2.get_country_code() || await auth2.get_country_code() 
 		
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
@@ -3821,25 +3843,16 @@ async function init_game_env(env) {
 			kill_game();		
 	});
 				
-				
-	//получаем информацию о стране
-	const country =  (other_data && other_data.country) || await auth2.get_country_code();
-				
-	
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=my_data.rating;
-
 	
 	//обновляем базовые данные в файербейс так могло что-то поменяться
-	fbs.ref("players/"+my_data.uid+"/name").set(my_data.name);
-	fbs.ref("players/"+my_data.uid+"/country").set(country);
-	fbs.ref("players/"+my_data.uid+"/pic_url").set(my_data.pic_url);				
-	fbs.ref("players/"+my_data.uid+"/rating").set(my_data.rating);
-	fbs.ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
-	
-	//добавляем страну в имя
-	my_data.name = my_data.name+' (' +country +')'
-	
+	fbs.ref('players/'+my_data.uid+'/name').set(my_data.name);
+	fbs.ref('players/'+my_data.uid+'/country').set(my_data.country);
+	fbs.ref('players/'+my_data.uid+'/pic_url').set(my_data.pic_url);				
+	fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
+		
 	//устанавлием мое имя в карточки
 	make_text(objects.id_name,my_data.name,150);
 	
