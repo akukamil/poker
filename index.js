@@ -2524,14 +2524,14 @@ players_cache={
 		//заполняем параметры которые дали
 		for (let param in params) player[param]=params[param];		
 		
-		/*if (!player.country||!player.name){
+		if (!player.country||!player.name){
 			let data=await fbs_once('players/'+uid);
 			player.name=data.name;
 			player.rating=data.rating;
 			player.pic_url=data.pic_url;			
 			player.country=data.country||'';
 			return;			
-		}*/
+		}
 		
 		//рейтинг всегда обновляем
 		player.rating=await fbs_once('players/'+uid+'/rating');
