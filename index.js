@@ -3944,14 +3944,7 @@ async function init_game_env(env) {
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
 	}
 
-	//загружаем мои данные в кэш
-	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url});
-	await players_cache.update_avatar(my_data.uid);
 
-
-	//устанавливаем фотки в попап
-	objects.id_avatar.texture=players_cache.players[my_data.uid].texture;
-	objects.id_name.set2(my_data.name,150);
 		
 	//также сразу включаем его в кэш
 	if(!players_cache.players.BOT){
@@ -3978,6 +3971,15 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
 	my_data.pic_url=other_data?.pic_url || my_data.orig_pic_url;
+	
+	//загружаем мои данные в кэш
+	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url});
+	await players_cache.update_avatar(my_data.uid);
+
+
+	//устанавливаем фотки в попап
+	objects.id_avatar.texture=players_cache.players[my_data.uid].texture;
+	objects.id_name.set2(my_data.name,150);	
 	
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
