@@ -2888,9 +2888,10 @@ tables_menu={
 		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table2_data_cont,{x:[-50,objects.table2_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table3_data_cont,{x:[-50,objects.table3_data_cont.sx]}, true, 0.25,'linear');
-				
+		anim2.add(objects.my_data_cont,{x:[-150,objects.my_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
 
+		this.update_my_data();
 		
 		fbs.ref('table1/pending').on('value',function(data){			
 			tables_menu.table_data_updated(objects.t_table1_players_num,data.val())
@@ -2944,6 +2945,7 @@ tables_menu={
 		this.payments.purchase({ id: 'chips1000' }).then(purchase => {
 			objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
 			my_data.rating+=1000;
+			this.update_my_data();
 			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 			
 		}).catch(err => {
@@ -2997,6 +2999,15 @@ tables_menu={
 		
 	},
 	
+	update_my_data(){
+		
+		//обновляем инфу
+		objects.player_name.set2(my_data.name,130);
+		objects.player_chips.text=my_data.rating;
+		objects.player_avatar.texture=players_cache.players[my_data.uid].texture;
+		
+	},
+	
 	close(){
 		
 		fbs.ref('table1/pending').off();
@@ -3006,6 +3017,8 @@ tables_menu={
 		anim2.add(objects.table1_data_cont,{x:[objects.table1_data_cont.x,850]}, false, 0.25,'linear');
 		anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.x,850]}, false, 0.25,'linear');
 		anim2.add(objects.table3_data_cont,{x:[objects.table3_data_cont.x,850]}, false, 0.25,'linear');
+		
+		anim2.add(objects.my_data_cont,{x:[objects.my_data_cont.x,-150]}, false, 0.25,'linear');
 		
 		anim2.add(objects.table_buttons_cont,{x:[objects.table_buttons_cont.sx,400]}, false, 0.5,'linear');	
 	}
@@ -3337,6 +3350,7 @@ pref={
 			players_cache.players[my_data.uid].name=my_data.name
 			fbs.ref(`players/${my_data.uid}/nick_tm`).set(my_data.nick_tm);
 			fbs.ref(`players/${my_data.uid}/name`).set(my_data.name);
+			tables_menu.update_my_data();
 
 		}else{
 			
@@ -3381,7 +3395,7 @@ pref={
 		
 	},
 	
-	ok_button_down(){
+	async ok_button_down(){
 		
 		if(anim2.any_on()){
 			sound.play('locked');
@@ -3397,12 +3411,14 @@ pref={
 			players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
 			
 			
+			
 			fbs.ref(`players/${my_data.uid}/pic_url`).set(this.cur_pic_url);
 			
 			my_data.avatar_tm=Date.now();
 			fbs.ref(`players/${my_data.uid}/avatar_tm`).set(my_data.avatar_tm);
 						
-			players_cache.update_avatar(my_data.uid);
+			await players_cache.update_avatar(my_data.uid);
+			tables_menu.update_my_data();
 			
 		}		
 		
