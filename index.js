@@ -1173,44 +1173,37 @@ anim2 = {
 	}
 }
 
-sound = {
+sound={	
 	
 	on : 1,
 	
-	play : function(snd_res) {
-				
-		if (game_res.resources[snd_res].sound===undefined)
+	play(res_name, res_src) {
+		
+		res_src=res_src||gres;
+		
+		if (!this.on||document.hidden)
 			return;
 		
-		if (this.on === 0)
+		if (!res_src[res_name]?.data)
 			return;
 		
-		if (game_res.resources[snd_res]===undefined)
-			return;
-		
-		game_res.resources[snd_res].sound.play();	
+		res_src[res_name].sound.play();	
 		
 	},
 	
-	play_delayed (snd_res, delay) {
+	switch(){
 		
-		if (this.on === 0)
-			return;
-		
-		if (game_res.resources[snd_res]===undefined)
-			return;
-		
-		
-		setTimeout(function(){game_res.resources[snd_res].sound.play()}, delay);
+		if (this.on){
+			this.on=0;
+			objects.pref_info.text=['Звуки отключены','Sounds is off'][LANG];
 			
+		} else{
+			this.on=1;
+			objects.pref_info.text=['Звуки включены','Sounds is on'][LANG];
+		}
+		anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
 		
-	},
-	
-	stop_all(){
-		
-		PIXI.sound.stopAll();
 	}
-	
 	
 }
 
@@ -3284,6 +3277,139 @@ rules = {
 	
 }
 
+pref={
+	
+	cur_pic_url:'',
+	avatar_changed:0,
+	
+	activate(){
+		
+		if(anim2.any_on()||objects.pref_cont.visible){
+			sound.play('locked');
+			return;			
+		}
+		
+		anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);	
+		objects.pref_info.text=['Менять аватар и имя можно 1 раз в 30 дней!','You can change name and avatar once per month'][LANG];
+		
+		sound.play('click');
+		anim2.add(objects.pref_cont,{scale_x:[0,1]}, true, 0.2,'linear');
+		
+		this.avatar_changed=0;
+		objects.pref_cont.visible=true;
+		objects.pref_avatar.texture=players_cache.players[my_data.uid].texture;
+		
+	},
+	
+	check_time(last_time){
+
+
+		//провряем можно ли менять
+		const tm=Date.now();
+		const days_since_nick_change=~~((tm-last_time)/86400000);
+		const days_befor_change=30-days_since_nick_change;
+		const ln=days_befor_change%10;
+		const opt=[0,5,6,7,8,9].includes(ln)*0+[2,3,4].includes(ln)*1+(ln===1)*2;
+		const day_str=['дней','дня','день'][opt];
+		
+		if (days_befor_change>0){
+			objects.pref_info.text=[`Поменять можно через ${days_befor_change} ${day_str}`,`Wait ${days_befor_change} days`][LANG];
+			anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);	
+			sound.play('locked');
+			return 0;
+		}
+		
+		return 1;
+	},
+	
+	async change_name(){
+		
+		//провряем можно ли менять ник
+		if(!this.check_time(my_data.nick_tm)) return;
+									
+		const name=await keyboard.read(15);
+		if (name.length>1){
+			
+			my_data.name=name;	
+			objects.pref_info.text=['Имя изменено','Name has been changed'][LANG];
+			anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
+			my_data.nick_tm=Date.now();			
+			players_cache.players[my_data.uid].name=my_data.name
+			fbs.ref(`players/${my_data.uid}/nick_tm`).set(my_data.nick_tm);
+			fbs.ref(`players/${my_data.uid}/name`).set(my_data.name);
+
+		}else{
+			
+			objects.pref_info.text=['Какая-то ошибка','Unknown error'][LANG];
+			anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);
+			
+		}
+		
+	},
+	
+	async reset_avatar(){
+		
+		this.avatar_changed=1;
+		this.cur_pic_url=my_data.orig_pic_url;
+		objects.pref_avatar.texture=await players_cache.load_pic(my_data.uid,my_data.orig_pic_url);
+		objects.pref_info.text=['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG];
+		objects.pref_info.visible=true;
+		players_cache.players[my_data.uid].texture=objects.pref_avatar.texture;
+	},
+	
+	change_avatar(){
+		
+		if(!this.check_time(my_data.avatar_tm)) return;
+		this.avatar_changed=1;
+		this.cur_pic_url='mavatar'+irnd(10,999999);
+		objects.pref_avatar.texture=PIXI.Texture.from(multiavatar(this.cur_pic_url));
+		objects.pref_info.text=['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG];
+		objects.pref_info.visible=true;
+		players_cache.players[my_data.uid].texture=objects.pref_avatar.texture;
+	},
+	
+	sound_switch(){
+		
+		if(anim2.any_on()){
+			sound.play('locked');
+			return;			
+		}
+		sound.switch();
+		sound.play('click');
+		const tar_x=sound.on?310:271; //-38
+		anim2.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x]}, true, 0.1,'linear');	
+		
+	},
+	
+	ok_button_down(){
+		
+		if(anim2.any_on()){
+			sound.play('locked');
+			return;			
+		}
+		
+		sound.play('click');
+		anim2.add(objects.pref_cont,{scale_x:[1,0]}, false, 0.2,'linear');	
+		
+		if (this.avatar_changed){
+			
+			players_cache.players[my_data.uid].texture=0;
+			players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
+			
+			
+			fbs.ref(`players/${my_data.uid}/pic_url`).set(this.cur_pic_url);
+			
+			my_data.avatar_tm=Date.now();
+			fbs.ref(`players/${my_data.uid}/avatar_tm`).set(my_data.avatar_tm);
+						
+			players_cache.update_avatar(my_data.uid);
+			
+		}		
+		
+	}
+
+}
+
 auth2 = {
 		
 	load_script(src) {
@@ -3408,7 +3534,7 @@ auth2 = {
 			
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GM_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;			
 			
 		}
 				
@@ -3425,15 +3551,17 @@ auth2 = {
 			
 			my_data.uid = _player.getUniqueID().replace(/[\/+=]/g, '');
 			my_data.name = _player.getName();
-			my_data.pic_url = _player.getPhoto('medium');
+			my_data.orig_pic_url = _player.getPhoto('medium');
 			
-			if (my_data.pic_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
-				my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;	
+			if (my_data.orig_pic_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
+				my_data.orig_pic_url = 'mavatar'+my_data.uid;	
 			
 			if (my_data.name === '')
 				my_data.name = this.get_random_name(my_data.uid);
 			
-		
+			//если английский яндекс до добавляем к имени страну
+			my_data.name = my_data.name;			
+			
 			return;
 		}
 		
@@ -3451,7 +3579,7 @@ auth2 = {
 			
 			my_data.name 	= _player.first_name + ' ' + _player.last_name;
 			my_data.uid 	= "vk"+_player.id;
-			my_data.pic_url = _player.photo_100;
+			my_data.orig_pic_url = _player.photo_100;
 			
 			return;
 			
@@ -3461,7 +3589,7 @@ auth2 = {
 
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GP_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;		
 			return;
 		}
 		
@@ -3469,25 +3597,24 @@ auth2 = {
 
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('RS_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;		
 			return;
 		}
 		
 		if (game_platform === 'DEBUG') {		
 
 			my_data.name = my_data.uid = 'debug' + prompt('Отладка. Введите ID', 100);
-			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;			
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;			
 			return;
 		}
 		
-	
 		if (game_platform === 'UNKNOWN') {
 			
 			//если не нашли платформу
 			alert('Неизвестная платформа. Кто Вы?')
 			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('LS_');
 			my_data.name = this.get_random_name(my_data.uid);
-			my_data.pic_url = 'https://api.dicebear.com/7.x/adventurer/svg?seed='+my_data.uid;		
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;		
 		}
 	
 		
@@ -3682,7 +3809,10 @@ async function init_game_env(env) {
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);
-						
+				
+	//подгружаем библиотеку аватаров
+	await auth2.load_script('https://akukamil.github.io/poker/multiavatar.min.js');
+				
 	//отображаем шкалу загрузки
 	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
 			
@@ -3826,10 +3956,13 @@ async function init_game_env(env) {
 		
 	my_data.rating = other_data?.rating || 100;
 	my_data.games = other_data?.games || 0;
-	my_data.name = my_data?.name||other_data?.name||'no_name';
+	my_data.name=other_data?.name || my_data.name;
 	my_data.blocked=await fbs_once('blocked/'+my_data.uid);
 	my_data.country = other_data?.country || await auth2.get_country_code() || await auth2.get_country_code() 
-		
+	my_data.nick_tm = other_data?.nick_tm || 0;
+	my_data.avatar_tm = other_data?.avatar_tm || 0;
+	my_data.pic_url=other_data?.pic_url || my_data.orig_pic_url;
+	
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
 	
