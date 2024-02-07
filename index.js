@@ -3998,7 +3998,7 @@ async function init_game_env(env) {
 		my_data.name=`${my_data.name} (${my_data.country})`
 	
 	//загружаем мои данные в кэш
-	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url,name:my_data.name,country:my_data.country});
+	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
 	await players_cache.update_avatar(my_data.uid);
 
 
