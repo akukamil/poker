@@ -325,10 +325,16 @@ class player_card_class extends PIXI.Container {
 		this.name.tint=0xFFFF00;
 						
 		this.t_rating=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :24});
-		this.t_rating.x=90;
+		this.t_rating.x=120;
 		this.t_rating.y=95;
 		this.t_rating.tint=0xffffff;
-		this.t_rating.anchor.set(0.5,0.5);
+		this.t_rating.anchor.set(1,0.5);
+		
+		this.t_country=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :24});
+		this.t_country.x=20;
+		this.t_country.y=95;
+		this.t_country.tint=0x88ccff;
+		this.t_country.anchor.set(0,0.5);
 		
 		this.my_card_icon=new PIXI.Sprite(gres.my_card_icon_img.texture);
 		this.my_card_icon.width=this.my_card_icon.height=40;
@@ -371,7 +377,7 @@ class player_card_class extends PIXI.Container {
 			
 		this.visible=false;
 		
-		this.addChild(this.bcg,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
+		this.addChild(this.bcg,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_country,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
 		
 	}	
 	
@@ -1368,8 +1374,10 @@ game={
 
 			await players_cache.update(uid);			
 			const pcard=this.uid_to_pcards[uid];
-			pcard.name.set2(players_cache.players[uid].name,110);	
-			pcard.rating=pcard.t_rating.text=players_cache.players[uid].rating;			
+			const player_data=players_cache.players[uid];
+			pcard.name.set2(player_data.name,110);
+			pcard.t_country.text=player_data.country||'';
+			pcard.rating=pcard.t_rating.text=player_data.rating;			
 			this.load_avatar({uid,tar_obj:pcard.avatar})
 		}
 
@@ -2524,16 +2532,23 @@ players_cache={
 		//заполняем параметры которые дали
 		for (let param in params) player[param]=params[param];		
 		
-		if (!player.country||!player.pic_url){
+		if (!player.name||!player.pic_url){
 			let data=await fbs_once('players/'+uid);
 			player.name=data.name;
 			player.rating=data.rating;
 			player.pic_url=data.pic_url;			
-			return;			
+		}else{
+
+			//рейтинг всегда обновляем
+			player.rating=await fbs_once('players/'+uid+'/rating');			
 		}
 		
-		//рейтинг всегда обновляем
-		player.rating=await fbs_once('players/'+uid+'/rating');
+		//извлекаем страну если она есть в отдельную категорию и из имени убираем
+		const country =auth2.get_country_from_name(player.name);
+		if (country){			
+			player.country=country;
+			player.name=player.name.slice(0, -4);
+		}		
 
 	},
 	
@@ -3631,11 +3646,18 @@ auth2 = {
 			my_data.name = this.get_random_name(my_data.uid);
 			my_data.orig_pic_url = 'mavatar'+my_data.uid;		
 		}
-	
 		
 	
-	}
+	},
 	
+	get_country_from_name(name){
+		
+		const have_country_code=/\(.{2}\)/.test(name);
+		if(have_country_code)
+			return name.slice(-3, -1);
+		return '';
+		
+	}
 }
 
 function resize() {
@@ -3971,11 +3993,12 @@ async function init_game_env(env) {
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
 	my_data.pic_url=other_data?.pic_url || my_data.orig_pic_url;
 	
-	//добавляем страну
-	if(my_data.country&&!/\(.{2}\)/.test(my_data.name)) my_data.name=`${my_data.name} (${my_data.country})`
+	//добавляем страну к имени если ее нет
+	if (!auth2.get_country_from_name(my_data.name)&&my_data.country)
+		my_data.name=`${my_data.name} (${my_data.country})`
 	
 	//загружаем мои данные в кэш
-	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url,name:my_data.name,country:my_data.country||0});
+	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url,name:my_data.name,country:my_data.country});
 	await players_cache.update_avatar(my_data.uid);
 
 
