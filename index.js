@@ -2524,12 +2524,11 @@ players_cache={
 		//заполняем параметры которые дали
 		for (let param in params) player[param]=params[param];		
 		
-		if (!player.country||!player.name){
+		if (!player.country||!player.pic_url){
 			let data=await fbs_once('players/'+uid);
 			player.name=data.name;
 			player.rating=data.rating;
 			player.pic_url=data.pic_url;			
-			player.country=data.country||'';
 			return;			
 		}
 		
@@ -3971,6 +3970,9 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
 	my_data.pic_url=other_data?.pic_url || my_data.orig_pic_url;
+	
+	//добавляем страну
+	if(my_data.country&&!/\(.{2}\)/.test(my_data.name)) my_data.name=`${my_data.name} (${my_data.country})`
 	
 	//загружаем мои данные в кэш
 	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url,name:my_data.name,country:my_data.country||0});
