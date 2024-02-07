@@ -330,7 +330,7 @@ class player_card_class extends PIXI.Container {
 		this.t_rating.tint=0xffffff;
 		this.t_rating.anchor.set(1,0.5);
 		
-		this.t_country=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :24});
+		this.t_country=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :20});
 		this.t_country.x=20;
 		this.t_country.y=95;
 		this.t_country.tint=0x88ccff;
