@@ -339,7 +339,7 @@ class player_card_class extends PIXI.Container {
 		this.my_card_icon=new PIXI.Sprite(gres.my_card_icon_img.texture);
 		this.my_card_icon.width=this.my_card_icon.height=40;
 		this.my_card_icon.x=5;
-		this.my_card_icon.y=80;
+		this.my_card_icon.y=24;
 		this.my_card_icon.visible=true;
 					
 		this.card0=new mini_cards_calss();
