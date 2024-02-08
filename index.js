@@ -3991,7 +3991,13 @@ async function init_game_env(env) {
 	my_data.country = other_data?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
 	my_data.nick_tm = other_data?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
-	my_data.pic_url=other_data?.pic_url || my_data.orig_pic_url;
+
+	
+	//правильно определяем аватарку
+	if (other_data?.pic_url && other_data.pic_url.includes('mavatar'))
+		my_data.pic_url=other_data.pic_url
+	else
+		my_data.pic_url=my_data.orig_pic_url
 	
 	//добавляем страну к имени если ее нет
 	if (!auth2.get_country_from_name(my_data.name)&&my_data.country)
