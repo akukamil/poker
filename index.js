@@ -46,7 +46,7 @@ class lb_player_card_class extends PIXI.Container{
 
 
 		this.name=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'});
-		this.name.tint=0xdddddd;
+		this.name.tint=0x55ffaa;
 		this.name.x=105;
 		this.name.y=22;
 
@@ -54,7 +54,7 @@ class lb_player_card_class extends PIXI.Container{
 		this.rating=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'});
 		this.rating.x=350;
 		this.rating.anchor.set(1,0);
-		this.rating.tint=0xffaaff;
+		this.rating.tint=0xffff55;
 		this.rating.y=22;
 
 		this.addChild(this.bcg,this.place, this.avatar, this.name, this.rating);
