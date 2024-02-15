@@ -4053,6 +4053,9 @@ async function init_game_env(env) {
 	//если маленький рейтинг
 	if (my_data.rating<=20) my_data.rating=100;
 	
+	//если новый игрок
+	if (!other_data) my_data.rating=1000;
+	
 	//правильно определяем аватарку
 	if (other_data?.pic_url && other_data.pic_url.includes('mavatar'))
 		my_data.pic_url=other_data.pic_url
