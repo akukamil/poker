@@ -1444,12 +1444,30 @@ game={
 			i++;
 		})
 		
-		//раскидываем общие карты
-		for (let card of objects.cen_cards) {		
+		
+		
+		//убираем карты
+		const init_card=objects.cen_cards[0];
+		if (init_card.visible){
 			sound.play('card');
-			card.set_shirt();
-			await anim2.add(card,{angle:[irnd(-45,45),0],x:[-200, card.sx],y:[225, card.sy]}, true, 0.2,'linear');	
-		}	
+			for (const card of objects.cen_cards)
+				anim2.add(card,{x:[card.x, 850]}, false, 0.25,'linear');		
+			await new Promise((resolve, reject) => {setTimeout(resolve, 250);});			
+		}
+
+		
+		//раскидываем красиво общие карты
+		for (const card of objects.cen_cards) card.set_shirt();		
+				
+		sound.play('card');
+		await anim2.add(init_card,{angle:[-90,0],x:[-200, init_card.sx],y:[450, init_card.sy]}, true, 0.5,'linear');	
+		await new Promise((resolve, reject) => {setTimeout(resolve, 250);});
+		sound.play('card');
+		for (let i=1;i<5;i++){
+			const card=objects.cen_cards[i];
+			anim2.add(card,{x:[init_card.sx, card.sx],y:[init_card.sy, card.sy]}, true, 0.35,'linear');	
+		}
+		
 
 		anim2.add(objects.control_buttons_cont,{x:[-150,0]}, true, 0.2,'linear');	
 		
