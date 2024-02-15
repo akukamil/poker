@@ -1,5 +1,5 @@
 var M_WIDTH=800, M_HEIGHT=450;
-var app, gdata={}, game_res, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, chat_path='chat', connected = 1, client_id =0, h_state = 0, game_platform = "",
+var app, gdata={}, game_res,app_start_time=0, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, chat_path='chat', connected = 1, client_id =0, h_state = 0, game_platform = "",
 hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''},
 opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
 
@@ -1354,7 +1354,6 @@ game={
 		for (let player of players){
 			const pcard=objects.pcards[i];
 			pcard.uid=player.uid;	
-			pcard.visible=true;
 			pcard.in_game=1;
 			pcard.place=-1;
 			pcard.bank=0;
@@ -1364,7 +1363,8 @@ game={
 			pcard.my_card_icon.visible=player.uid===my_data.uid;
 			pcard.hand_value=0;
 			pcard.set_cards(player.cards)
-			this.uid_to_pcards[player.uid]=pcard;
+			this.uid_to_pcards[player.uid]=pcard;			
+					
 			i++;			
 		}	
 
@@ -1380,6 +1380,16 @@ game={
 			pcard.rating=pcard.t_rating.text=player_data.rating;			
 			this.load_avatar({uid,tar_obj:pcard.avatar})
 		}
+		
+		//показываем карточки
+		i=0;
+		for (let player of players){
+			const pcard=objects.pcards[i];
+			anim2.add(pcard,{y:[-100,pcard.sy]}, true, 0.1,'linear');
+			await new Promise((resolve, reject) => {setTimeout(resolve, 50);});
+			i++;
+		}
+		
 
 	},
 					
@@ -2896,7 +2906,9 @@ keyboard={
 tables_menu={
 	
 	payments:null,
-	
+	timer:0,
+	free_chips:0,
+		
 	activate(){
 				
 		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
@@ -2922,6 +2934,33 @@ tables_menu={
 		objects.table_menu_info.text=''
 		this.init_payments();
 		
+		if (!this.free_chips);
+			this.timer=setInterval(function(){tables_menu.tick()},1000);
+		
+	},
+	
+	tick(){
+		
+		
+		
+		const cur_time=Date.now();
+		const difference = app_start_time+3600000 - cur_time;
+		
+		if (difference<=0){
+			this.free_chips=1;
+			objects.buy_chips_button.texture=gres.take_free_chips.texture;
+			objects.free_chips_counter.visible=false;
+			clearInterval(this.timer);
+			return;
+		}
+
+		// Convert milliseconds to minutes and seconds
+		const minutes = Math.floor(difference / 60000);
+		const seconds = Math.floor((difference % 60000) / 1000);
+
+		// Format the result
+		objects.free_chips_counter.text=[`Бесплатно через ${minutes}м ${seconds}с`,`Free in ${minutes}m ${seconds}s`][LANG];		
+		
 	},
 	
 	table_data_updated(table_players_num,data,bot_on){
@@ -2937,12 +2976,9 @@ tables_menu={
 	},
 	
 	init_payments(){
-		
-		objects.table_menu_info.visible=objects.buy_chips_button.visible=false;
-		
+				
 		if (game_platform!=='YANDEX') return;			
 		
-		objects.table_menu_info.visible=objects.buy_chips_button.visible=true;
 		
 		if(this.payments) return;
 		
@@ -2955,6 +2991,26 @@ tables_menu={
 	},
 	
 	buy_chips_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
+		if (this.free_chips){
+			
+			my_data.rating+=1000;
+			this.update_my_data();
+			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+			anim2.add(objects.buy_chips_button,{y:[objects.buy_chips_button.sy, 500]}, false, 0.5,'easeInBack');
+			sound.play('confirm_dialog');
+			return;
+		}
+		
+		if (game_platform!=='YANDEX') {
+			objects.table_menu_info.text=['Только для яндекса!','Only for yandex!'][LANG];
+			return;
+		};	
 		
 		this.payments.purchase({ id: 'chips1000' }).then(purchase => {
 			objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
@@ -3035,13 +3091,15 @@ tables_menu={
 		anim2.add(objects.my_data_cont,{x:[objects.my_data_cont.x,-150]}, false, 0.25,'linear');
 		
 		anim2.add(objects.table_buttons_cont,{x:[objects.table_buttons_cont.sx,400]}, false, 0.5,'linear');	
+		
+		clearInterval(this.timer);
 	}
 	
 }
 
 main_menu= {
 
-	activate: async function() {
+	async activate() {
 
 		some_process.main_menu = this.process;
 		anim2.add(objects.mb_cont,{y:[400,objects.mb_cont.sy]}, true, 0.5,'linear');
@@ -3050,11 +3108,11 @@ main_menu= {
 		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');
 	},
 	
-	process : function() {
+	process() {
 
 	},
 
-	close : async function() {
+	async close() {
 
 		//some_process.main_menu = function(){};
 		objects.mb_cont.visible=false;
@@ -3064,7 +3122,7 @@ main_menu= {
 		//await anim2.add(objects.desktop,{alpha:[1,0]}, false, 0.6,'linear');	
 	},
 
-	pb_down: async function () {
+	async pb_down () {
 
 		if (anim2.any_on()===true || objects.id_cont.visible === true) {
 			sound.play('locked');
@@ -3078,7 +3136,7 @@ main_menu= {
 
 	},
 	
-	lb_button_down: async function () {
+	async lb_button_down () {
 
 		if (anim2.any_on()===true) {
 			sound.play('locked');
@@ -3092,7 +3150,7 @@ main_menu= {
 
 	},
 
-	rules_button_down: async function () {
+	async rules_button_down () {
 
 		if (anim2.any_on()===true) {
 			sound.play('locked');
@@ -3143,7 +3201,7 @@ main_menu= {
 		
 	},
 
-	rules_ok_down: function () {
+	rules_ok_down () {
 
 		anim2.add(objects.rules_cont,{y:[objects.rules_cont.sy, -450]}, false, 0.5,'easeInBack');
 
@@ -3991,7 +4049,9 @@ async function init_game_env(env) {
 	my_data.country = other_data?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
 	my_data.nick_tm = other_data?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
-
+	
+	//если маленький рейтинг
+	if (my_data.rating<=20) my_data.rating=100;
 	
 	//правильно определяем аватарку
 	if (other_data?.pic_url && other_data.pic_url.includes('mavatar'))
@@ -4007,6 +4067,8 @@ async function init_game_env(env) {
 	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
 	await players_cache.update_avatar(my_data.uid);
 
+	//время начала игры
+	app_start_time=Date.now();
 
 	//устанавливаем фотки в попап
 	objects.id_avatar.texture=players_cache.players[my_data.uid].texture;
