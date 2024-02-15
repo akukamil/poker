@@ -1461,7 +1461,7 @@ game={
 				
 		sound.play('card');
 		await anim2.add(init_card,{angle:[-90,0],x:[-200, init_card.sx],y:[450, init_card.sy]}, true, 0.5,'linear');	
-		await new Promise((resolve, reject) => {setTimeout(resolve, 250);});
+		await new Promise((resolve, reject) => {setTimeout(resolve, 200);});
 		sound.play('card');
 		for (let i=1;i<5;i++){
 			const card=objects.cen_cards[i];
