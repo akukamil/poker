@@ -645,7 +645,7 @@ chat={
 
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
 		objects.desktop.texture=gres.desktop.texture;
-		objects.chat_enter_button.visible=true;
+		objects.chat_enter_button.visible=(!my_data.blocked)&&my_data.rating>5000;
 
 	},
 	
@@ -744,8 +744,8 @@ chat={
 		
 		if (this.moderation_mode){
 			console.log(player_data.index,player_data.uid,player_data.name.text,player_data.msg.text);
-			fbs_once('players/'+player_data.uid+'/games').then((data)=>{
-				console.log('сыграно игр: ',data)
+			fbs_once('players/'+player_data.uid).then((data)=>{
+				console.log('ИНФО: ',data)
 			})
 		}
 		
@@ -1545,12 +1545,13 @@ game={
 			return;			
 		}
 		
-		if(my_data.blocked){
-			objects.game_info.text=['ЗАБЛОКИРОВАНО!','YOU ARE BLOCKED!'][LANG];
+		if(my_data.blocked ||my_data.rating<5000){
+			objects.game_info.text=['ЗАКРЫТО!','CLOSED!'][LANG];
 			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
 			sound.play('locked')
 			return;			
 		}
+		
 		
 		//убираем метки старых сообщений
 		const cur_dt=Date.now();
