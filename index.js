@@ -1300,7 +1300,6 @@ game={
 		
 		if(my_data.rating<1){
 			objects.game_info.text=['Нужно иметь минимум 100 фишек для игры.','You need at least 100 chips to play.'][LANG];
-			
 		}
 		
 		//показываем окошко статуса
@@ -1703,7 +1702,7 @@ game={
 			
 	street_fin_event(event){
 						
-		//console.log('FIN event type');
+		console.log(event);
 		
 		objects.timer_bar.scale_x=0;
 		objects.control_buttons_cont.visible=false;
@@ -1813,7 +1812,14 @@ game={
 			}
 		})
 
-				
+		//показываем рекламу
+		if(event.ad){
+			objects.t_table_status0.text=['РЕКЛАМНАЯ ПАУЗА!\nСпасибо Вам большое за поддержку!','Commercial break...'][LANG]
+			new Promise(res=> {setTimeout(res, 2000)}).then(()=>{ad.show()})
+		}else{
+			objects.t_table_status0.text=['Ждем игроков...','Waiting other players...'][LANG];
+		}
+			
 	},
 	
 	async open_cen_cards(table_card_indexes,cards_values){		
@@ -2645,8 +2651,8 @@ ad = {
 		if (game_platform==='VK') {
 					 
 			vkBridge.send("VKWebAppShowNativeAds", {ad_format:"interstitial"})
-			.then(data => console.log(data.result))
-			.catch(error => console.log(error));	
+			.then(function(data){})
+			.catch(function(error){})
 		}			
 		
 		if (game_platform==='CRAZYGAMES') {				
