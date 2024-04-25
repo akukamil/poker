@@ -3782,16 +3782,13 @@ function vis_change() {
 async function load_resources() {
 
 
-	//это нужно удалить потом
-	/*document.body.innerHTML = "Привет!\nДобавляем в игру некоторые улучшения))\nЗайдите через 40 минут.";
-	document.body.style.fontSize="24px";
-	document.body.style.color = "red";
-	return;*/
+	//отображаем шкалу загрузки
+	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(20,20,80,1);flex-direction: column	}#m_progress {	  background: rgb(30, 30, 80);border:1px solid rgb(130, 130, 200);	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {border-radius: 5px;	  background: rgb(80, 80, 180);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
 
 	document.getElementById("m_progress").style.display = 'flex';
 
 	let git_src="https://akukamil.github.io/poker/"
-	//git_src=""
+	git_src=""
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
@@ -3835,6 +3832,9 @@ async function load_resources() {
 	//убираем элементы загрузки
 	document.getElementById("m_progress").outerHTML = "";	
 
+	document.body.style.backgroundImage = "radial-gradient(circle, #FFF2CC, #000000)";
+
+
 	//короткое обращение к ресурсам
 	gres=game_res.resources;
 
@@ -3849,7 +3849,7 @@ language_dialog = {
 		return new Promise(function(resolve, reject){
 
 
-			document.body.innerHTML='<style>		html,		body {		margin: 0;		padding: 0;		height: 100%;	}		body {		display: flex;		align-items: center;		justify-content: center;		background-color: rgba(24,24,64,1);		flex-direction: column	}		.two_buttons_area {	  width: 70%;	  height: 50%;	  margin: 20px 20px 0px 20px;	  display: flex;	  flex-direction: row;	}		.button {		margin: 5px 5px 5px 5px;		width: 50%;		height: 100%;		color:white;		display: block;		background-color: rgba(44,55,100,1);		font-size: 10vw;		padding: 0px;	}  	#m_progress {	  background: rgba(11,255,255,0.1);	  justify-content: flex-start;	  border-radius: 100px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 10px 40px -10px #fff;	  border-radius: 100px;	  background: #fff;	  height: 70%;	  width: 0%;	}	</style><div id ="two_buttons" class="two_buttons_area">	<button class="button" id ="but_ref1" onclick="language_dialog.p_resolve(0)">RUS</button>	<button class="button" id ="but_ref2"  onclick="language_dialog.p_resolve(1)">ENG</button></div><div id="m_progress">  <div id="m_bar"></div></div>';
+			document.body.innerHTML='<style> html, body {margin: 0;padding: 0;height: 100%;} body {display: flex;align-items: center;justify-content: center;background-color: rgba(24,24,54,1);		flex-direction: column	}		.two_buttons_area {width: 70%;height: 50%; margin: 20px 20px 0px 20px;	  display: flex;	  flex-direction: row;	}.button {margin: 5px 5px 5px 5px;width: 50%;height: 100%;color:white;display: block;background-color: rgba(44,55,80,1);font-size: 10vw;padding: 0px;border-radius: 20px}  	#m_progress {background: rgba(11,255,255,0.1);justify-content: flex-start;	  border-radius: 100px;	  align-items: center;	  position: relative;	  padding: 0 5px; display: none;height: 50px; width: 70%;	}	#m_bar {	  box-shadow: 0 10px 40px -10px #fff;	  border-radius: 100px;	  background: #fff;	  height: 70%;	  width: 0%;	}	</style><div id ="two_buttons" class="two_buttons_area">	<button class="button" id ="but_ref1" onclick="language_dialog.p_resolve(0)">RUS</button>	<button class="button" id ="but_ref2"  onclick="language_dialog.p_resolve(1)">ENG</button></div><div id="m_progress">  <div id="m_bar"></div></div>';
 			
 			language_dialog.p_resolve = resolve;	
 						
@@ -3933,9 +3933,7 @@ async function init_game_env(env) {
 	//подгружаем библиотеку аватаров
 	await auth2.load_script('https://akukamil.github.io/poker/multiavatar.min.js');
 				
-	//отображаем шкалу загрузки
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(41,41,41,1);flex-direction: column	}#m_progress {	  background: #1a1a1a;	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {	  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;	  border-radius: 5px;	  background: rgb(119, 119, 119);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
-			
+	
 	await load_resources();
 	
 	await auth2.init();
@@ -3958,7 +3956,7 @@ async function init_game_env(env) {
 
 	//создаем приложение пикси и добавляем тень
 	app = new PIXI.Application({width:M_WIDTH, height:M_HEIGHT,antialias:true});
-	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #000000";
+	document.body.appendChild(app.view);
 	
 	//доп функция для текста битмап
 	PIXI.BitmapText.prototype.set2=function(text,w){		
