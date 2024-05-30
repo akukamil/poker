@@ -1406,6 +1406,8 @@ game={
 		
 		//console.log('INIT event type',event.players);
 		
+		my_data.s_rating=my_data.rating;
+		
 		this.players_in_game=event.players;		
 				
 		//отключаем проверку количества игроков
@@ -1666,9 +1668,7 @@ game={
 		
 	},
 	
-	player_action_event(event){
-		
-		
+	player_action_event(event){		
 		
 		//выход если не делал ход
 		if (event.data==='FOLD'&&event.uid===my_data.uid&&objects.bet_dialog_cont.visible&&objects.bet_dialog_cont.ready){	
@@ -1677,9 +1677,6 @@ game={
 			main_menu.activate();
 			return;				
 		}
-
-		
-	
 								
 		if (event.data==='FOLD'){
 						
@@ -1826,16 +1823,7 @@ game={
 				sound.play('lose')			
 		}
 		
-		if (my_data.uid==='GP_DQaeAZcrAtPg'){
-			
-			const res=players.map(p=>{return {uid:p.uid,bank:p.bank}});
-			try{
-				fbs.ref('TEST_LEADER').push(res);				
-			}catch(e){
-				
-			}
 
-		}
 		
 		//обновляем	банки
 		players.forEach(p=>{
@@ -1844,6 +1832,17 @@ game={
 				p.change_balance(p.bank);				
 			}
 		})
+		
+		if (my_data.uid==='GP_DQaeAZcrAtPg'){
+			
+			const res=players.map(p=>{return {uid:p.uid,bank:p.bank}});
+			try{
+				fbs.ref('TEST_LEADER').push([my_data.s_rating||999,my_data.rating,res]);				
+			}catch(e){
+				
+			}
+		}		
+		
 
 		//показываем рекламу
 		if(event.ad){
