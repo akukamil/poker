@@ -1221,6 +1221,8 @@ game={
 	iam_in_game:0,
 	first_event:1,
 	pending_timer:0,
+	prv_time:0,
+	write_fb_timer:0,
 	my_card:null,
 	recent_msg:[],
 	
@@ -1242,6 +1244,7 @@ game={
 		
 		//процессинг таймера ходов
 		objects.timer_bar.scale_x=0;
+		this.prv_time=Date.now();
 		some_process.timer_bar=this.process.bind(this);
 		
 		//скрываем карты посередине
@@ -1498,7 +1501,18 @@ game={
 	
 	process(){
 		
-		const time_left=15-(Date.now()-objects.timer_bar.tm)*0.001;
+		const cur_time=Date.now();
+		
+		//проверяем ошибку таймера
+		/*const last_frame_passed=cur_time-this.prv_time;
+		if (last_frame_passed>1000 || last_frame_passed<0){
+			this.kick_out_player();
+		}
+		this.prv_time=cur_time;*/
+		
+		
+		
+		const time_left=15-(cur_time-objects.timer_bar.tm)*0.001;
 		if (objects.timer_bar.scale_x>0)
 			objects.timer_bar.scale_x=time_left/15;
 		
@@ -1572,6 +1586,14 @@ game={
 		if (msg_data) fbs.ref(table_id+'/events').set({name:my_data.name,type:'chat',tm:Date.now(),data:msg_data});	
 		
 		this.message_time=Date.now();
+	},
+	
+	kick_out_player(){
+		
+		this.show_status_window();
+		this.iam_in_game=0;
+		objects.game_info.text=['Ошибка таймера или сети!','Timer Error!'][LANG];	
+		
 	},
 	
 	update_bank(amount){
@@ -1695,7 +1717,7 @@ game={
 				
 		this.show_player_to_move(event.next_uid);	
 		
-		if (event.next_uid===my_data.uid)
+		if (event.next_uid===my_data.uid&&this.iam_in_game)
 			this.make_bet(event.resp_to,event.bet_raise);
 		
 	},
@@ -1804,6 +1826,17 @@ game={
 				sound.play('lose')			
 		}
 		
+		if (my_data.uid==='GP_DQaeAZcrAtPg'){
+			
+			const res=players.map(p=>{return {uid:p.uid,bank:p.bank}});
+			try{
+				fbs.ref('TEST_LEADER').push(res);				
+			}catch(e){
+				
+			}
+
+		}
+		
 		//обновляем	банки
 		players.forEach(p=>{
 			if (p.bank>0){
@@ -1867,7 +1900,16 @@ game={
 		const chips=bet_data.chips;
 		const bet_obj={player:my_data.uid,type:bet_data.action,chips,tm:Date.now()};
 		//console.log(bet_obj)
+				
+		//отправляем ход онайлн сопернику (с таймаутом)
+		/*clearTimeout(this.write_fb_timer);
+		this.write_fb_timer=setTimeout(function(){game.kick_out_player('no_connection');}, 5000);  
+		fbs.ref(table_id+'/players_actions').set(bet_obj).then(()=>{	
+			clearTimeout(game.write_fb_timer);			
+		});	*/
+		
 		fbs.ref(table_id+'/players_actions').set(bet_obj)
+
 	},
 	
 	close(){
