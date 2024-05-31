@@ -1407,6 +1407,8 @@ game={
 		//console.log('INIT event type',event.players);
 		
 		my_data.s_rating=my_data.rating;
+		my_data.game_id=irnd(10,9999);
+		
 		
 		this.players_in_game=event.players;		
 				
@@ -1426,6 +1428,8 @@ game={
 		
 		//показываем игроков сейчас
 		await this.show_active_players(this.players_in_game);
+		
+		
 				
 		//начальный банк из анте всех игроков
 		objects.t_bank.amount=0;
@@ -1833,11 +1837,13 @@ game={
 			}
 		})
 		
-		if (my_data.uid==='GP_DQaeAZcrAtPg'){
+		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){
 			
+			const tm=Date.now();
 			const res=players.map(p=>{return {uid:p.uid,bank:p.bank}});
+			const start_rating=my_data.s_rating||999;
 			try{
-				fbs.ref('TEST_LEADER').push([my_data.s_rating||999,my_data.rating,res]);				
+				fbs.ref('TEST_LEADER').push(['ZZZX',start_rating,my_data.rating,my_data.rating-start_rating,tm,res]);				
 			}catch(e){
 				
 			}
@@ -3942,7 +3948,7 @@ async function define_platform_and_language(env) {
 		return;	
 	}	
 	
-	if (s.includes('192.168')) {
+	if (s.includes('127.0')) {
 			
 		game_platform = 'DEBUG';	
 		LANG = await language_dialog.show();
