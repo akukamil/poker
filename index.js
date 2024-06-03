@@ -3141,6 +3141,16 @@ tables_menu={
 		
 		//table='table4'
 		
+		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+			try{
+				const tm=Date.now();
+				fbs.ref('TEST_LEADER').push(['ZZZX','table_down',table,tm]);				
+			}catch(e){
+				
+			}
+		}	
+		
+		
 		table_id=table;
 		game.activate();
 		this.close();
