@@ -1228,6 +1228,16 @@ game={
 	
 	activate(){
 		
+		
+		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+			try{
+				const tm=Date.now();
+				fbs.ref('TEST_LEADER').push(['ZZZX','game_activate',tm]);				
+			}catch(e){
+				
+			}
+		}	
+		
 		//текущее состояние стола
 		fbs.ref(table_id).once('value',function(s){			
 			game.analyse_table(s.val());			
@@ -1261,8 +1271,7 @@ game={
 		fbs.ref(table_id+'/pending/'+my_data.uid).onDisconnect().remove();
 		
 		fbs.ref(table_id+'/events').on('value',function(s){
-			
-			
+						
 			
 			if (game.first_event){
 				game.first_event=0;
@@ -1609,7 +1618,17 @@ game={
 	
 	exit_button_down(){
 		
-		if(anim2.any_on())return;
+		if(anim2.any_on())return;		
+		
+		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+			try{
+				const tm=Date.now();
+				fbs.ref('TEST_LEADER').push(['ZZZX','exit_button_down',tm]);				
+			}catch(e){
+				
+			}
+		}	
+		
 		this.close();
 		main_menu.activate();
 		
@@ -1676,6 +1695,17 @@ game={
 		
 		//выход если не делал ход
 		if (event.data==='FOLD'&&event.uid===my_data.uid&&objects.bet_dialog_cont.visible&&objects.bet_dialog_cont.ready){	
+		
+			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+				try{
+					const tm=Date.now();
+					fbs.ref('TEST_LEADER').push(['ZZZX','fold_kick_out',tm]);				
+				}catch(e){
+					
+				}
+			}	
+		
+		
 			objects.bet_dialog_cont.visible=false;	
 			this.close();
 			main_menu.activate();
