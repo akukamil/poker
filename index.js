@@ -461,7 +461,20 @@ class player_card_class extends PIXI.Container {
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
 			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
-			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);				
+			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
+
+			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){
+				
+				
+				try{
+					const tm=Date.now();
+					fbs.ref('TEST_LEADER').push(['change_balance',my_data.rating,amount,tm]);				
+				}catch(e){
+					
+				}
+			}	
+
+			
 		}
 				
 
@@ -1232,7 +1245,7 @@ game={
 		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
 			try{
 				const tm=Date.now();
-				fbs.ref('TEST_LEADER').push(['ZZZX','game_activate',tm]);				
+				fbs.ref('TEST_LEADER').push([my_data.rating,'game_activate',tm]);				
 			}catch(e){
 				
 			}
@@ -1623,7 +1636,7 @@ game={
 		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
 			try{
 				const tm=Date.now();
-				fbs.ref('TEST_LEADER').push(['ZZZX','exit_button_down',tm]);				
+				fbs.ref('TEST_LEADER').push(['exit_button_down',tm]);				
 			}catch(e){
 				
 			}
@@ -1699,7 +1712,7 @@ game={
 			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
 				try{
 					const tm=Date.now();
-					fbs.ref('TEST_LEADER').push(['ZZZX','fold_kick_out',tm]);				
+					fbs.ref('TEST_LEADER').push(['fold_kick_out',tm]);				
 				}catch(e){
 					
 				}
@@ -1867,18 +1880,18 @@ game={
 			}
 		})
 		
+	
 		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){
 			
 			const tm=Date.now();
 			const res=players.map(p=>{return {uid:p.uid,bank:p.bank}});
 			const start_rating=my_data.s_rating||999;
 			try{
-				fbs.ref('TEST_LEADER').push(['ZZZX',start_rating,my_data.rating,my_data.rating-start_rating,tm,res]);				
+				fbs.ref('TEST_LEADER').push(['street_fin_event',start_rating,my_data.rating,my_data.rating-start_rating,tm,res]);				
 			}catch(e){
 				
 			}
-		}		
-		
+		}	
 
 		//показываем рекламу
 		if(event.ad){
@@ -3101,6 +3114,16 @@ tables_menu={
 		
 		if (this.free_chips){
 			
+			
+			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+				try{
+					const tm=Date.now();
+					fbs.ref('TEST_LEADER').push(['free_chips',tm]);				
+				}catch(e){
+					
+				}
+			}	
+			
 			my_data.rating+=1000;
 			this.update_my_data();
 			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
@@ -3144,7 +3167,7 @@ tables_menu={
 		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
 			try{
 				const tm=Date.now();
-				fbs.ref('TEST_LEADER').push(['ZZZX','table_down',table,tm]);				
+				fbs.ref('TEST_LEADER').push(['table_down',table,tm]);				
 			}catch(e){
 				
 			}
