@@ -1245,7 +1245,7 @@ game={
 		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
 			try{
 				const tm=Date.now();
-				fbs.ref('TEST_LEADER').push([my_data.rating,'game_activate',tm]);				
+				fbs.ref('TEST_LEADER').push(['game_activate',my_data.rating,tm]);				
 			}catch(e){
 				
 			}
