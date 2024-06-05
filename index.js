@@ -3113,8 +3113,7 @@ tables_menu={
 		};
 		
 		if (this.free_chips){
-			
-			
+						
 			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
 				try{
 					const tm=Date.now();
@@ -3132,20 +3131,35 @@ tables_menu={
 			return;
 		}
 		
-		if (game_platform!=='YANDEX') {
-			objects.table_menu_info.text=['Только для яндекса!','Only for yandex!'][LANG];
-			return;
+		if (game_platform==='YANDEX') {
+			
+			this.payments.purchase({ id: 'chips1000' }).then(purchase => {
+				objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
+				my_data.rating+=1000;
+				this.update_my_data();
+				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+				
+			}).catch(err => {
+				objects.table_menu_info.text=['Ошибка при покупке!','Error!'][LANG];
+			})			
 		};	
 		
-		this.payments.purchase({ id: 'chips1000' }).then(purchase => {
-			objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
-			my_data.rating+=1000;
-			this.update_my_data();
-			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+		if (game_platform==='VK') {
 			
-		}).catch(err => {
-			objects.table_menu_info.text=['Ошибка при покупке!','Error!'][LANG];
-		})
+			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: 'chips1000'}).then((data) =>{
+				objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
+				my_data.rating+=1000;
+				this.update_my_data();
+				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+			}).catch((err) => {
+				objects.table_menu_info.text=['Ошибка при покупке!','Error!'][LANG];
+			});			
+		
+		};	
+		
+		if (!['YANDEX','VK'].includes(game_platform)){
+			objects.table_menu_info.text=['Только для Яндекса и ВК!','Only for Yandex and VK'][LANG];
+		}
 		
 	},
 	
