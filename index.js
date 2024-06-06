@@ -295,11 +295,17 @@ class player_card_class extends PIXI.Container {
 		this.stat=0;
 		this.place=0;
 		this.uid=0;
+		this.card_id=1;
 		
-		this.bcg=new PIXI.Sprite(gres.id_card_bcg.texture);
+		this.bcg=new PIXI.Sprite(gres.card1.texture);
 		this.bcg.width=150;
 		this.bcg.height=120;
 		this.bcg.visible=true;
+		
+		this.hl=new PIXI.Sprite(gres.bcg_hl.texture);
+		this.hl.width=150;
+		this.hl.height=120;
+		this.hl.visible=false;
 		
 		this.avatar_mask=new PIXI.Sprite(gres.avatar_mask.texture);
 		this.avatar_mask.width=this.avatar_mask.height=70;
@@ -377,7 +383,7 @@ class player_card_class extends PIXI.Container {
 			
 		this.visible=false;
 		
-		this.addChild(this.bcg,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_country,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
+		this.addChild(this.bcg,this.hl,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_country,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
 		
 	}	
 	
@@ -442,12 +448,12 @@ class player_card_class extends PIXI.Container {
 		
 		if(on){
 			this.run_timer();
-			this.bcg.texture=gres.id_card_play_bcg.texture			
+			this.hl.visible=true;
+			this.name.tint=0xFFFF00;
 		}else{			
-			this.bcg.texture=gres.id_card_bcg.texture			
-		}
-
-		
+			this.hl.visible=false;	
+			this.name.tint=0x666600;
+		}		
 	}
 	
 	change_balance(amount){
@@ -478,6 +484,44 @@ class player_card_class extends PIXI.Container {
 		}
 				
 
+		
+	}
+	
+	async update_data(){	
+	
+		let player_data=players_cache.players?.[this.uid];
+		const name=players_cache.players?.[this.uid]?.name;
+		const pic_url=players_cache.players?.[this.uid]?.pic_url;
+		const card_id=players_cache.players?.[this.uid]?.card_id;
+	
+		//рейтинг всегда обновляем
+		const rating=await fbs_once('players/'+this.uid+'/rating');		
+		this.rating=rating;
+		this.t_rating.text=rating;
+		
+		if(!player_data||!name||!pic_url||!card_id){
+					
+			player_data=await fbs_once('players/'+this.uid);
+			if(!player_data) return;			
+			
+			//обновляем кэше
+			if (!players_cache.players[this.uid]) players_cache.players[this.uid]={};		
+			players_cache.players[this.uid].name=player_data.name;
+			players_cache.players[this.uid].pic_url=player_data.pic_url;
+			players_cache.players[this.uid].card_id=player_data.card_id;				
+			
+		}			
+
+		
+		//устанавливаем данные карточки
+		this.t_country.text=player_data.country||'';
+		this.name.set2(player_data.name,110);
+		this.card_id=player_data.card_id||1;
+
+		game.load_avatar({uid:this.uid,tar_obj:this.avatar})
+				
+		//устанавливаем карточку
+		this.bcg.texture=gres['card'+this.card_id].texture;		
 		
 	}
 	
@@ -1257,10 +1301,9 @@ game={
 		})
 							
 		//keep-alive для стола		
-		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
+		game.update_pending();
 		this.pending_timer=setInterval(function(){
-			if(!document.hidden)
-				fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
+			if(!document.hidden) game.update_pending();
 		},15000)
 						
 		objects.t_bank.amount=0;
@@ -1312,6 +1355,12 @@ game={
 
 		});
 				
+	},
+	
+	update_pending(){
+		//return;
+		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
+		
 	},
 	
 	show_status_window(){
@@ -1388,22 +1437,10 @@ game={
 			pcard.hand_value=0;
 			pcard.set_cards(player.cards)
 			this.uid_to_pcards[player.uid]=pcard;			
-					
+			pcard.update_data();
 			i++;			
 		}	
 
-
-		//теперь другие данные которые нужно загружать
-		for (let uid in this.uid_to_pcards){		
-
-			await players_cache.update(uid);			
-			const pcard=this.uid_to_pcards[uid];
-			const player_data=players_cache.players[uid];
-			pcard.name.set2(player_data.name,110);
-			pcard.t_country.text=player_data.country||'';
-			pcard.rating=pcard.t_rating.text=player_data.rating;			
-			this.load_avatar({uid,tar_obj:pcard.avatar})
-		}
 		
 		//показываем карточки
 		i=0;
@@ -1450,9 +1487,7 @@ game={
 		
 		//показываем игроков сейчас
 		await this.show_active_players(this.players_in_game);
-		
-		
-				
+						
 		//начальный банк из анте всех игроков
 		objects.t_bank.amount=0;
 		this.update_bank(20*this.players_in_game.length);	
@@ -1774,7 +1809,7 @@ game={
 		objects.control_buttons_cont.visible=false;
 		
 		//добавляем данные в ожидание
-		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
+		this.update_pending();
 				
 		//я больше не в игре
 		this.iam_in_game=0;		
@@ -2663,7 +2698,6 @@ players_cache={
 			player.rating=data.rating;
 			player.pic_url=data.pic_url;			
 		}else{
-
 			//рейтинг всегда обновляем
 			player.rating=await fbs_once('players/'+uid+'/rating');			
 		}
@@ -4196,6 +4230,7 @@ async function init_game_env(env) {
 	my_data.country = other_data?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
 	my_data.nick_tm = other_data?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
+	my_data.cards_id = other_data?.cards_id || 1;
 	
 	//если маленький рейтинг
 	if (my_data.rating<=20) my_data.rating=100;
@@ -4245,6 +4280,7 @@ async function init_game_env(env) {
 	fbs.ref('players/'+my_data.uid+'/country').set(my_data.country);
 	fbs.ref('players/'+my_data.uid+'/pic_url').set(my_data.pic_url);				
 	fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+	fbs.ref('players/'+my_data.uid+'/cards_id').set(my_data.cards_id);
 	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
 		
 	//устанавлием мое имя в карточки
