@@ -510,13 +510,22 @@ class player_card_class extends PIXI.Container {
 			players_cache.players[this.uid].pic_url=player_data.pic_url;
 			players_cache.players[this.uid].card_id=player_data.card_id;				
 			
+			//извлекаем страну если она есть в отдельную категорию и из имени убираем
+			const country =auth2.get_country_from_name(player_data.name);
+			if (country){			
+				players_cache.players[this.uid].country=country;
+				players_cache.players[this.uid].name=player_data.name.slice(0, -4);
+			}	
+			
 		}			
+		
+		const cached_player_data=players_cache.players[this.uid];
 
 		
 		//устанавливаем данные карточки
-		this.t_country.text=player_data.country||'';
-		this.name.set2(player_data.name,110);
-		this.card_id=player_data.card_id||1;
+		this.t_country.text=cached_player_data.country||'';
+		this.name.set2(cached_player_data.name,110);
+		this.card_id=cached_player_data.card_id||1;
 
 		game.load_avatar({uid:this.uid,tar_obj:this.avatar})
 				
