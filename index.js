@@ -1291,6 +1291,7 @@ game={
 	write_fb_timer:0,
 	my_card:null,
 	recent_msg:[],
+	fold_kick_out_tm:0,
 	
 	activate(){
 		
@@ -3212,6 +3213,17 @@ tables_menu={
 			sound.play('locked');
 			return
 		};
+		
+		//защита от кик аута
+		const cur_tm=Date.now();
+		const wait_to_play=120-Math.floor((tm-game.fold_kick_out_tm)*0.001);
+		if (wait_to_play>0){
+			objects.table_menu_info.text=[`Вы не сделали ход, ждите ${wait_to_play} сек.`,`Wait ${wait_to_play} sec.`][LANG];
+			sound.play('locked');
+			return;
+		}
+		
+		
 		
 		/*if(table==='table2'){
 			anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.sx,objects.table2_data_cont.sx+5]}, true, 0.25,'shake');
