@@ -3216,7 +3216,7 @@ tables_menu={
 		
 		//защита от кик аута
 		const cur_tm=Date.now();
-		const wait_to_play=120-Math.floor((cur_tm-game.fold_kick_out_tm)*0.001);
+		const wait_to_play=180-Math.floor((cur_tm-game.fold_kick_out_tm)*0.001);
 		if (wait_to_play>0){
 			objects.table_menu_info.text=[`Ждите ${wait_to_play} сек.`,`Wait ${wait_to_play} sec.`][LANG];
 			sound.play('locked');
