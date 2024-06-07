@@ -1763,7 +1763,7 @@ game={
 				}
 			}	
 		
-		
+			this.fold_kick_out_tm=Date.now();
 			objects.bet_dialog_cont.visible=false;	
 			this.close();
 			main_menu.activate();
