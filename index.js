@@ -355,14 +355,14 @@ class player_card_class extends PIXI.Container {
 		this.my_card_icon.visible=true;
 					
 		this.card0=new mini_cards_calss();
-		this.card0.x=87;
+		this.card0.x=84;
 		this.card0.y=60;
-		this.card0.angle=-10;
+		this.card0.angle=0;
 		
 		this.card1=new mini_cards_calss();
-		this.card1.x=114;
+		this.card1.x=116;
 		this.card1.y=60;
-		this.card1.angle=10;		
+		this.card1.angle=0;		
 						
 		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:45});
 		this.t_comb.x=75;
