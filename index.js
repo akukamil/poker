@@ -4329,6 +4329,12 @@ async function init_game_env(env) {
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
 	my_data.card_id = other_data?.card_id || 1;
 	
+	
+	//убираем страну из имени
+	if (auth2.get_country_from_name(my_data.name))
+		my_data.name=my_data.name.slice(0, -4);
+	
+	
 	//если маленький рейтинг
 	if (my_data.rating<=20) my_data.rating=100;
 	
