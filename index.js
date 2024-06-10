@@ -307,10 +307,16 @@ class player_card_class extends PIXI.Container {
 		this.hl.height=120;
 		this.hl.visible=false;
 		
-		this.avatar_mask=new PIXI.Sprite(gres.avatar_mask.texture);
+		/*this.avatar_mask=new PIXI.Sprite(gres.avatar_mask.texture);
 		this.avatar_mask.width=this.avatar_mask.height=70;
 		this.avatar_mask.x=5;
-		this.avatar_mask.y=25;
+		this.avatar_mask.y=25;*/
+		
+		this.avatar_mask=new PIXI.Graphics;
+		this.avatar_mask.beginFill(0xff0000);
+		this.avatar_mask.drawCircle(40,60,25);
+
+		
 		
 		this.avatar=new PIXI.Sprite();
 		this.avatar.width=this.avatar.height=50;
@@ -499,23 +505,19 @@ class player_card_class extends PIXI.Container {
 		this.rating=rating;
 		this.t_rating.text=rating;
 		
+		console.log('Текущие данные',this.uid,player_data,name,pic_url,card_id)
 		if(!player_data||!name||!pic_url||!card_id){
 					
 			player_data=await fbs_once('players/'+this.uid);
+			console.log('загружены данные из фб',this.uid)
 			if(!player_data) return;			
 			
 			//обновляем кэше
 			if (!players_cache.players[this.uid]) players_cache.players[this.uid]={};		
 			players_cache.players[this.uid].name=player_data.name;
 			players_cache.players[this.uid].pic_url=player_data.pic_url;
-			players_cache.players[this.uid].card_id=player_data.card_id;				
-			
-			//извлекаем страну если она есть в отдельную категорию и из имени убираем
-			const country =auth2.get_country_from_name(player_data.name);
-			if (country){			
-				players_cache.players[this.uid].country=country;
-				players_cache.players[this.uid].name=player_data.name.slice(0, -4);
-			}	
+			players_cache.players[this.uid].card_id=player_data.card_id||1;		
+			players_cache.players[this.uid].country=player_data.country||'';			
 			
 		}			
 		
@@ -531,6 +533,11 @@ class player_card_class extends PIXI.Container {
 				
 		//устанавливаем карточку
 		this.bcg.texture=gres['card'+this.card_id].texture;		
+		
+	}
+	
+	set_name(name){
+		
 		
 	}
 	
@@ -1267,14 +1274,13 @@ sound={
 		
 		if (this.on){
 			this.on=0;
-			objects.pref_info.text=['Звуки отключены','Sounds is off'][LANG];
+			pref.add_info(['Звуки отключены','Sounds is off'][LANG]);
 			
 		} else{
 			this.on=1;
-			objects.pref_info.text=['Звуки включены','Sounds is on'][LANG];
+			pref.add_info(['Звуки включены','Sounds is on'][LANG]);
 		}
-		anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
-		
+	
 	}
 	
 }
@@ -1631,13 +1637,19 @@ game={
 			return;			
 		}
 		
-		if(my_data.blocked ||my_data.rating<5000){
+		if(my_data.blocked){
 			objects.game_info.text=['ЗАКРЫТО!','CLOSED!'][LANG];
 			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
 			sound.play('locked')
 			return;			
-		}
+		}		
 		
+		if(my_data.rating<5000){
+			objects.game_info.text=['Нужно иметь более 5000 фишек чтобы писать в чат!','You need more that 5000 chips to chat!'][LANG];
+			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
+			sound.play('locked')
+			return;			
+		}
 		
 		//убираем метки старых сообщений
 		const cur_dt=Date.now();
@@ -2706,18 +2718,15 @@ players_cache={
 			let data=await fbs_once('players/'+uid);
 			player.name=data.name;
 			player.rating=data.rating;
-			player.pic_url=data.pic_url;			
+			player.pic_url=data.pic_url;
+			player.country=data.country||'';	
+			player.card_id=data.card_id||1;	
 		}else{
 			//рейтинг всегда обновляем
 			player.rating=await fbs_once('players/'+uid+'/rating');			
 		}
 		
-		//извлекаем страну если она есть в отдельную категорию и из имени убираем
-		const country =auth2.get_country_from_name(player.name);
-		if (country){			
-			player.country=country;
-			player.name=player.name.slice(0, -4);
-		}		
+
 
 	},
 	
@@ -3216,13 +3225,11 @@ tables_menu={
 		
 		//защита от кик аута
 		const cur_tm=Date.now();
-		const wait_to_play=180-Math.floor((cur_tm-game.fold_kick_out_tm)*0.001);
+		const wait_to_play=120-Math.floor((cur_tm-game.fold_kick_out_tm)*0.001);
 		if (wait_to_play>0){
-			objects.table_menu_info.text=[`Ждите ${wait_to_play} сек.`,`Wait ${wait_to_play} sec.`][LANG];
-			sound.play('locked');
+			objects.table_menu_info.text=[`Вы не сделали ход, ждите ${wait_to_play} сек.`,`Wait ${wait_to_play} sec.`][LANG];
 			return;
 		}
-		
 		
 		
 		/*if(table==='table2'){
@@ -3279,6 +3286,11 @@ tables_menu={
 		objects.player_name.set2(my_data.name,130);
 		objects.player_chips.text=my_data.rating;
 		objects.player_avatar.texture=players_cache.players[my_data.uid].texture;
+		objects.card_pic.name.set2(my_data.name,110);
+		objects.card_pic.t_rating.text=my_data.rating;
+		
+		players_cache.players[my_data.uid].name=my_data.name
+		players_cache.players[my_data.uid].card_id=my_data.card_id
 		
 	},
 	
@@ -3570,6 +3582,8 @@ pref={
 	
 	cur_pic_url:'',
 	avatar_changed:0,
+	cur_card:0,
+	cards_prices:[0,0,1000,2000,5000,30000,50000,100000,200000,500000,700000,1000000],
 	
 	activate(){
 		
@@ -3578,8 +3592,7 @@ pref={
 			return;			
 		}
 		
-		anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);	
-		objects.pref_info.text=['Менять аватар и имя можно 1 раз в 30 дней!','You can change name and avatar once per month'][LANG];
+		this.add_info(['Менять аватар и имя можно 1 раз в 30 дней!','You can change name and avatar once per month'][LANG]);
 		
 		sound.play('click');
 		anim2.add(objects.pref_cont,{scale_x:[0,1]}, true, 0.2,'linear');
@@ -3587,6 +3600,13 @@ pref={
 		this.avatar_changed=0;
 		objects.pref_cont.visible=true;
 		objects.pref_avatar.texture=players_cache.players[my_data.uid].texture;
+		
+		//текущие айди карточки
+		this.cur_card=my_data.card_id;
+		this.change_card(0)
+		objects.card_pic.uid=my_data.uid;
+		objects.card_pic.update_data();
+				
 		
 	},
 	
@@ -3602,8 +3622,7 @@ pref={
 		const day_str=['дней','дня','день'][opt];
 		
 		if (days_befor_change>0){
-			objects.pref_info.text=[`Поменять можно через ${days_befor_change} ${day_str}`,`Wait ${days_befor_change} days`][LANG];
-			anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);	
+			this.add_info([`Поменять можно через ${days_befor_change} ${day_str}`,`Wait ${days_befor_change} days`][LANG]);
 			sound.play('locked');
 			return 0;
 		}
@@ -3614,24 +3633,26 @@ pref={
 	async change_name(){
 		
 		//провряем можно ли менять ник
-		if(!this.check_time(my_data.nick_tm)) return;
+		//if(!this.check_time(my_data.nick_tm)) return;
 									
 		const name=await keyboard.read(15);
 		if (name.length>1){
 			
-			my_data.name=name;	
-			objects.pref_info.text=['Имя изменено','Name has been changed'][LANG];
-			anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
+			//обновляем имя и в кэше тоже
+			my_data.name=name;
+			players_cache.players[my_data.uid].name=name
+			
+			
+			this.add_info(['Имя изменено','Name has been changed'][LANG]);
 			my_data.nick_tm=Date.now();			
-			players_cache.players[my_data.uid].name=my_data.name
+			
 			fbs.ref(`players/${my_data.uid}/nick_tm`).set(my_data.nick_tm);
 			fbs.ref(`players/${my_data.uid}/name`).set(my_data.name);
 			tables_menu.update_my_data();
 
 		}else{
 			
-			objects.pref_info.text=['Какая-то ошибка','Unknown error'][LANG];
-			anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);
+			this.add_info(['Какая-то ошибка','Unknown error'][LANG]);
 			
 		}
 		
@@ -3642,8 +3663,9 @@ pref={
 		this.avatar_changed=1;
 		this.cur_pic_url=my_data.orig_pic_url;
 		objects.pref_avatar.texture=await players_cache.load_pic(my_data.uid,my_data.orig_pic_url);
-		objects.pref_info.text=['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG];
+		this.add_info(['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG]);
 		objects.pref_info.visible=true;
+		objects.card_pic.avatar.texture=objects.pref_avatar.texture;
 		players_cache.players[my_data.uid].texture=objects.pref_avatar.texture;
 	},
 	
@@ -3653,9 +3675,62 @@ pref={
 		this.avatar_changed=1;
 		this.cur_pic_url='mavatar'+irnd(10,999999);
 		objects.pref_avatar.texture=PIXI.Texture.from(multiavatar(this.cur_pic_url));
-		objects.pref_info.text=['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG];
+		this.add_info(['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG]);
 		objects.pref_info.visible=true;
+		objects.card_pic.avatar.texture=objects.pref_avatar.texture;
 		players_cache.players[my_data.uid].texture=objects.pref_avatar.texture;
+	},
+		
+	change_card(dir){
+		this.cur_card+=dir;
+		if (this.cur_card<1) this.cur_card=1;
+		if (this.cur_card>11) this.cur_card=11;
+		objects.card_pic.bcg.texture=gres['card'+this.cur_card].texture;
+		
+		objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
+		
+	},
+	
+	set_card(){
+		
+		
+		const cur_price=this.cards_prices[this.cur_card];
+		if (my_data.rating<cur_price){			
+			this.add_info(['Недостаточно фишек!','Not enough chips!'][LANG]);
+			sound.play('locked');
+			return;
+		}
+		
+		if (my_data.card_id===this.cur_card){
+			
+			this.add_info(['Это ваша текущая карточка!','It is already yours!'][LANG]);
+			sound.play('locked');
+			return;
+		}
+		
+		
+		
+		//меняем рейтинг чипов
+		my_data.rating-=cur_price;
+		tables_menu.update_my_data();
+		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+	
+		//записываем
+		my_data.card_id = this.cur_card;
+		fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);
+		players_cache.players[my_data.uid].card_id=my_data.card_id;
+		
+		this.add_info(['Вы поменяли карточку!','The card design has been changed!'][LANG]);
+		
+		sound.play('confirm_dialog');
+		
+	},
+	
+	add_info(info){
+		
+		anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);
+		objects.pref_info.text=info;
+		
 	},
 	
 	sound_switch(){
@@ -3666,7 +3741,7 @@ pref={
 		}
 		sound.switch();
 		sound.play('click');
-		const tar_x=sound.on?356:318; //-38
+		const tar_x=sound.on?596:558; //-38
 		anim2.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x]}, true, 0.1,'linear');	
 		
 	},
@@ -4224,14 +4299,14 @@ async function init_game_env(env) {
 		objects.id_loup.x=20*Math.sin(game_tick*8)+90;
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
 	}
-
-
 		
 	//также сразу включаем его в кэш
 	if(!players_cache.players.BOT){
 		players_cache.players.BOT={};
 		players_cache.players.BOT.name='Victoria';
 		players_cache.players.BOT.rating=100;
+		players_cache.players.BOT.country='XX';
+		players_cache.players.BOT.card_id=irnd(1,10);
 		players_cache.players.BOT.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
 	}
 		
@@ -4244,6 +4319,7 @@ async function init_game_env(env) {
 	let _other_data = await fbs.ref("players/" + my_data.uid).once('value');
 	let other_data = _other_data.val();
 		
+	//определяем базовые параметры
 	my_data.rating = other_data?.rating || 100;
 	my_data.games = other_data?.games || 0;
 	my_data.name=other_data?.name || my_data.name;
@@ -4251,7 +4327,7 @@ async function init_game_env(env) {
 	my_data.country = other_data?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
 	my_data.nick_tm = other_data?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
-	my_data.cards_id = other_data?.cards_id || 1;
+	my_data.card_id = other_data?.card_id || 1;
 	
 	//если маленький рейтинг
 	if (my_data.rating<=20) my_data.rating=100;
@@ -4264,13 +4340,9 @@ async function init_game_env(env) {
 		my_data.pic_url=other_data.pic_url
 	else
 		my_data.pic_url=my_data.orig_pic_url
-	
-	//добавляем страну к имени если ее нет
-	if (!auth2.get_country_from_name(my_data.name)&&my_data.country)
-		my_data.name=`${my_data.name} (${my_data.country})`
-	
+		
 	//загружаем мои данные в кэш
-	await players_cache.update(my_data.uid,{pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
+	await players_cache.update(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
 	await players_cache.update_avatar(my_data.uid);
 
 	//время начала игры
@@ -4301,7 +4373,7 @@ async function init_game_env(env) {
 	fbs.ref('players/'+my_data.uid+'/country').set(my_data.country);
 	fbs.ref('players/'+my_data.uid+'/pic_url').set(my_data.pic_url);				
 	fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-	fbs.ref('players/'+my_data.uid+'/cards_id').set(my_data.cards_id);
+	fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);	
 	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
 		
 	//устанавлием мое имя в карточки
