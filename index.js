@@ -3633,7 +3633,7 @@ pref={
 	async change_name(){
 		
 		//провряем можно ли менять ник
-		//if(!this.check_time(my_data.nick_tm)) return;
+		if(!this.check_time(my_data.nick_tm)) return;
 									
 		const name=await keyboard.read(15);
 		if (name.length>1){
