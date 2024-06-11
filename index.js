@@ -545,7 +545,7 @@ class player_card_class extends PIXI.Container {
 		
 		
 		objects.timer_bar.width=130;
-		objects.timer_bar.sx=objects.timer_bar.x=this.x+10;		
+		objects.timer_bar.sx=objects.timer_bar.x=this.x+73;		
 		objects.timer_bar.y=this.y+94;
 		objects.timer_bar.tm=Date.now();
 		objects.timer_bar.visible=true;
@@ -1596,7 +1596,7 @@ game={
 			const time_left=15-(cur_time-objects.timer_bar.tm)*0.001;
 			if (objects.timer_bar.width>30){
 				objects.timer_bar.width=30+time_left*6.6666;
-				objects.timer_bar.x=objects.timer_bar.sx+(130-objects.timer_bar.width)*0.5;			
+				objects.timer_bar.x=objects.timer_bar.sx-objects.timer_bar.width*0.5;			
 			}			
 		}
 
