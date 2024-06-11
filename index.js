@@ -1833,20 +1833,16 @@ game={
 		//добавляем данные в ожидание
 		this.update_pending();
 				
-		//я больше не в игре
-		this.iam_in_game=0;		
 		
 		//Показываем окно статуса
 		this.show_status_window();			
 		
 		//открываем карты игроков и создем массив для проверки
-		let players=[],all_players=[];
+		let players=[];
 		objects.pcards.forEach(p=>{
 			if(p.visible){
 				p.open_cards();
-				if (p.in_game)
-					players.push(p)
-				all_players.push(p);
+				if (p.in_game) players.push(p)
 			}			
 		})		
 						
@@ -1888,6 +1884,11 @@ game={
 		
 		//убираем тех кто не участвует в раздаче общего банка
 		players=players.filter(p=>p.place!==-1)
+		
+		//убираем меня если я случайно на экране
+		if (!this.iam_in_game)
+			players=players.filter(p=>p.uid!==my_data.uid);
+
 		
 		//определяем общие банки
 		players_num=players.length;	
@@ -1937,8 +1938,11 @@ game={
 			}
 		})
 		
+		//я больше не в игре
+		this.iam_in_game=0;	
+		
 	
-		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){
+		/*if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){
 			
 			const tm=Date.now();
 			const res=players.map(p=>{return {uid:p.uid,bank:p.bank}});
@@ -1948,7 +1952,7 @@ game={
 			}catch(e){
 				
 			}
-		}	
+		}*/
 
 		//показываем рекламу
 		if(event.ad){
@@ -4339,7 +4343,12 @@ async function init_game_env(env) {
 	if (my_data.rating<=20) my_data.rating=100;
 	
 	//если новый игрок
-	if (!other_data) my_data.rating=100;
+	if (!other_data){
+		if (game_platform==='VK')
+			my_data.rating=1500;
+		else
+			my_data.rating=100;
+	}
 	
 	//правильно определяем аватарку
 	if (other_data?.pic_url && other_data.pic_url.includes('mavatar'))
