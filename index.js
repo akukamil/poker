@@ -4055,7 +4055,7 @@ async function load_resources() {
 	document.getElementById("m_progress").style.display = 'flex';
 
 	let git_src="https://akukamil.github.io/poker/"
-	git_src=""
+	//git_src=""
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
