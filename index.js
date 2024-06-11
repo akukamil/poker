@@ -545,7 +545,7 @@ class player_card_class extends PIXI.Container {
 		
 		
 		objects.timer_bar.width=130;
-		objects.timer_bar.sx=objects.timer_bar.x=this.x+73;		
+		objects.timer_bar.sx=objects.timer_bar.x=this.x+10;		
 		objects.timer_bar.y=this.y+94;
 		objects.timer_bar.tm=Date.now();
 		objects.timer_bar.visible=true;
@@ -4055,7 +4055,7 @@ async function load_resources() {
 	document.getElementById("m_progress").style.display = 'flex';
 
 	let git_src="https://akukamil.github.io/poker/"
-	//git_src=""
+	git_src=""
 
 	//подпапка с ресурсами
 	let lang_pack = ['RUS','ENG'][LANG];
