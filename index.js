@@ -543,9 +543,10 @@ class player_card_class extends PIXI.Container {
 	
 	run_timer(){
 		
-		objects.timer_bar.scale_x=1;
-		objects.timer_bar.x=this.x+30;
-		objects.timer_bar.y=this.y+105;
+		
+		objects.timer_bar.width=130;
+		objects.timer_bar.sx=objects.timer_bar.x=this.x+73;		
+		objects.timer_bar.y=this.y+94;
 		objects.timer_bar.tm=Date.now();
 		objects.timer_bar.visible=true;
 
@@ -1325,7 +1326,7 @@ game={
 		objects.t_bank.amount=0;
 		
 		//процессинг таймера ходов
-		objects.timer_bar.scale_x=0;
+		objects.timer_bar.width=130;
 		this.prv_time=Date.now();
 		some_process.timer_bar=this.process.bind(this);
 		
@@ -1378,7 +1379,7 @@ game={
 		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 		
 	},
-	
+		
 	show_status_window(){
 		
 		objects.t_table_status1.text='...';
@@ -1590,13 +1591,17 @@ game={
 		this.prv_time=cur_time;*/
 		
 		
+		//обработка таймера
+		if (objects.timer_bar.visible){
+			const time_left=15-(cur_time-objects.timer_bar.tm)*0.001;
+			if (objects.timer_bar.width>30){
+				objects.timer_bar.width=30+time_left*6.6666;
+				objects.timer_bar.x=objects.timer_bar.sx+(130-objects.timer_bar.width)*0.5;			
+			}			
+		}
+
 		
-		const time_left=15-(cur_time-objects.timer_bar.tm)*0.001;
-		if (objects.timer_bar.scale_x>0)
-			objects.timer_bar.scale_x=time_left/15;
-		
-		if (objects.table_status_cont.visible){
-			
+		if (objects.table_status_cont.visible){			
 			objects.table_status_circle.rotation+=0.2;				
 			objects.table_status_pic.scale_y=Math.sin(game_tick)*0.666;
 		}
@@ -1827,8 +1832,11 @@ game={
 						
 		console.log(event);
 		
-		objects.timer_bar.scale_x=0;
+		objects.timer_bar.width=130;
 		objects.control_buttons_cont.visible=false;
+		
+		//убираем таймер
+		objects.timer_bar.visible=false;
 		
 		//добавляем данные в ожидание
 		this.update_pending();
@@ -2032,6 +2040,7 @@ game={
 		objects.table_chat_cont.visible=false;
 		objects.cen_cards_cont.visible=false;		
 		objects.exit_game_button.visible=false;
+		objects.timer_bar.visible=false;
 		some_process.timer_bar=function(){};
 		clearInterval(this.pending_timer);
 		fbs.ref(table_id+'/events').off();
