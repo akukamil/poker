@@ -475,7 +475,7 @@ class player_card_class extends PIXI.Container {
 			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
 			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
 
-			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){
+			if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){
 				
 				
 				try{
@@ -1300,11 +1300,12 @@ game={
 	my_card:null,
 	recent_msg:[],
 	fold_kick_out_tm:0,
+	no_pending:0,
 	
 	activate(){
 		
 		
-		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+		if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
 			try{
 				const tm=Date.now();
 				fbs.ref('TEST_LEADER').push(['game_activate',my_data.rating,tm]);				
@@ -1376,9 +1377,8 @@ game={
 	},
 	
 	update_pending(){
-		//return;
+		if (game.no_pending) return;
 		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
-		
 	},
 		
 	show_status_window(){
@@ -1696,7 +1696,7 @@ game={
 		
 		if(anim2.any_on())return;		
 		
-		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+		if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
 			try{
 				const tm=Date.now();
 				fbs.ref('TEST_LEADER').push(['exit_button_down',tm]);				
@@ -1772,7 +1772,7 @@ game={
 		//выход если не делал ход
 		if (event.data==='FOLD'&&event.uid===my_data.uid&&objects.bet_dialog_cont.visible&&objects.bet_dialog_cont.ready){	
 		
-			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+			if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
 				try{
 					const tm=Date.now();
 					fbs.ref('TEST_LEADER').push(['fold_kick_out',tm]);				
@@ -1951,7 +1951,7 @@ game={
 		this.iam_in_game=0;	
 		
 	
-		/*if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){
+		/*if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){
 			
 			const tm=Date.now();
 			const res=players.map(p=>{return {uid:p.uid,bank:p.bank}});
@@ -3181,7 +3181,7 @@ tables_menu={
 		
 		if (this.free_chips){
 						
-			if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+			if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
 				try{
 					const tm=Date.now();
 					fbs.ref('TEST_LEADER').push(['free_chips',tm]);				
@@ -3254,7 +3254,7 @@ tables_menu={
 		
 		//table='table4'
 		
-		if (my_data.uid==='GP_DQaeAZcrAtPg'||my_data.uid==='debug100'){			
+		if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
 			try{
 				const tm=Date.now();
 				fbs.ref('TEST_LEADER').push(['table_down',table,tm]);				
