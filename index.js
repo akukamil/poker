@@ -4435,10 +4435,12 @@ async function init_game_env(env) {
 	fbs.ref('service').on('value', data => {
 		const msg=data.val();
 		console.log('SERVIVE:',msg);
-		if (msg.player===my_data.uid){			
-			if (msg.data==='kill_game')
+		if (msg.uid===my_data.uid){			
+			if (msg.info==='kill_game')
 				kill_game();			
 		}
+		
+		
 	});
 	
 }
