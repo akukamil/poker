@@ -4185,6 +4185,7 @@ async function define_platform_and_language(env) {
 
 var kill_game = function() {
 	
+	keep_alive=function(){};
 	firebase.app().delete();
 	document.body.innerHTML = 'CLIENT TURN OFF';
 }
