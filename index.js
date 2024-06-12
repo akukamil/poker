@@ -505,7 +505,7 @@ class player_card_class extends PIXI.Container {
 		this.rating=rating;
 		this.t_rating.text=rating;
 		
-		console.log('Текущие данные',this.uid,player_data,name,pic_url,card_id)
+		//console.log('Текущие данные',this.uid,player_data,name,pic_url,card_id)
 		if(!player_data||!name||!pic_url||!card_id){
 					
 			player_data=await fbs_once('players/'+this.uid);
@@ -4430,6 +4430,11 @@ async function init_game_env(env) {
 	//показыаем основное меню
 	main_menu.activate();
 
+
+	//сервисные сообщения
+	fbs.ref('service').on('value', data => {
+		console.log(data);
+	});
 	
 }
 
