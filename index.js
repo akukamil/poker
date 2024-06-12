@@ -4433,7 +4433,7 @@ async function init_game_env(env) {
 
 
 	//сервисные сообщения	
-	fbs.ref('service').on('value', fbs_data => {
+	/*fbs.ref('service').on('value', fbs_data => {
 		const msg=fbs_data.val();
 		console.log('SERVICE:',msg);
 		if (msg.uid===my_data.uid){			
@@ -4441,10 +4441,8 @@ async function init_game_env(env) {
 				if (msg.info==='kill_game')
 					kill_game();				
 			})
-		}
-		
-		
-	});
+		}	
+	});*/
 	
 }
 
