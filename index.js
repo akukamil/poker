@@ -4436,9 +4436,10 @@ async function init_game_env(env) {
 		const msg=fbs_data.val();
 		console.log('SERVICE:',msg);
 		if (msg.uid===my_data.uid){			
-			fbs.ref('service').set({uid:'read_'+my_data.uid,info:'read',tm:Date.now()});		
-			if (msg.info==='kill_game')
-				kill_game();
+			fbs.ref('service').set({uid:'read_'+my_data.uid,info:'read',tm:Date.now()}).then(()=>{
+				if (msg.info==='kill_game')
+					kill_game();				
+			})
 		}
 		
 		
