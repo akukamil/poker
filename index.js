@@ -4433,7 +4433,12 @@ async function init_game_env(env) {
 
 	//сервисные сообщения
 	fbs.ref('service').on('value', data => {
-		console.log(data);
+		const msg=d.val();
+		console.log('SERVIVE:',msg);
+		if (msg.player===my_data.uid){			
+			if (msg.data==='kill_game')
+				kill_game();			
+		}
 	});
 	
 }
