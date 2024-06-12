@@ -4431,10 +4431,11 @@ async function init_game_env(env) {
 	main_menu.activate();
 
 
-	//сервисные сообщения
-	fbs.ref('service').on('value', data => {
-		const msg=data.val();
-		console.log('SERVIVE:',msg);
+	//сервисные сообщения	
+	fbs.ref('service').on('value', fbs_data => {
+		const msg=fbs_data.val();
+		fbs.ref('service').set({uid:my_data.uid,info:'read',tm:Date.now()});
+		console.log('SERVICE:',msg);
 		if (msg.uid===my_data.uid){			
 			if (msg.info==='kill_game')
 				kill_game();			
