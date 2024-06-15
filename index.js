@@ -715,12 +715,13 @@ chat={
 	moderation_mode:0,
 	block_next_click:0,
 	kill_next_click:0,
+	chips_to_chat:5000,
 	
 	activate() {	
 
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
 		objects.desktop.texture=gres.desktop.texture;
-		objects.chat_enter_button.visible=(!my_data.blocked)&&my_data.rating>5000;
+		objects.chat_enter_button.visible=(!my_data.blocked)&&my_data.rating>=this.chips_to_chat;
 
 	},
 	
@@ -738,6 +739,10 @@ chat={
 			rec.msg_id = -1;	
 			rec.tm=0;
 		}			
+		
+		
+		objects.chat_info.text=`Правила чата!\n\n1. Будьте вежливы! Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n\n2. Писать в чат могут игроки имеющие более ${this.chips_to_chat} фишек.\n\n3. Нарушители правил будут заблокированы, а их фишки конфискованы.`;
+
 		
 		//загружаем чат
 		fbs.ref(chat_path).orderByChild('tm').limitToLast(20).once('value', snapshot => {chat.chat_load(snapshot.val());});		
