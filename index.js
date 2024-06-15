@@ -3942,11 +3942,13 @@ auth2 = {
 			if (my_data.orig_pic_url === 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/0/islands-retina-medium')
 				my_data.orig_pic_url = 'mavatar'+my_data.uid;	
 			
-			if (my_data.name === '')
-				my_data.name = this.get_random_name(my_data.uid);
-			
-			//если английский яндекс до добавляем к имени страну
-			my_data.name = my_data.name;			
+			if (my_data.name === ''){				
+				my_data.name = this.get_random_name(my_data.uid);				
+			}else{
+				my_data.yndx_auth=1;
+			}
+
+
 			
 			return;
 		}
@@ -4360,7 +4362,7 @@ async function init_game_env(env) {
 	
 	//если новый игрок
 	if (!other_data){
-		if (game_platform==='VK')
+		if (game_platform==='VK'||my_data.yndx_auth)
 			my_data.rating=1500;
 		else
 			my_data.rating=100;
