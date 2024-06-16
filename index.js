@@ -22,6 +22,18 @@ irnd = function(min,max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+formatNumber=function(num) {
+    if (num >= 1e9) {
+        return (num / 1e9).toFixed(1) + 'b';
+    } else if (num >= 1e6) {
+        return (num / 1e6).toFixed(1) + 'm';
+    } else if (num >= 1e3) {
+        return (num / 1e3).toFixed(1) + 'k';
+    } else {
+        return num.toString();
+    }
+}
+
 class lb_player_card_class extends PIXI.Container{
 
 	constructor(x,y,place) {
@@ -467,30 +479,15 @@ class player_card_class extends PIXI.Container {
 		if(!amount) return;
 		
 		this.rating+=amount;
-		this.t_rating.text=this.rating;				
+		this.t_rating.text=formatNumber(this.rating);				
 		
 		if(this.uid===my_data.uid){			
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
 			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
 			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
-
-			if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){
-				
-				
-				try{
-					const tm=Date.now();
-					fbs.ref('TEST_LEADER').push(['change_balance',my_data.rating,amount,tm]);				
-				}catch(e){
-					
-				}
-			}	
-
 			
-		}
-				
-
-		
+		}		
 	}
 	
 	async update_data(){	
@@ -503,7 +500,7 @@ class player_card_class extends PIXI.Container {
 		//рейтинг всегда обновляем
 		const rating=await fbs_once('players/'+this.uid+'/rating');		
 		this.rating=rating;
-		this.t_rating.text=rating;
+		this.t_rating.text=formatNumber(rating);
 		
 		//console.log('Текущие данные',this.uid,player_data,name,pic_url,card_id)
 		if(!player_data||!name||!pic_url||!card_id){
@@ -541,8 +538,7 @@ class player_card_class extends PIXI.Container {
 		
 	}
 	
-	run_timer(){
-		
+	run_timer(){		
 		
 		objects.timer_bar.width=130;
 		objects.timer_bar.sx=this.x+73;
