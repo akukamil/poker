@@ -10,7 +10,7 @@ const comb_to_text = {HIGH_CARD : ['СТ.КАРТА','HIGH CARD'],PAIR : ['ПА�
 const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['КОЛЛ','CALL'],FOLD:['ФОЛД','FOLD'],BET:['БЭТ','BET']};
 let table_id='table1';
 let cards_suit_texture=''
-
+const ante_data={'table1':20,'table2':50,'table3':100};
 fbs_once=async function(path){
 	const info=await fbs.ref(path).once('value');
 	return info.val();	
@@ -1508,8 +1508,9 @@ game={
 		await this.show_active_players(this.players_in_game);
 						
 		//начальный банк из анте всех игроков
+		const ante=ante_data[table_id];
 		objects.t_bank.amount=0;
-		this.update_bank(20*this.players_in_game.length);	
+		this.update_bank(ante*this.players_in_game.length);	
 		objects.t_my_bank.text='';
 
 		//кнопка выхода
@@ -1524,7 +1525,7 @@ game={
 			pcard.set_cards(player.cards);
 			
 			//анте
-			pcard.change_balance(-20);
+			pcard.change_balance(-ante);
 			i++;
 		})
 		
@@ -1562,7 +1563,7 @@ game={
 			return;
 		}
 		
-		objects.game_info.text=['НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ 20','STARTING NEW ROUND, ANTE 20'][LANG];
+		objects.game_info.text=[`НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ ${ante}`,`STARTING NEW ROUND, ANTE ${ante}`][LANG];
 		
 		//приветствие от бота
 		if (this.players_in_game.some(p=>p.uid==='BOT'))
@@ -3247,6 +3248,14 @@ tables_menu={
 		}
 		
 		
+		//проверка фишек
+		const ante=ante_data[table];
+		if (my_data.rating<ante){
+			objects.table_menu_info.text=[`Нужно минимум ${ante} фишек для этого стола.`,`Need at least ${ante} chips for this table.`][LANG];
+			return;
+		}
+		
+		
 		/*if(table==='table2'){
 			anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.sx,objects.table2_data_cont.sx+5]}, true, 0.25,'shake');
 			sound.play('locked');
@@ -3536,7 +3545,7 @@ lb={
 			const target=top[place];
 			const leader=leaders_array[place];
 			target.t_name.set2(leader.name,place>2?180:130);
-			target.t_rating.text=leader.rating;			
+			target.t_rating.text=formatNumber(leader.rating);			
 		}
 		
 		//заполняем аватар
