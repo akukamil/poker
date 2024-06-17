@@ -1449,7 +1449,7 @@ game={
 			pcard.in_game=1;
 			pcard.place=-1;
 			pcard.bank=0;
-			pcard.added_chips=20;
+			pcard.added_chips=ante_data[table_id];
 			pcard.my_pot=0;
 			pcard.rating=0;
 			pcard.my_card_icon.visible=player.uid===my_data.uid;
