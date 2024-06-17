@@ -4363,7 +4363,7 @@ async function init_game_env(env) {
 	
 	
 	//если маленький рейтинг
-	if (my_data.rating<=20) my_data.rating=100;
+	if (my_data.rating<100) my_data.rating=100;
 	
 	//если новый игрок
 	if (!other_data){
