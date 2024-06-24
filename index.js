@@ -326,9 +326,7 @@ class player_card_class extends PIXI.Container {
 		
 		this.avatar_mask=new PIXI.Graphics;
 		this.avatar_mask.beginFill(0xff0000);
-		this.avatar_mask.drawCircle(40,60,25);
-
-		
+		this.avatar_mask.drawCircle(40,60,25);		
 		
 		this.avatar=new PIXI.Sprite();
 		this.avatar.width=this.avatar.height=50;
@@ -346,7 +344,15 @@ class player_card_class extends PIXI.Container {
 		this.name.anchor.set(0.5,0.5);
 		this.name.x=70;
 		this.name.y=23;
-		this.name.tint=0xFFFF00;
+		this.name.tint=0xFFFF00;						
+						
+		this.chip_icon=new PIXI.Sprite(gres.chip_img.texture);
+		this.chip_icon.x=100;
+		this.chip_icon.y=96;
+		this.chip_icon.width=25;
+		this.chip_icon.height=25;
+		this.chip_icon.anchor.set(0.5,0.5);		
+						
 						
 		this.t_rating=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :24});
 		this.t_rating.x=120;
@@ -401,7 +407,7 @@ class player_card_class extends PIXI.Container {
 			
 		this.visible=false;
 		
-		this.addChild(this.bcg,this.hl,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_country,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
+		this.addChild(this.bcg,this.hl,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_country,this.chip_icon,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
 		
 	}	
 	
@@ -474,19 +480,24 @@ class player_card_class extends PIXI.Container {
 		}		
 	}
 	
+	set_rating(rating){
+		
+		this.rating=rating;
+		this.t_rating.text=formatNumber(rating);		
+		this.chip_icon.x=this.t_rating.x-this.t_rating.width-10;
+	}
+	
 	change_balance(amount){
 				
 		if(!amount) return;
 		
-		this.rating+=amount;
-		this.t_rating.text=formatNumber(this.rating);				
+		this.set_rating(this.rating+amount);
 		
 		if(this.uid===my_data.uid){			
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
 			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
-			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
-			
+			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);			
 		}		
 	}
 	
@@ -499,8 +510,8 @@ class player_card_class extends PIXI.Container {
 	
 		//рейтинг всегда обновляем
 		const rating=await fbs_once('players/'+this.uid+'/rating');		
-		this.rating=rating;
-		this.t_rating.text=formatNumber(rating);
+		
+		this.set_rating(rating);
 		
 		//console.log('Текущие данные',this.uid,player_data,name,pic_url,card_id)
 		if(!player_data||!name||!pic_url||!card_id){
@@ -656,6 +667,63 @@ class mini_cards_calss extends PIXI.Container{
 		
 	}
 	
+}
+
+class daily_reward_class extends PIXI.Container{
+	
+	constructor(){
+		
+		super();
+		
+		this.bcg=new PIXI.Sprite(gres.dr_card_bcg.texture);
+		this.bcg.width=100;
+		this.bcg.height=170;
+		this.bcg.interactive=true;
+		this.bcg.buttonMode=true;
+		this.bcg.pointerdown=dr.card_down.bind(this);
+		
+		this.t_day=new PIXI.BitmapText('День N', {fontName: 'mfont', fontSize :22});
+		this.t_day.x=50;
+		this.t_day.y=10;
+		this.t_day.anchor.set(0.5,0);
+		
+		this.claimed_icon=new PIXI.Sprite(gres.dr_claimed_icon.texture);
+		this.claimed_icon.width=100;
+		this.claimed_icon.height=120;		
+		
+		this.t_reward=new PIXI.BitmapText('1000', {fontName: 'mfont', fontSize :24});
+		this.t_reward.x=50;
+		this.t_reward.y=83;
+		this.t_reward.anchor.set(0.5,0);
+		
+		this.claim_button=new PIXI.Sprite(gres.dr_claim_button_img.texture);
+		this.claim_button.width=100;
+		this.claim_button.height=50;	
+		this.claim_button.y=105;		
+		
+		this.reward_day=0;
+		this.reward_prize=0;
+		this.claimed=0;
+		this.reached=0;
+		
+		this.addChild(this.bcg,this.t_day,this.t_reward,this.claim_button,this.claimed_icon);
+		
+	}
+	
+	update(){
+		
+		if (this.claimed)
+			this.claimed_icon.visible=true;
+		else
+			this.claimed_icon.visible=false;
+		
+		if (this.reached&&!this.claimed)
+			this.claim_button.visible=true;
+		else
+			this.claim_button.visible=false;
+		
+	}
+		
 }
 
 table_chat={
@@ -2761,7 +2829,7 @@ players_cache={
 			player.pic_url='https://akukamil.github.io/domino/vk_icon.png';
 				
 		//загружаем и записываем текстуру
-		if (player.pic_url) player.texture=await this.load_pic(uid, player.pic_url);	
+		if (player.pic_url) player.texture=await this.load_pic(uid, player.pic_url);
 		
 	}	
 }
@@ -3098,7 +3166,7 @@ tables_menu={
 		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table2_data_cont,{x:[-50,objects.table2_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table3_data_cont,{x:[-50,objects.table3_data_cont.sx]}, true, 0.25,'linear');
-		anim2.add(objects.my_data_cont,{x:[-150,objects.my_data_cont.sx]}, true, 0.25,'linear');
+		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
 
 		this.update_my_data();
@@ -3127,8 +3195,7 @@ tables_menu={
 		
 	},
 	
-	tick(){
-		
+	tick(){	
 		
 		
 		const cur_time=Date.now();
@@ -3136,8 +3203,8 @@ tables_menu={
 		
 		if (difference<=0){
 			this.free_chips=1;
-			objects.buy_chips_button.texture=gres.take_free_chips.texture;
-			objects.free_chips_counter.visible=false;
+			objects.free_chips_counter.text=['Забрать','Claim'][LANG];
+			objects.free_chips_button.alpha=1;
 			clearInterval(this.timer);
 			return;
 		}
@@ -3147,7 +3214,7 @@ tables_menu={
 		const seconds = Math.floor((difference % 60000) / 1000);
 
 		// Format the result
-		objects.free_chips_counter.text=[`Бесплатно через ${minutes}м ${seconds}с`,`Free in ${minutes}m ${seconds}s`][LANG];		
+		objects.free_chips_counter.text=[`Через ${minutes}м ${seconds}с`,`Free in ${minutes}m ${seconds}s`][LANG];		
 		
 	},
 	
@@ -3178,61 +3245,28 @@ tables_menu={
 		
 	},
 	
-	buy_chips_down(){
+	free_chips_down(){
 		
 		if (anim2.any_on()) {
-			sound.play('locked');
-			return
-		};
-		
-		if (this.free_chips){
-						
-			if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
-				try{
-					const tm=Date.now();
-					fbs.ref('TEST_LEADER').push(['free_chips',tm]);				
-				}catch(e){
-					
-				}
-			}	
-			
-			my_data.rating+=1000;
-			this.update_my_data();
-			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-			anim2.add(objects.buy_chips_button,{y:[objects.buy_chips_button.sy, 500]}, false, 0.5,'easeInBack');
-			sound.play('confirm_dialog');
-			return;
-		}
-		
-		if (game_platform==='YANDEX') {
-			
-			this.payments.purchase({ id: 'chips1000' }).then(purchase => {
-				objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
-				my_data.rating+=1000;
-				this.update_my_data();
-				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-				
-			}).catch(err => {
-				objects.table_menu_info.text=['Ошибка при покупке!','Error!'][LANG];
-			})			
+			sound.play('locked');return};				
+
+		if (!this.free_chips) {
+			objects.table_menu_info.text=objects.free_chips_counter.text;
+			sound.play('locked');return
 		};	
 		
-		if (game_platform==='VK') {
 			
-			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: 'chips1000'}).then((data) =>{
-				objects.table_menu_info.text=['Вы купили 1000 фишек!','you bought 1000 chips!'][LANG];
-				my_data.rating+=1000;
-				this.update_my_data();
-				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-			}).catch((err) => {
-				objects.table_menu_info.text=['Ошибка при покупке!','Error!'][LANG];
-			});			
+		my_data.rating+=1000;
+		this.update_my_data();
+		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+
+		//заново запускаем отсчет
+		objects.free_chips_button.alpha=0.5;
+		this.free_chips=0;
+		app_start_time=Date.now();
+		this.timer=setInterval(function(){tables_menu.tick()},1000);
 		
-		};	
-		
-		if (!['YANDEX','VK'].includes(game_platform)){
-			objects.table_menu_info.text=['Только для Яндекса и ВК!','Only for Yandex and VK'][LANG];
-		}
+		sound.play('confirm_dialog');
 		
 	},
 	
@@ -3287,9 +3321,7 @@ tables_menu={
 	chat_button_down(){
 		
 		if (anim2.any_on()) {
-			sound.play('locked');
-			return
-		};
+			sound.play('locked');return};
 		
 		this.close();
 		chat.activate();
@@ -3308,6 +3340,35 @@ tables_menu={
 		
 	},
 	
+	dr_button_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
+		this.close();
+		dr.activate();
+		
+		
+		
+	},
+	
+	shop_button_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+				
+		if (!['YANDEX','VK'].includes(game_platform)){			
+			objects.table_menu_info.text=['Магазин работает только для Яндекса и ВК','Only for Yandex and VK'][LANG];
+			return;}
+				
+		this.close();
+		shop.activate();		
+	},
+	
 	update_my_data(){
 		
 		//обновляем инфу
@@ -3315,7 +3376,8 @@ tables_menu={
 		objects.player_chips.text=my_data.rating;
 		objects.player_avatar.texture=players_cache.players[my_data.uid].texture;
 		objects.card_pic.name.set2(my_data.name,110);
-		objects.card_pic.t_rating.text=my_data.rating;
+		
+		objects.card_pic.set_rating(my_data.rating);
 		
 		players_cache.players[my_data.uid].name=my_data.name
 		players_cache.players[my_data.uid].card_id=my_data.card_id
@@ -3332,7 +3394,7 @@ tables_menu={
 		anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.x,850]}, false, 0.25,'linear');
 		anim2.add(objects.table3_data_cont,{x:[objects.table3_data_cont.x,850]}, false, 0.25,'linear');
 		
-		anim2.add(objects.my_data_cont,{x:[objects.my_data_cont.x,-150]}, false, 0.25,'linear');
+		anim2.add(objects.my_data_cont,{alpha:[1,0]}, false, 0.25,'linear');
 		
 		anim2.add(objects.table_buttons_cont,{x:[objects.table_buttons_cont.sx,400]}, false, 0.5,'linear');	
 		
@@ -3549,7 +3611,9 @@ lb={
 			const target=top[place];
 			const leader=leaders_array[place];
 			target.t_name.set2(leader.name,place>2?180:130);
-			target.t_rating.text=formatNumber(leader.rating);			
+			
+			target.set_rating(leader.rating);
+	
 		}
 		
 		//заполняем аватар
@@ -3563,6 +3627,223 @@ lb={
 	}
 
 
+}
+
+dr={
+	
+	rewards:[
+		{day:1,reward:2000},
+		{day:2,reward:3000},
+		{day:3,reward:4000},
+		{day:4,reward:5000},
+		{day:5,reward:6000},
+		{day:10,reward:10000},
+		{day:20,reward:30000},
+		{day:30,reward:50000},
+		{day:40,reward:40000},
+		{day:50,reward:50000},
+	],	
+	
+	day_reached:0,
+	
+	claimed:0,
+	
+	activate(){
+		
+		for (let i=0;i<8;i++){
+			const card=objects.dr_cards[i];
+			const reward_data=this.rewards[i];
+			
+			card.t_day.text=['День ','Day '][LANG]+reward_data.day;
+			card.t_reward.text=reward_data.reward;
+		}	
+		
+		anim2.add(objects.dr_cont,{y:[-450,objects.dr_cont.sy]}, true, 0.25,'linear');	
+		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
+	},
+		
+	round_tm_to_day(d){
+		d.setHours(0);
+		d.setMinutes(0);
+		d.setSeconds(0);
+		d.setMilliseconds(0);
+	},
+	
+	async update(){
+		
+		const dr_data=await fbs_once('DR/'+my_data.uid);
+		this.claimed=dr_data?.claimed||[0,0,0];
+		const prv_auth_tm=dr_data?.prv_auth_tm||0;
+		this.day_reached=dr_data?.day_reached||0;
+		
+		//текущее время
+		const cur_date=new Date();
+		this.round_tm_to_day(cur_date);
+		const cur_tm=cur_date.getTime();
+				
+		if (cur_tm-prv_auth_tm===86400000){
+			this.day_reached++;
+			console.log('дней в игре подряд:', this.day_reached)			
+		}
+		
+		if (cur_tm-prv_auth_tm>86400000){
+			this.day_reached=0;				
+			console.log('увы, теперь дней:', this.day_reached)
+		}
+				
+		fbs.ref('DR/'+my_data.uid+'/day_reached').set(this.day_reached);
+		fbs.ref('DR/'+my_data.uid+'/prv_auth_tm').set(cur_tm);
+		
+		for (let i=0;i<8;i++){
+			
+			const card=objects.dr_cards[i];
+			const target_day=this.rewards[i].day;
+			const reward=this.rewards[i].reward;
+			
+			//записываем в параметры карточки
+			card.reward=reward;
+			card.target_day=target_day;
+						
+			if (this.day_reached>=target_day){		
+				card.reached=1;
+				card.claimed=this.claimed?.[target_day]||0;
+			}else{
+				card.reached=0;
+			}		
+			
+			card.update();
+			
+		}		
+		
+		objects.dr_logs_info.text=['Текущий день: ','Current day:'][LANG]+this.day_reached;
+		
+	},
+	
+	take_reward(card){		
+			
+		
+		this.claimed[card.target_day]=1;			
+		
+		fbs.ref('DR/'+my_data.uid+'/claimed').set(this.claimed).then(()=>{
+			
+			my_data.rating+=card.reward;
+			tables_menu.update_my_data();
+			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+			card.claimed=1;
+			card.update();		
+			
+		})		
+		
+	},
+	
+	card_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');return};
+		
+		if (!this.reached) {
+			sound.play('locked');
+			objects.dr_info.text=['Вы еще не достигли до этого дня','You have not reached this day yet'][LANG];
+			return
+		}
+		if (this.claimed) {
+			sound.play('locked');
+			objects.dr_info.text=['Эта награда уже получена','This reward has already been claimed'][LANG];
+			return
+		}
+		
+		dr.take_reward(this);
+		sound.play('confirm_dialog');
+		
+	},
+	
+
+	close(){
+		
+		anim2.add(objects.dr_cont,{y:[objects.dr_cont.sy, -450]}, false, 0.25,'linear');	
+		
+	},
+	
+	close_button_down(){		
+		
+		if (anim2.any_on()) {
+			sound.play('locked');return};
+		
+		this.close();
+		tables_menu.activate();
+		
+	}	
+	
+}
+
+shop={
+	
+	data:[
+		{x:53,y:203,w:100,h:100,id:'chips1000',amount:1000},
+		{x:170,y:203,w:100,h:100,id:'chips5000',amount:5000},
+		{x:287,y:203,w:100,h:100,id:'chips10000',amount:10000},
+		{x:404,y:203,w:100,h:100,id:'chips50000',amount:50000},
+		{x:521,y:203,w:100,h:100,id:'chips100000',amount:100000},
+		{x:638,y:203,w:100,h:100,id:'chips500000',amount:500000},
+	],
+	
+	activate(){
+		
+		anim2.add(objects.shop_cont,{y:[-450,objects.shop_cont.sy]}, true, 0.25,'linear');	
+	},
+	
+	close_button_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');return};
+			
+		this.close();
+		tables_menu.activate();
+	},
+	
+	close(){
+		
+		anim2.add(objects.shop_cont,{y:[objects.shop_cont.sy, -450]}, false, 0.25,'linear');	
+		
+	},
+	
+	button_down(e){		
+	
+		if (anim2.any_on()) {
+			sound.play('locked');return};
+		
+		const px = e.data.global.x/app.stage.scale.x;
+		const py = e.data.global.y/app.stage.scale.y;		
+		const item=this.data.find(function(q){
+			return px>q.x&&px<q.x+q.w&&py>q.y&&py<q.y+q.h;
+		});
+		
+		if(!item) return;
+		
+		objects.shop_sel_hl.x=item.x-20;
+		objects.shop_sel_hl.y=item.y-20;
+		anim2.add(objects.shop_sel_hl,{alpha:[1, 0]}, true, 0.5,'linear');	
+			
+		if (game_platform==='YANDEX') {
+			
+			this.payments.purchase({ id: item.id }).then(purchase => {
+				objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
+				my_data.rating+=1000;
+				tables_menu.update_my_data();
+				sound.play('confirm_dialog');
+				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+				
+			}).catch(err => {
+				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
+			})			
+		};	
+			
+			
+		
+		
+	}
+	
+	
 }
 
 rules = {
@@ -3610,8 +3891,12 @@ pref={
 	
 	cur_pic_url:'',
 	avatar_changed:0,
-	cur_card:0,
+
 	cards_prices:[0,0,1000,2000,5000,30000,50000,100000,200000,500000,700000,1000000],
+	change_price:{avatar:0,name:0,card:0},
+	name_to_change:0,
+	avatar_to_change:0,
+	card_to_change:0,
 	
 	activate(){
 		
@@ -3627,14 +3912,17 @@ pref={
 		
 		this.avatar_changed=0;
 		objects.pref_cont.visible=true;
-		objects.pref_avatar.texture=players_cache.players[my_data.uid].texture;
+		//objects.pref_avatar.texture=players_cache.players[my_data.uid].texture;
 		
 		//текущие айди карточки
-		this.cur_card=my_data.card_id;
+		this.card_to_change=my_data.card_id;
 		this.change_card(0)
 		objects.card_pic.uid=my_data.uid;
 		objects.card_pic.update_data();
-				
+
+		this.change_price={avatar:0,name:0,card:0};
+		this.name_to_change=0;
+		this.avatar_to_change=0;
 		
 	},
 	
@@ -3661,61 +3949,56 @@ pref={
 	async change_name(){
 		
 		//провряем можно ли менять ник
-		if(!this.check_time(my_data.nick_tm)) return;
+		//if(!this.check_time(my_data.nick_tm)) return;
 									
 		const name=await keyboard.read(15);
 		if (name.length>1){
-			
-			//обновляем имя и в кэше тоже
-			my_data.name=name;
-			players_cache.players[my_data.uid].name=name
-			
-			
-			this.add_info(['Имя изменено','Name has been changed'][LANG]);
-			my_data.nick_tm=Date.now();			
-			
-			fbs.ref(`players/${my_data.uid}/nick_tm`).set(my_data.nick_tm);
-			fbs.ref(`players/${my_data.uid}/name`).set(my_data.name);
-			tables_menu.update_my_data();
-
-		}else{
-			
-			this.add_info(['Какая-то ошибка','Unknown error'][LANG]);
-			
-		}
-		
+			this.name_to_change=name;
+			this.change_price.name=100;
+			objects.card_pic.name.set2(name,110);
+			this.update_prices();
+		}else{			
+			this.add_info(['Какая-то ошибка','Unknown error'][LANG]);			
+		}		
 	},
 	
 	async reset_avatar(){
 		
-		this.avatar_changed=1;
-		this.cur_pic_url=my_data.orig_pic_url;
-		objects.pref_avatar.texture=await players_cache.load_pic(my_data.uid,my_data.orig_pic_url);
-		this.add_info(['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG]);
-		objects.pref_info.visible=true;
-		objects.card_pic.avatar.texture=objects.pref_avatar.texture;
-		players_cache.players[my_data.uid].texture=objects.pref_avatar.texture;
+		this.add_info(['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG]);		
+		this.avatar_to_change=my_data.orig_pic_url;		
+		objects.card_pic.avatar.texture=await players_cache.load_pic(my_data.uid,my_data.orig_pic_url);		
+		this.change_price.avatar=0;
+		this.update_prices();
 	},
 	
 	change_avatar(){
 		
-		if(!this.check_time(my_data.avatar_tm)) return;
-		this.avatar_changed=1;
-		this.cur_pic_url='mavatar'+irnd(10,999999);
-		objects.pref_avatar.texture=PIXI.Texture.from(multiavatar(this.cur_pic_url));
-		this.add_info(['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG]);
-		objects.pref_info.visible=true;
-		objects.card_pic.avatar.texture=objects.pref_avatar.texture;
-		players_cache.players[my_data.uid].texture=objects.pref_avatar.texture;
+		//if(!this.check_time(my_data.avatar_tm)) return;
+		this.avatar_to_change='mavatar'+irnd(10,999999);
+		objects.card_pic.avatar.texture=PIXI.Texture.from(multiavatar(this.avatar_to_change));			
+		//players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;		
+		
+		this.change_price.avatar=100;
+		this.update_prices();
 	},
 		
 	change_card(dir){
-		this.cur_card+=dir;
-		if (this.cur_card<1) this.cur_card=1;
-		if (this.cur_card>11) this.cur_card=11;
-		objects.card_pic.bcg.texture=gres['card'+this.cur_card].texture;
+				
+		this.card_to_change+=dir;
 		
-		objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
+		if (this.card_to_change<1) this.card_to_change=1;
+		if (this.card_to_change>11) this.card_to_change=11;
+		objects.card_pic.bcg.texture=gres['card'+this.card_to_change].texture;
+		
+		//проверяем нужно ли предъявить счет за изменения карточки
+		if (this.card_to_change!==my_data.card_id)
+			this.change_price.card=this.cards_prices[this.card_to_change];
+		else
+			this.change_price.card=0
+		this.update_prices();
+		
+		
+		//objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
 		
 	},
 	
@@ -3735,8 +4018,7 @@ pref={
 			sound.play('locked');
 			return;
 		}
-		
-		
+				
 		
 		//меняем рейтинг чипов
 		my_data.rating-=cur_price;
@@ -3754,6 +4036,13 @@ pref={
 		
 	},
 	
+	update_prices(){
+		
+		const total_price=this.change_price.card+this.change_price.name+this.change_price.avatar;
+		objects.pref_changes_price.text=total_price;			
+			
+	},
+		
 	add_info(info){
 		
 		anim2.add(objects.pref_info,{alpha:[0,1]}, false, 3,'easeBridge',false);
@@ -3769,7 +4058,7 @@ pref={
 		}
 		sound.switch();
 		sound.play('click');
-		const tar_x=sound.on?610:572; //-38
+		const tar_x=sound.on?435:395; //-38
 		anim2.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x]}, true, 0.1,'linear');	
 		
 	},
@@ -3781,25 +4070,68 @@ pref={
 			return;			
 		}
 		
+
+		const total_price=this.change_price.card+this.change_price.name+this.change_price.avatar;
+		if (my_data.rating<total_price){	
+			sound.play('locked');
+			this.add_info(['Недостаточно фишек!','Not enough chips!'][LANG]);
+			return;
+		}
+		
 		sound.play('click');
 		anim2.add(objects.pref_cont,{scale_x:[1,0]}, false, 0.2,'linear');	
+				
+				
+		//если поменяли аватар
+		if (this.avatar_to_change){
 		
-		if (this.avatar_changed){
+			players_cache.players[my_data.uid].pic_url=this.avatar_to_change;
+			players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;
 			
-			players_cache.players[my_data.uid].texture=0;
-			players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
-			
-			
-			
-			fbs.ref(`players/${my_data.uid}/pic_url`).set(this.cur_pic_url);
+			fbs.ref(`players/${my_data.uid}/pic_url`).set(this.avatar_to_change);
 			
 			my_data.avatar_tm=Date.now();
 			fbs.ref(`players/${my_data.uid}/avatar_tm`).set(my_data.avatar_tm);
-						
-			await players_cache.update_avatar(my_data.uid);
-			tables_menu.update_my_data();
 			
-		}		
+		}	
+
+		//если поменяли имя
+		if (this.name_to_change){
+			
+			my_data.name=this.name_to_change;
+			players_cache.players[my_data.uid].name=this.name_to_change			
+			my_data.nick_tm=Date.now();			
+			fbs.ref(`players/${my_data.uid}/nick_tm`).set(my_data.nick_tm);
+			fbs.ref(`players/${my_data.uid}/name`).set(my_data.name);
+		
+		}
+		
+		//если поменяли карточку
+		if (this.card_to_change!==my_data.card_id){			
+			my_data.card_id = this.card_to_change;
+			fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);
+			players_cache.players[my_data.uid].card_id=my_data.card_id;
+			
+		}
+		
+		
+		//меняем рейтинг чипов
+		my_data.rating-=total_price;
+		tables_menu.update_my_data();
+		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+		
+		
+	},
+	
+	async close_button_down(){
+		
+		if(anim2.any_on()){
+			sound.play('locked');
+			return;			
+		}
+		
+		sound.play('click');
+		anim2.add(objects.pref_cont,{scale_x:[1,0]}, false, 0.2,'linear');	
 		
 	}
 
@@ -4154,7 +4486,7 @@ async function define_platform_and_language(env) {
 		return;
 	}
 	
-	if (s.includes('yandex')) {
+	if (s.includes('yandex')||s.includes('app-id=169005')) {
 		
 		game_platform = 'YANDEX';
 		
@@ -4447,6 +4779,8 @@ async function init_game_env(env) {
 	//показыаем основное меню
 	main_menu.activate();
 
+	//проверка ежедневных бонусов
+	dr.update();
 
 	//сервисные сообщения	
 	/*fbs.ref('service').on('value', fbs_data => {
