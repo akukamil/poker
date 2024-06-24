@@ -3923,6 +3923,7 @@ pref={
 		this.change_price={avatar:0,name:0,card:0};
 		this.name_to_change=0;
 		this.avatar_to_change=0;
+		this.update_prices();
 		
 	},
 	
