@@ -3183,9 +3183,10 @@ tables_menu={
 			tables_menu.table_data_updated(objects.t_table3_players_num,data.val(),0)
 		})
 
-		objects.t_table1_ante.text='Анте '+ante_data['table1'];
-		objects.t_table2_ante.text='Анте '+ante_data['table2'];
-		objects.t_table3_ante.text='Анте '+ante_data['table3'];
+		const ante_str=['Анте ','Ante '][LANG];
+		objects.t_table1_ante.text=ante_str+ante_data['table1'];
+		objects.t_table2_ante.text=ante_str+ante_data['table2'];
+		objects.t_table3_ante.text=ante_str+ante_data['table3'];
 
 		objects.table_menu_info.text=''		
 		
