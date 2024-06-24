@@ -3829,7 +3829,7 @@ shop={
 			
 			this.payments.purchase({ id: item.id }).then(purchase => {
 				objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
-				my_data.rating+=1000;
+				my_data.rating+=item.amount;
 				tables_menu.update_my_data();
 				sound.play('confirm_dialog');
 				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
@@ -3837,6 +3837,20 @@ shop={
 			}).catch(err => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
 			})			
+		};	
+		
+		
+		if (game_platform==='VK') {
+			
+			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: item.id}).then((data) =>{
+				objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
+				my_data.rating+=item.amount;
+				tables_menu.update_my_data();
+				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+			}).catch((err) => {
+				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
+			});			
+		
 		};	
 			
 			
