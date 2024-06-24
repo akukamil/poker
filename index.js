@@ -3187,8 +3187,7 @@ tables_menu={
 		objects.t_table2_ante.text='Анте '+ante_data['table2'];
 		objects.t_table3_ante.text='Анте '+ante_data['table3'];
 
-		objects.table_menu_info.text=''
-		this.init_payments();
+		objects.table_menu_info.text=''		
 		
 		if (!this.free_chips);
 			this.timer=setInterval(function(){tables_menu.tick()},1000);
@@ -3229,22 +3228,7 @@ tables_menu={
 		table_players_num.text=['Игроков: ','Players: '][LANG]+num_of_players+'/6';
 		
 	},
-	
-	init_payments(){
-				
-		if (game_platform!=='YANDEX') return;			
 		
-		
-		if(this.payments) return;
-		
-		ysdk.getPayments({ signed: true }).then(_payments => {
-			tables_menu.payments = _payments;
-		}).catch(err => {
-			console.log(err);
-		})			
-		
-	},
-	
 	free_chips_down(){
 		
 		if (anim2.any_on()) {
@@ -3779,17 +3763,33 @@ dr={
 shop={
 	
 	data:[
-		{x:53,y:203,w:100,h:100,id:'chips1000',amount:1000},
-		{x:170,y:203,w:100,h:100,id:'chips5000',amount:5000},
-		{x:287,y:203,w:100,h:100,id:'chips10000',amount:10000},
-		{x:404,y:203,w:100,h:100,id:'chips50000',amount:50000},
-		{x:521,y:203,w:100,h:100,id:'chips100000',amount:100000},
-		{x:638,y:203,w:100,h:100,id:'chips500000',amount:500000},
+		{x:53,y:218,w:100,h:100,id:'chips1000',amount:1000},
+		{x:170,y:218,w:100,h:100,id:'chips5000',amount:5000},
+		{x:287,y:218,w:100,h:100,id:'chips10000',amount:10000},
+		{x:404,y:218,w:100,h:100,id:'chips50000',amount:50000},
+		{x:521,y:218,w:100,h:100,id:'chips100000',amount:100000},
+		{x:638,y:218,w:100,h:100,id:'chips500000',amount:500000},
 	],
+	payments:0,
 	
 	activate(){
 		
+		this.init_yandex_payments();
 		anim2.add(objects.shop_cont,{y:[-450,objects.shop_cont.sy]}, true, 0.25,'linear');	
+	},
+	
+	init_yandex_payments(){
+				
+		if (game_platform!=='YANDEX') return;			
+				
+		if(this.payments) return;
+		
+		ysdk.getPayments({ signed: true }).then(_payments => {
+			shop.payments = _payments;
+		}).catch(err => {
+			objects.shop_info.text=['Ошибка при загрузке магазина!','Shop init error!'][LANG];
+		})			
+		
 	},
 	
 	close_button_down(){
@@ -3891,6 +3891,7 @@ pref={
 	
 	cur_pic_url:'',
 	avatar_changed:0,
+	payments:null,
 
 	cards_prices:[0,0,1000,2000,5000,30000,50000,100000,200000,500000,700000,1000000],
 	change_price:{avatar:0,name:0,card:0},
