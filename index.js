@@ -3776,6 +3776,7 @@ shop={
 		
 		this.init_yandex_payments();
 		anim2.add(objects.shop_cont,{y:[-450,objects.shop_cont.sy]}, true, 0.25,'linear');	
+		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 	},
 	
 	init_yandex_payments(){
