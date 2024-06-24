@@ -3307,6 +3307,7 @@ tables_menu={
 		if (anim2.any_on()) {
 			sound.play('locked');return};
 		
+		sound.play('click');
 		this.close();
 		chat.activate();
 		
@@ -3319,6 +3320,7 @@ tables_menu={
 			return
 		};
 		
+		sound.play('click');
 		this.close();
 		main_menu.activate();		
 		
@@ -3331,11 +3333,9 @@ tables_menu={
 			return
 		};
 		
+		sound.play('click');
 		this.close();
-		dr.activate();
-		
-		
-		
+		dr.activate();	
 	},
 	
 	shop_button_down(){
@@ -3349,6 +3349,7 @@ tables_menu={
 			objects.table_menu_info.text=['Магазин работает только для Яндекса и ВК','Only for Yandex and VK'][LANG];
 			return;}
 				
+		sound.play('click');
 		this.close();
 		shop.activate();		
 	},
