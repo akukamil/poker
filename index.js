@@ -3595,8 +3595,7 @@ lb={
 			const target=top[place];
 			const leader=leaders_array[place];
 			target.t_name.set2(leader.name,place>2?180:130);
-			
-			target.set_rating(leader.rating);
+			target.t_rating.text=formatNumber(leader.rating);
 	
 		}
 		
@@ -3736,12 +3735,12 @@ dr={
 			return
 		}
 		
+		
 		dr.take_reward(this);
 		sound.play('confirm_dialog');
 		
 	},
 	
-
 	close(){
 		
 		anim2.add(objects.dr_cont,{y:[objects.dr_cont.sy, -450]}, false, 0.25,'linear');	
@@ -3753,6 +3752,7 @@ dr={
 		if (anim2.any_on()) {
 			sound.play('locked');return};
 		
+		sound.play('click')
 		this.close();
 		tables_menu.activate();
 		
@@ -3797,7 +3797,8 @@ shop={
 		
 		if (anim2.any_on()) {
 			sound.play('locked');return};
-			
+		
+		sound.play('click')
 		this.close();
 		tables_menu.activate();
 	},
@@ -3812,6 +3813,8 @@ shop={
 	
 		if (anim2.any_on()) {
 			sound.play('locked');return};
+		
+		sound.play('click')
 		
 		const px = e.data.global.x/app.stage.scale.x;
 		const py = e.data.global.y/app.stage.scale.y;		
