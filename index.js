@@ -3971,7 +3971,7 @@ pref={
 	async change_name(){
 		
 		//провряем можно ли менять ник
-		//if(!this.check_time(my_data.nick_tm)) return;
+		if(!this.check_time(my_data.nick_tm)) return;
 									
 		const name=await keyboard.read(15);
 		if (name.length>1){
@@ -3995,7 +3995,7 @@ pref={
 	
 	change_avatar(){
 		
-		//if(!this.check_time(my_data.avatar_tm)) return;
+		if(!this.check_time(my_data.avatar_tm)) return;
 		this.avatar_to_change='mavatar'+irnd(10,999999);
 		objects.card_pic.avatar.texture=PIXI.Texture.from(multiavatar(this.avatar_to_change));			
 		//players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;		
