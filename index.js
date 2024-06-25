@@ -429,7 +429,7 @@ class player_card_class extends PIXI.Container {
 				
 		objects.action_info.x=this.x+70;
 		if (this.t_comb.visible)
-			objects.action_info.y=this.y+160;
+			objects.action_info.y=this.y+155;
 		else
 			objects.action_info.y=this.y+130;
 		objects.action_info.t_info.text=transl_action[event.data][LANG];
@@ -1661,7 +1661,7 @@ game={
 		
 		this.my_balance+=amount;
 		const b_str=(this.my_balance>0?'+':'') + this.my_balance;
-		objects.my_balance_info.text=['Баланс: ', 'Balance: '][LANG]+b_str;
+		objects.my_balance_info.text=['Ваш баланс: ', 'Your balance: '][LANG]+b_str;
 		
 	},
 	
