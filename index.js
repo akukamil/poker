@@ -429,7 +429,7 @@ class player_card_class extends PIXI.Container {
 				
 		objects.action_info.x=this.x+70;
 		if (this.t_comb.visible)
-			objects.action_info.y=this.y+155;
+			objects.action_info.y=this.y+157;
 		else
 			objects.action_info.y=this.y+130;
 		objects.action_info.t_info.text=transl_action[event.data][LANG];
