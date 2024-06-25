@@ -493,7 +493,8 @@ class player_card_class extends PIXI.Container {
 		
 		this.set_rating(this.rating+amount);
 		
-		if(this.uid===my_data.uid){			
+		if(this.uid===my_data.uid){		
+			game.update_my_balance_info(amount);
 			my_data.rating+=amount;		
 			if(my_data.rating<0)my_data.rating=0;
 			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
@@ -1370,6 +1371,7 @@ game={
 	recent_msg:[],
 	fold_kick_out_tm:0,
 	no_pending:0,
+	my_balance:0,
 	
 	activate(){
 		
@@ -1400,6 +1402,10 @@ game={
 		objects.timer_bar.width=130;
 		this.prv_time=Date.now();
 		some_process.timer_bar=this.process.bind(this);
+		
+		
+		//это мой баланс в игре
+		this.my_balance=0;
 		
 		//скрываем карты посередине
 		objects.cen_cards.forEach(c=>c.visible=false);
@@ -1554,7 +1560,7 @@ game={
 		
 		my_data.s_rating=my_data.rating;
 		my_data.game_id=irnd(10,9999);
-		
+
 		
 		this.players_in_game=event.players;		
 				
@@ -1638,6 +1644,7 @@ game={
 			table_chat.add_message('Victoria',['Привет! Удачной игры!','Hello and good luck'][LANG])
 				
 		this.iam_in_game=1;
+					
 		
 		//показываем мои большие карты
 		objects.my_cards[0].open(this.my_card.card0.card_index);
@@ -1648,6 +1655,14 @@ game={
 				
 		//сразу проверяем мою комбинацию которая пока только 2 карты		
 		this.update_my_combination();			
+	},
+	
+	update_my_balance_info(amount){
+		
+		this.my_balance+=amount;
+		const b_str=(this.my_balance>0?'+':'') + this.my_balance;
+		objects.my_balance_info.text=['Баланс: ', 'Balance: '][LANG]+b_str;
+		
 	},
 	
 	process(){
