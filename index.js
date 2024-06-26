@@ -129,6 +129,7 @@ class chat_record_class extends PIXI.Container {
 		this.msg_bcg.width=200;
 		this.msg_bcg.height=70;	
 		this.msg_bcg.x=100;	
+		this.msg_bcg.alpha=0.4;
 
 		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: gdata.chat_record_name_font_size});
 		this.name.anchor.set(0.5,0.5);
@@ -153,12 +154,12 @@ class chat_record_class extends PIXI.Container {
 		this.msg.y=35;
 		this.msg.maxWidth=450;
 		this.msg.anchor.set(0,0.5);
-		this.msg.tint = 0x3B3838;
+		this.msg.tint = 0xffffff;
 		
 		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: gdata.chat_record_tm_font_size}); 
 		this.msg_tm.x=200;		
 		this.msg_tm.y=45;
-		this.msg_tm.tint=0x767171;
+		this.msg_tm.tint=0xaabbaa;
 		this.msg_tm.anchor.set(0,0);
 		
 		this.visible = false;
