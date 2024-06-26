@@ -1413,6 +1413,8 @@ game={
 		//показываем окошко статуса
 		this.show_status_window();
 		
+		objects.desktop.texture=gres[`bcg_${table_id}`].texture;
+		
 		objects.table_chat_cont.visible=true;
 		objects.avatars_cont.visible=true;
 		objects.cen_cards_cont.visible=true;	
@@ -4436,7 +4438,7 @@ async function load_resources() {
 
 
 	//отображаем шкалу загрузки
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(20,20,80,1);flex-direction: column	}#m_progress {	  background: rgb(30, 30, 80);border:1px solid rgb(130, 130, 200);	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {border-radius: 5px;	  background: rgb(80, 80, 180);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
+	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(20,20,20,1);flex-direction: column	}#m_progress {	  background: rgb(30, 30, 30);border:1px solid rgb(130, 130, 130);	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {border-radius: 5px;	  background: rgb(80, 80, 80);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
 
 	document.getElementById("m_progress").style.display = 'flex';
 
@@ -4449,8 +4451,13 @@ async function load_resources() {
 
 	game_res=new PIXI.Loader();
 	
+		
+	//добавляем фон отдельно
+	game_res.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
+	game_res.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
+	game_res.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
 	
-	game_res.add("m2_font", git_src+"fonts/Bahnschrift/font.fnt");
+	game_res.add("m2_font", git_src+"fonts/Bahnschrift_shadow/font.fnt");
 	game_res.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
 
 	game_res.add('check',git_src+'sounds/check.mp3');
@@ -4485,8 +4492,8 @@ async function load_resources() {
 	//убираем элементы загрузки
 	document.getElementById("m_progress").outerHTML = "";	
 
-	document.body.style.backgroundImage = "radial-gradient(circle, #FFF2CC, #000000)";
-
+	document.body.style.backgroundColor = "rgb(5,5,10)";
+	
 
 	//короткое обращение к ресурсам
 	gres=game_res.resources;
@@ -4610,7 +4617,7 @@ async function init_game_env(env) {
 
 	//создаем приложение пикси и добавляем тень
 	app = new PIXI.Application({width:M_WIDTH, height:M_HEIGHT,antialias:true});
-	document.body.appendChild(app.view);
+	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #999999";
 	
 	//доп функция для текста битмап
 	PIXI.BitmapText.prototype.set2=function(text,w){		
