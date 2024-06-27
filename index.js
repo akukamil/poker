@@ -3726,14 +3726,13 @@ dr={
 			
 		
 		this.claimed[card.target_day]=1;			
+		card.claimed=1;
+		card.update();
 		
-		fbs.ref('DR/'+my_data.uid+'/claimed').set(this.claimed).then(()=>{
-			
+		fbs.ref('DR/'+my_data.uid+'/claimed').set(this.claimed).then(()=>{			
 			my_data.rating+=card.reward;
 			tables_menu.update_my_data();
 			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-			card.claimed=1;
-			card.update();		
 			
 		})		
 		
@@ -3749,6 +3748,7 @@ dr={
 			objects.dr_info.text=['Вы еще не достигли до этого дня','You have not reached this day yet'][LANG];
 			return
 		}
+		
 		if (this.claimed) {
 			sound.play('locked');
 			objects.dr_info.text=['Эта награда уже получена','This reward has already been claimed'][LANG];
@@ -3790,6 +3790,7 @@ shop={
 		{x:521,y:218,w:100,h:100,id:'chips100000',amount:100000},
 		{x:638,y:218,w:100,h:100,id:'chips500000',amount:500000},
 	],
+	
 	payments:0,
 	
 	activate(){
