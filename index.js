@@ -495,11 +495,11 @@ class player_card_class extends PIXI.Container {
 		this.set_rating(this.rating+amount);
 		
 		if(this.uid===my_data.uid){		
-			game.update_my_balance_info(amount);
-			my_data.rating+=amount;		
-			if(my_data.rating<0)my_data.rating=0;
+		
+			game.update_my_balance_info(amount);			
+			game.change_my_balance(amount);			
 			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
-			fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);			
+
 		}		
 	}
 	
@@ -1454,6 +1454,15 @@ game={
 				
 	},
 	
+	change_my_balance(amount){
+		
+		my_data.rating+=amount;
+		if(my_data.rating<0)my_data.rating=0;
+		fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
+		fbs.ref('players/' + my_data.uid + '/PUB/rating').set(my_data.rating);	
+			
+	},
+	
 	update_pending(){
 		if (game.no_pending) return;
 		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
@@ -1652,10 +1661,7 @@ game={
 		//показываем мои большие карты
 		objects.my_cards[0].open(this.my_card.card0.card_index);
 		objects.my_cards[1].open(this.my_card.card1.card_index);
-			
-		//записываем мой баланс после анте
-		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-				
+							
 		//сразу проверяем мою комбинацию которая пока только 2 карты		
 		this.update_my_combination();			
 	},
@@ -3005,7 +3011,7 @@ confirm_dialog = {
 
 keep_alive= function() {
 	
-	fbs.ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
+	fbs.ref('players/'+my_data.uid+'/PRV/tm').set(firebase.database.ServerValue.TIMESTAMP);
 
 }
 
@@ -3258,10 +3264,10 @@ tables_menu={
 			sound.play('locked');return
 		};	
 		
-			
-		my_data.rating+=1000;
+		
+		game.change_my_balance(1000)
+		
 		this.update_my_data();
-		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 
 		//заново запускаем отсчет
 		objects.free_chips_button.alpha=0.5;
@@ -3475,42 +3481,6 @@ main_menu= {
 
 	},
 
-	async chips_button_down() {
-		
-		if(game_platform==='YANDEX'){			
-			confirm_dialog.show(['Вы можете купить фишки на странице выбора столов.','You can only buy chips.'][LANG]);
-			return;
-		}
-		
-		if (my_data.rating > 100) {
-			confirm_dialog.show(['У вас уже есть более 100 фишек.','You already have more than 100 chips.'][LANG]);			
-			return;
-		}
-		
-		let res = await confirm_dialog.show(['Получить 100 фишек за просмотр рекламы?','Get 100 chips (reward video)?'][LANG]);
-		if (res === 'ok') {
-			
-			let res2='';
-			if (game_platform==='VK')
-				res2 = await ad.show2();
-			if (game_platform==='GOOGLE_PLAY'){
-				res2='';
-				ad.show();				
-			}
-
-			
-			if (res2 !== 'err' || game_platform === 'GM' || game_platform === 'RUSTORE') {
-				sound.play("confirm_dialog");
-				my_data.rating=100;
-				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-			} else {
-				sound.play('locked')
-			}
-
-		}
-		
-	},
-
 	rules_ok_down () {
 
 		anim2.add(objects.rules_cont,{y:[objects.rules_cont.sy, -450]}, false, 0.5,'easeInBack');
@@ -3697,6 +3667,9 @@ dr={
 		fbs.ref('DR/'+my_data.uid+'/day_reached').set(this.day_reached);
 		fbs.ref('DR/'+my_data.uid+'/prv_auth_tm').set(cur_tm);
 		
+		fbs.ref('players/'+my_data.uid+'/PRV/DR/day_reached').set(this.day_reached);
+		fbs.ref('players/'+my_data.uid+'/PRV/DR/prv_auth_tm').set(cur_tm);
+		
 		for (let i=0;i<8;i++){
 			
 			const card=objects.dr_cards[i];
@@ -3729,12 +3702,14 @@ dr={
 		card.claimed=1;
 		card.update();
 		
-		fbs.ref('DR/'+my_data.uid+'/claimed').set(this.claimed).then(()=>{			
-			my_data.rating+=card.reward;
+		fbs.ref('DR/'+my_data.uid+'/claimed').set(this.claimed).then(()=>{	
+			game.change_my_balance(card.reward);
 			tables_menu.update_my_data();
-			fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-			
-		})		
+		})	
+
+		fbs.ref('players/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed);
+
+		
 		
 	},
 	
@@ -3853,10 +3828,10 @@ shop={
 			
 			this.payments.purchase({ id: item.id }).then(purchase => {
 				objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
-				my_data.rating+=item.amount;
+				game.change_my_balance(item.amount);
 				tables_menu.update_my_data();
 				sound.play('confirm_dialog');
-				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
+
 				
 			}).catch(err => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
@@ -3868,9 +3843,8 @@ shop={
 			
 			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: item.id}).then((data) =>{
 				objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
-				my_data.rating+=item.amount;
+				game.change_my_balance(item.amount)
 				tables_menu.update_my_data();
-				fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 			}).catch((err) => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
 			});			
@@ -4042,41 +4016,7 @@ pref={
 		//objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
 		
 	},
-	
-	set_card(){
 		
-		
-		const cur_price=this.cards_prices[this.cur_card];
-		if (my_data.rating<cur_price){			
-			this.add_info(['Недостаточно фишек!','Not enough chips!'][LANG]);
-			sound.play('locked');
-			return;
-		}
-		
-		if (my_data.card_id===this.cur_card){
-			
-			this.add_info(['Это ваша текущая карточка!','It is already yours!'][LANG]);
-			sound.play('locked');
-			return;
-		}
-				
-		
-		//меняем рейтинг чипов
-		my_data.rating-=cur_price;
-		tables_menu.update_my_data();
-		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-	
-		//записываем
-		my_data.card_id = this.cur_card;
-		fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);
-		players_cache.players[my_data.uid].card_id=my_data.card_id;
-		
-		this.add_info(['Вы поменяли карточку!','The card design has been changed!'][LANG]);
-		
-		sound.play('confirm_dialog');
-		
-	},
-	
 	update_prices(){
 		
 		const total_price=this.change_price.card+this.change_price.name+this.change_price.avatar;
@@ -4130,10 +4070,11 @@ pref={
 			players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;
 			
 			fbs.ref(`players/${my_data.uid}/pic_url`).set(this.avatar_to_change);
+			fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.avatar_to_change);
 			
 			my_data.avatar_tm=Date.now();
 			fbs.ref(`players/${my_data.uid}/avatar_tm`).set(my_data.avatar_tm);
-			
+			fbs.ref(`players/${my_data.uid}/PRV/avatar_tm`).set(my_data.avatar_tm);
 		}	
 
 		//если поменяли имя
@@ -4143,23 +4084,25 @@ pref={
 			players_cache.players[my_data.uid].name=this.name_to_change			
 			my_data.nick_tm=Date.now();			
 			fbs.ref(`players/${my_data.uid}/nick_tm`).set(my_data.nick_tm);
+			fbs.ref(`players/${my_data.uid}/PRV/nick_tm`).set(my_data.nick_tm);
+			
 			fbs.ref(`players/${my_data.uid}/name`).set(my_data.name);
-		
+			fbs.ref(`players/${my_data.uid}/PUB/name`).set(my_data.name);
 		}
 		
 		//если поменяли карточку
 		if (this.card_to_change!==my_data.card_id){			
 			my_data.card_id = this.card_to_change;
 			fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);
+			fbs.ref('players/'+my_data.uid+'/PUB/card_id').set(my_data.card_id);
 			players_cache.players[my_data.uid].card_id=my_data.card_id;
 			
 		}
 		
 		
 		//меняем рейтинг чипов
-		my_data.rating-=total_price;
+		game.change_my_balance(-total_price);
 		tables_menu.update_my_data();
-		fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 		
 		
 	},
@@ -4595,8 +4538,7 @@ async function init_game_env(env) {
 				
 	//подгружаем библиотеку аватаров
 	await auth2.load_script('https://akukamil.github.io/poker/multiavatar.min.js');
-				
-	
+					
 	await load_resources();
 	
 	await auth2.init();
@@ -4616,7 +4558,7 @@ async function init_game_env(env) {
 	
 	//короткое обращение к базе данных
 	fbs=firebase.database();
-
+	
 	//создаем приложение пикси и добавляем тень
 	app = new PIXI.Application({width:M_WIDTH, height:M_HEIGHT,antialias:true});
 	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #999999";
@@ -4629,9 +4571,8 @@ async function init_game_env(env) {
 			if (this.width<w) return;
 		}	
 	}
-
 	
-	//изменение размера окна
+	//событие по изменению размера окна
 	resize();
 	window.addEventListener("resize", resize);
 
@@ -4795,6 +4736,22 @@ async function init_game_env(env) {
 	fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 	fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);	
 	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
+	
+	//новая версия
+	fbs.ref('players/'+my_data.uid+'/PUB/name').set(my_data.name);
+	fbs.ref('players/'+my_data.uid+'/PUB/country').set(my_data.country);
+	fbs.ref('players/'+my_data.uid+'/PUB/pic_url').set(my_data.pic_url);				
+	fbs.ref('players/'+my_data.uid+'/PUB/rating').set(my_data.rating);
+	fbs.ref('players/'+my_data.uid+'/PUB/card_id').set(my_data.card_id);	
+	
+	fbs.ref('players/'+my_data.uid+'/PRV/nick_tm').set(my_data.nick_tm);
+	fbs.ref('players/'+my_data.uid+'/PRV/avatar_tm').set(my_data.avatar_tm);
+	fbs.ref('players/'+my_data.uid+'/PRV/blocked').set(my_data.blocked);
+	fbs.ref('players/'+my_data.uid+'/PRV/tm').set(firebase.database.ServerValue.TIMESTAMP);
+	
+	if(!other_data?.PRV?.first_log_tm)
+	fbs.ref('players/'+my_data.uid+'/PRV/first_log_tm').set(firebase.database.ServerValue.TIMESTAMP);
+	
 		
 	//устанавлием мое имя в карточки
 	make_text(objects.id_name,my_data.name,150);
