@@ -728,6 +728,53 @@ class daily_reward_class extends PIXI.Container{
 		
 }
 
+class star_anim_class extends PIXI.Container{
+		
+	constructor(cx,cy){
+		
+		super();
+		this.next_tm=0;
+		this.cen_x=cx;
+		this.cen_y=cy;
+		this.stars=[];
+		
+		for (let i=0;i<10;i++){
+			const star=new PIXI.Sprite(gres.star_img.texture);
+			star.anchor.set(0.5,0.5);
+			star.visible=false;			
+			this.stars.push(star);	
+			this.addChild(star);
+		}		
+	}	
+	
+	add_star(){
+		
+		const star=this.stars.find(s=>!s.visible);
+		if(!star) return;
+		const ang=Math.random()*Math.PI*2;	
+		const tx=this.cen_x+60*Math.cos(ang);;
+		const ty=this.cen_y+60*Math.sin(ang);
+		const tar_scale=Math.random()*0.5+0.4;
+		star.tint=(Math.random()*0.1+0.9)*0xffffff;
+		const tm=Math.random()*2+1;
+		anim2.add(star,{x:[this.cen_x, tx],y:[this.cen_y, ty],angle:[0,120],scale_xy:[0.1,tar_scale],alpha:[1,0]}, false, tm,'linear',false);	
+		
+	}
+	
+	process(){
+		
+		//добавляем новые звезды
+		const tm=Date.now();
+		if (tm>this.next_tm){
+			this.next_tm=Date.now()+500;
+			this.add_star();
+		}			
+		
+		
+	}
+		
+}
+
 table_chat={
 	
 	bottom:0,
@@ -782,11 +829,12 @@ chat={
 	block_next_click:0,
 	kill_next_click:0,
 	chips_to_chat:5000,
+	confiscate_next_click:0,
 	
 	activate() {	
 
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
-		objects.desktop.texture=gres.desktop.texture;
+		objects.bcg.texture=gres.city_img.texture;
 		objects.chat_enter_button.visible=(!my_data.blocked)&&my_data.rating>=this.chips_to_chat;
 
 	},
@@ -795,11 +843,11 @@ chat={
 		
 		this.last_record_end = 0;
 		objects.chat_msg_cont.y = objects.chat_msg_cont.sy;		
-		objects.desktop.interactive=true;
-		objects.desktop.pointermove=this.pointer_move.bind(this);
-		objects.desktop.pointerdown=this.pointer_down.bind(this);
-		objects.desktop.pointerup=this.pointer_up.bind(this);
-		objects.desktop.pointerupoutside=this.pointer_up.bind(this);
+		objects.bcg.interactive=true;
+		objects.bcg.pointermove=this.pointer_move.bind(this);
+		objects.bcg.pointerdown=this.pointer_down.bind(this);
+		objects.bcg.pointerup=this.pointer_up.bind(this);
+		objects.bcg.pointerupoutside=this.pointer_up.bind(this);
 		for(let rec of objects.chat_records) {
 			rec.visible = false;			
 			rec.msg_id = -1;	
@@ -907,7 +955,12 @@ chat={
 			this.kill_next_click=0;
 		}
 		
-		
+		if (this.confiscate_next_click){			
+			fbs.ref('players/'+player_data.uid+'/rating').set(100);
+			fbs.ref('players/'+player_data.uid+'/PUB/rating').set(100);
+			console.log('Игрок убит: ',player_data.uid);
+			this.kill_next_click=0;
+		}
 		
 		if (objects.chat_keyboard_cont.visible)		
 			keyboard.response_message(player_data.uid,player_data.name.text);
@@ -1414,7 +1467,7 @@ game={
 		//показываем окошко статуса
 		this.show_status_window();
 		
-		objects.desktop.texture=gres[`bcg_${table_id}`].texture;
+		objects.bcg.texture=gres[`bcg_${table_id}`].texture;
 		
 		objects.table_chat_cont.visible=true;
 		objects.avatars_cont.visible=true;
@@ -1709,7 +1762,7 @@ game={
 		if(anim2.any_on())return;
 		
 		this.close();
-		main_menu.activate();
+		tables_menu.activate();
 		
 	},
 	
@@ -1800,7 +1853,7 @@ game={
 		}	
 		
 		this.close();
-		main_menu.activate();
+		tables_menu.activate();
 		
 	},
 	
@@ -1878,7 +1931,7 @@ game={
 			this.fold_kick_out_tm=Date.now();
 			objects.bet_dialog_cont.visible=false;	
 			this.close();
-			main_menu.activate();
+			tables_menu.activate();
 			return;				
 		}
 								
@@ -3191,8 +3244,10 @@ tables_menu={
 		anim2.add(objects.table2_data_cont,{x:[-50,objects.table2_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table3_data_cont,{x:[-50,objects.table3_data_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
+		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
 		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
-
+		objects.bcg.texture = gres.city_img.texture;
+		
 		this.update_my_data();
 		
 		fbs.ref('table1/pending').on('value',function(data){			
@@ -3216,7 +3271,17 @@ tables_menu={
 		
 		if (!this.free_chips);
 			this.timer=setInterval(function(){tables_menu.tick()},1000);
+			
+		some_process.table=function(){tables_menu.process()};
 		
+	},
+	
+	process(){
+		
+		objects.star_anim.process();
+		if (dr.have_bonus&&objects.table_dr_button_hl.ready)
+			anim2.add(objects.table_dr_button_hl,{scale_xy:[0.666,1.2],alpha:[0.5,0]}, false, 1,'linear',false);
+
 	},
 	
 	tick(){	
@@ -3337,20 +3402,7 @@ tables_menu={
 		chat.activate();
 		
 	},
-	
-	exit_button_down(){
 		
-		if (anim2.any_on()) {
-			sound.play('locked');
-			return
-		};
-		
-		sound.play('click');
-		this.close();
-		main_menu.activate();		
-		
-	},
-	
 	dr_button_down(){
 		
 		if (anim2.any_on()) {
@@ -3361,6 +3413,32 @@ tables_menu={
 		sound.play('click');
 		this.close();
 		dr.activate();	
+	},
+	
+	lb_button_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
+		sound.play('click');
+		this.close();
+		lb.activate();
+		
+	},
+	
+	rules_button_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
+		sound.play('click');
+		this.close();
+		rules.activate();
+		
 	},
 	
 	shop_button_down(){
@@ -3408,6 +3486,7 @@ tables_menu={
 		
 		anim2.add(objects.table_buttons_cont,{x:[objects.table_buttons_cont.sx,400]}, false, 0.5,'linear');	
 		
+		some_process.table=function(){};
 		clearInterval(this.timer);
 	}
 	
@@ -3420,8 +3499,8 @@ main_menu= {
 		some_process.main_menu = this.process;
 		anim2.add(objects.mb_cont,{y:[400,objects.mb_cont.sy]}, true, 0.5,'linear');
 		anim2.add(objects.game_title,{y:[-300,objects.game_title.sy]}, true, 0.5,'easeInOutCubic');
-		objects.desktop.texture = gres.desktop.texture;
-		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.6,'linear');
+		objects.bcg.texture = gres.city_img.texture;
+		anim2.add(objects.bcg,{alpha:[0,1]}, true, 0.6,'linear');
 	},
 	
 	process() {
@@ -3494,10 +3573,10 @@ lb={
 	cards_pos: [[370,10],[380,70],[390,130],[380,190],[360,250],[330,310],[290,370]],
 	last_update:0,
 
-	show() {
+	activate() {
 
-		objects.desktop.texture=gres.lb_bcg.texture;
-		anim2.add(objects.desktop,{alpha:[0,1]}, true, 0.5,'linear');
+		objects.bcg.texture=gres.lb_bcg.texture;
+		anim2.add(objects.bcg,{alpha:[0,1]}, true, 0.5,'linear');
 		
 		anim2.add(objects.lb_1_cont,{x:[-150, objects.lb_1_cont.sx]}, true, 0.5,'easeOutBack');
 		anim2.add(objects.lb_2_cont,{x:[-150, objects.lb_2_cont.sx]}, true, 0.5,'easeOutBack');
@@ -3543,7 +3622,7 @@ lb={
 
 		sound.play('click');
 		this.close();
-		main_menu.activate();
+		tables_menu.activate();
 
 	},
 
@@ -3619,6 +3698,8 @@ dr={
 	
 	day_reached:0,
 	
+	have_bonus:0,
+	
 	claimed:0,
 	
 	activate(){
@@ -3654,15 +3735,13 @@ dr={
 		this.round_tm_to_day(cur_date);
 		const cur_tm=cur_date.getTime();
 				
-		if (cur_tm-prv_auth_tm===86400000){
+		if (cur_tm-prv_auth_tm===86400000)
 			this.day_reached++;
-			console.log('дней в игре подряд:', this.day_reached)			
-		}
+
 		
-		if (cur_tm-prv_auth_tm>86400000){
+		if (cur_tm-prv_auth_tm>86400000)
 			this.day_reached=0;				
-			console.log('увы, теперь дней:', this.day_reached)
-		}
+
 				
 		fbs.ref('DR/'+my_data.uid+'/day_reached').set(this.day_reached);
 		fbs.ref('DR/'+my_data.uid+'/prv_auth_tm').set(cur_tm);
@@ -3687,11 +3766,22 @@ dr={
 				card.reached=0;
 			}		
 			
-			card.update();
-			
+			card.update();			
 		}		
 		
+		//проверяем есть ли бонус
+		this.check_any_bonuses();
+		
 		objects.dr_logs_info.text=['Текущий день: ','Current day:'][LANG]+this.day_reached;
+		
+	},
+	
+	check_any_bonuses(){
+		
+		if (objects.dr_cards.some(c=>c.claim_button.visible))
+			this.have_bonus=1;
+		else
+			this.have_bonus=0;
 		
 	},
 	
@@ -3709,7 +3799,7 @@ dr={
 
 		fbs.ref('players/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed);
 
-		
+		this.check_any_bonuses();
 		
 	},
 	
@@ -3863,17 +3953,17 @@ rules = {
 	
 	active : 0,
 	
-	activate : function() {
+	activate() {
 		
 		this.active = 1;
-		anim2.add(objects.desktop,{alpha:[0,0.5]}, true, 0.6,'linear');	
+		anim2.add(objects.bcg,{alpha:[0,0.5]}, true, 0.6,'linear');	
 		anim2.add(objects.rules_back_button,{x:[800, objects.rules_back_button.sx]}, true, 0.5,'easeOutCubic');
 		anim2.add(objects.rules_text,{alpha:[0, 1]}, true, 1,'linear');
 				
 		objects.rules_text.text = ['Добро пожаловать в карточную игру Покер Онлайн!\n\nВ игре участвуют до 6 игроков. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк. Также можно выиграть банк, если соперники откажутся продолжать партию (скинут карты). Выиграть можно также вводя соперников в заблуждение величиной ставок (блеф) и тем самым заставляя их скидывать карты.\n\nУдачной игры!','Welcome to the Poker Online game!\n\n The game involves up to 6 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\nHave a good game!'][LANG];
 	},
 	
-	back_button_down : async function() {
+	async back_button_down() {
 		
 		if (anim2.any_on()===true) {
 			sound.play('locked');
@@ -3883,17 +3973,16 @@ rules = {
 		
 		sound.play('click');
 		await this.close();
-		main_menu.activate();
+		tables_menu.activate();
 		
 	},
 	
-	close : async function() {
+	async close() {
 		
 		this.active = 0;
 		anim2.add(objects.rules_text,{alpha:[1, 0]}, false, 0.5,'linear');
-		anim2.add(objects.desktop,{alpha:[1, 0]}, false, 0.5,'linear');
+		anim2.add(objects.bcg,{alpha:[1, 0]}, true, 0.5,'linear');
 		await anim2.add(objects.rules_back_button,{x:[objects.rules_back_button.x, 800]}, false, 0.5,'easeInCubic');
-		
 		
 	}	
 	
@@ -4343,6 +4432,106 @@ auth2 = {
 	}
 }
 
+main_loader={
+	
+	async load1(){
+		
+		//подпапка с ресурсами
+		const lang_pack = ['RUS','ENG'][LANG];	
+		
+		//добавляем фон отдельно
+		game_res.add('city_img',git_src+'res/common/city_img.jpg');
+		game_res.add('game_title_img',git_src+`res/${lang_pack}/game_title.png`);	
+		game_res.add('loader_bcg_img',git_src+'res/common/loader_bcg_img.png');
+		game_res.add('loader_front_img',git_src+'res/common/loader_front_img.png');
+				
+		await new Promise(res=>game_res.load(res))
+		
+		//элементы загрузки
+		objects.loader_cont=new PIXI.Container();
+		
+		
+		objects.bcg=new PIXI.Sprite(gres.city_img.texture);
+		objects.bcg.width=820;
+		objects.bcg.height=470;
+		objects.bcg.x=-10;
+		objects.bcg.y=-10;
+		objects.title=new PIXI.Sprite(gres.game_title_img.texture);
+		objects.title.x=400;
+		objects.title.y=220;
+		objects.title.anchor.set(0.5,0.5);
+		objects.title.width=780;
+		objects.title.height=420;
+		
+		objects.loader_bcg=new PIXI.Sprite(gres.loader_bcg_img.texture);
+		objects.loader_bcg.x=220;
+		objects.loader_bcg.y=380;
+		objects.loader_bcg.width=360;
+		objects.loader_bcg.height=50;
+		
+		objects.loader_front=new PIXI.NineSlicePlane(gres.loader_front_img.texture,20,20,20,20);
+		objects.loader_front.x=230;
+		objects.loader_front.y=390;
+		objects.loader_front.width=340;
+		objects.loader_front.height=30;
+		
+		objects.loader_cont.addChild(objects.title,objects.loader_bcg,objects.loader_front);
+		app.stage.addChild(objects.bcg,objects.loader_cont);
+		
+		
+	},
+	
+	async load2(){
+		
+		//подпапка с ресурсами
+		const lang_pack = ['RUS','ENG'][LANG];	
+			
+		//добавляем фон отдельно
+		game_res.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
+		game_res.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
+		game_res.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
+		
+		game_res.add("m2_font", git_src+"fonts/Bahnschrift_shadow/font.fnt");
+		game_res.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
+
+		game_res.add('check',git_src+'sounds/check.mp3');
+		game_res.add('raise',git_src+'sounds/raise.mp3');
+		game_res.add('lose',git_src+'sounds/lose.mp3');
+		game_res.add('win',git_src+'sounds/win.mp3');
+		game_res.add('click',git_src+'sounds/click.mp3');
+		game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
+		game_res.add('close',git_src+'sounds/close.mp3');
+		game_res.add('locked',git_src+'sounds/locked.mp3');
+		game_res.add('clock',git_src+'sounds/clock.mp3');
+		game_res.add('card',git_src+'sounds/card.mp3');
+		game_res.add('card_open',git_src+'sounds/card_open.mp3');
+		game_res.add('dialog',git_src+'sounds/dialog.mp3');
+		game_res.add('keypress',git_src+'sounds/keypress.mp3');
+		game_res.add('inst_msg',git_src+'sounds/inst_msg.mp3');
+		game_res.add('fold',git_src+'sounds/fold.mp3');
+		game_res.add('money',git_src+'sounds/money.mp3');
+		
+		//добавляем из листа загрузки
+		for (var i = 0; i < load_list.length; i++)
+			if (load_list[i].class === "sprite" || load_list[i].class === "image" )
+				game_res.add(load_list[i].name, git_src+'res/'+lang_pack + '/' + load_list[i].name + "." +  load_list[i].image_format);
+
+		game_res.onProgress.add(progress);
+		function progress(loader, resource) {
+			objects.loader_front.width =  340*loader.progress*0.01;
+		}
+		
+		await new Promise((resolve, reject)=> game_res.load(resolve))
+		
+		
+		anim2.add(objects.loader_cont,{alpha:[1,0],y:[0,450]}, false, 1,'easeInCubic');	
+		objects.loader_bcg.visible=false;
+		objects.loader_front.visible=false;
+
+	}
+	
+}
+
 function resize() {
 	
     const vpw = window.innerWidth;  // Width of the viewport
@@ -4379,77 +4568,11 @@ function vis_change() {
 		
 }
 
-async function load_resources() {
-
-
-	//отображаем шкалу загрузки
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;	}body {display: flex;align-items: center;justify-content: center;background-color: rgba(20,20,20,1);flex-direction: column	}#m_progress {	  background: rgb(30, 30, 30);border:1px solid rgb(130, 130, 130);	  justify-content: flex-start;	  border-radius: 5px;	  align-items: center;	  position: relative;	  padding: 0 5px;	  display: none;	  height: 50px;	  width: 70%;	}	#m_bar {border-radius: 5px;	  background: rgb(80, 80, 80);	  height: 70%;	  width: 0%;	}	</style></div><div id="m_progress">  <div id="m_bar"></div></div>';
-
-	document.getElementById("m_progress").style.display = 'flex';
-
-	let git_src="https://akukamil.github.io/poker/"
-	//git_src=""
-
-	//подпапка с ресурсами
-	let lang_pack = ['RUS','ENG'][LANG];
-	
-
-	game_res=new PIXI.Loader();
-	
-		
-	//добавляем фон отдельно
-	game_res.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
-	game_res.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
-	game_res.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
-	
-	game_res.add("m2_font", git_src+"fonts/Bahnschrift_shadow/font.fnt");
-	game_res.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
-
-	game_res.add('check',git_src+'sounds/check.mp3');
-	game_res.add('raise',git_src+'sounds/raise.mp3');
-	game_res.add('lose',git_src+'sounds/lose.mp3');
-	game_res.add('win',git_src+'sounds/win.mp3');
-	game_res.add('click',git_src+'sounds/click.mp3');
-	game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
-	game_res.add('close',git_src+'sounds/close.mp3');
-	game_res.add('locked',git_src+'sounds/locked.mp3');
-	game_res.add('clock',git_src+'sounds/clock.mp3');
-	game_res.add('card',git_src+'sounds/card.mp3');
-	game_res.add('card_open',git_src+'sounds/card_open.mp3');
-	game_res.add('dialog',git_src+'sounds/dialog.mp3');
-	game_res.add('keypress',git_src+'sounds/keypress.mp3');
-	game_res.add('inst_msg',git_src+'sounds/inst_msg.mp3');
-	game_res.add('fold',git_src+'sounds/fold.mp3');
-	game_res.add('money',git_src+'sounds/money.mp3');
-	
-    //добавляем из листа загрузки
-    for (var i = 0; i < load_list.length; i++)
-        if (load_list[i].class === "sprite" || load_list[i].class === "image" )
-            game_res.add(load_list[i].name, git_src+'res/'+lang_pack + '/' + load_list[i].name + "." +  load_list[i].image_format);
-
-	game_res.onProgress.add(progress);
-	function progress(loader, resource) {
-		document.getElementById("m_bar").style.width =  Math.round(loader.progress)+"%";
-	}
-	
-	await new Promise((resolve, reject)=> game_res.load(resolve))
-	
-	//убираем элементы загрузки
-	document.getElementById("m_progress").outerHTML = "";	
-
-	document.body.style.backgroundColor = "rgb(5,5,10)";
-	
-
-	//короткое обращение к ресурсам
-	gres=game_res.resources;
-
-}
-
 language_dialog = {
 	
 	p_resolve : {},
 	
-	show : function() {
+	show() {
 				
 		return new Promise(function(resolve, reject){
 
@@ -4516,7 +4639,7 @@ async function define_platform_and_language(env) {
 	game_platform = 'UNKNOWN';	
 	LANG = await language_dialog.show();
 	
-	
+
 
 }
 
@@ -4529,19 +4652,44 @@ var kill_game = function() {
 
 async function init_game_env(env) {			
 
+
+
+	git_src="https://akukamil.github.io/poker/"
+	//git_src=""
+
 	//document.body.style.backgroundColor = "black";
 	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
 	//return;
+	
+	//ресурсы
+	game_res=new PIXI.Loader();
+	gres=game_res.resources;
 			
 	await define_platform_and_language(env);
-	console.log(game_platform, LANG);
+	console.log(game_platform, LANG);				
+				
 				
 	//подгружаем библиотеку аватаров
 	await auth2.load_script('https://akukamil.github.io/poker/multiavatar.min.js');
-					
-	await load_resources();
+				
+
+	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(41,41,41,1)}</style>';
+
+				
+	//создаем приложение пикси и добавляем тень
+	app = new PIXI.Application({width:M_WIDTH, height:M_HEIGHT,antialias:true});
+	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #999999";					
+
+				
+	//событие по изменению размера окна
+	resize();
+	window.addEventListener("resize", resize);
+
+				
+	await main_loader.load1();	
+	await main_loader.load2();
 	
-	await auth2.init();
+	await auth2.init();	
 	
 	//инициируем файербейс
 	if (firebase.apps.length===0) {
@@ -4559,10 +4707,6 @@ async function init_game_env(env) {
 	//короткое обращение к базе данных
 	fbs=firebase.database();
 	
-	//создаем приложение пикси и добавляем тень
-	app = new PIXI.Application({width:M_WIDTH, height:M_HEIGHT,antialias:true});
-	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #999999";
-	
 	//доп функция для текста битмап
 	PIXI.BitmapText.prototype.set2=function(text,w){		
 		const t=this.text=text;
@@ -4572,10 +4716,6 @@ async function init_game_env(env) {
 		}	
 	}
 	
-	//событие по изменению размера окна
-	resize();
-	window.addEventListener("resize", resize);
-
     //создаем спрайты и массивы спрайтов и запускаем первую часть кода
     for (var i = 0; i < load_list.length; i++) {
         const obj_class = load_list[i].class;
@@ -4645,6 +4785,7 @@ async function init_game_env(env) {
 	main_loop();
 
 	//анимация лупы
+	anim2.add(objects.id_cont,{y:[-200,objects.id_cont.sy]}, true, 0.5,'easeOutBack');
 	some_process.loup_anim=function() {
 		objects.id_loup.x=20*Math.sin(game_tick*8)+90;
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
@@ -4678,13 +4819,11 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.avatar_tm || 0;
 	my_data.card_id = other_data?.card_id || 1;
-	
-	
+		
 	//убираем страну из имени
 	if (auth2.get_country_from_name(my_data.name))
 		my_data.name=my_data.name.slice(0, -4);
-	
-	
+		
 	//если маленький рейтинг
 	if (my_data.rating<100) my_data.rating=100;
 	
@@ -4780,7 +4919,7 @@ async function init_game_env(env) {
 	});
 
 	//показыаем основное меню
-	main_menu.activate();
+	tables_menu.activate();
 
 	//проверка ежедневных бонусов
 	dr.update();
@@ -4807,8 +4946,8 @@ function main_loop() {
 	
 	//обрабатываем минипроцессы
 	for (let key in some_process)
-		some_process[key]();	
-	
+		some_process[key]();
+		
 	requestAnimationFrame(main_loop);
 	
 	
