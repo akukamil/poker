@@ -4527,7 +4527,7 @@ main_loader={
 		objects.loader_front=new PIXI.NineSlicePlane(gres.loader_front_img.texture,20,20,20,20);
 		objects.loader_front.x=230;
 		objects.loader_front.y=390;
-		objects.loader_front.width=340;
+		objects.loader_front.width=10;
 		objects.loader_front.height=30;
 		
 		objects.loader_cont.addChild(objects.title,objects.loader_bcg,objects.loader_front);
