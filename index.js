@@ -783,6 +783,7 @@ class table_icon_class extends PIXI.Container{
 		super();
 		
 		this.table_id='table'+id;
+		const table_id='table'+id;
 		
 		this.table_icon=new PIXI.Sprite(gres.table_icon.texture);
 		this.table_icon.y=3;
@@ -790,7 +791,7 @@ class table_icon_class extends PIXI.Container{
 		this.table_icon.height=110;
 		this.table_icon.interactive=true;
 		this.table_icon.buttonMode=true;
-		this.table_icon.pointerdown=function(){tables_menu.table_down(this.table_id)};
+		this.table_icon.pointerdown=function(){tables_menu.table_down(table_id)};
 				
 		this.t_table=new PIXI.BitmapText('СТОЛ №1', {fontName: 'mfont', fontSize :26});
 		this.t_table.x=96;
