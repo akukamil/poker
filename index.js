@@ -1699,7 +1699,8 @@ game={
 		if (table_id==='table1') cards_suit_texture=gres.cards_shirt.texture;
 		if (table_id==='table2') cards_suit_texture=gres.cards_shirt2.texture;
 		if (table_id==='table3') cards_suit_texture=gres.cards_shirt3.texture;
-				
+		if (table_id==='table4') cards_suit_texture=gres.cards_shirt4.texture;
+		
 		//Убираем окно статуса
 		this.close_status_window();			
 		
