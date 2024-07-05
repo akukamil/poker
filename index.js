@@ -10,7 +10,8 @@ const comb_to_text = {HIGH_CARD : ['СТ.КАРТА','HIGH CARD'],PAIR : ['ПА�
 const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['КОЛЛ','CALL'],FOLD:['ФОЛД','FOLD'],BET:['БЭТ','BET']};
 let table_id='table1';
 let cards_suit_texture=''
-const ante_data={'table1':20,'table2':50,'table3':100};
+const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
+const enter_data={'table1':50,'table2':50,'table3':5000,'table4':30000};
 fbs_once=async function(path){
 	const info=await fbs.ref(path).once('value');
 	return info.val();	
@@ -775,6 +776,64 @@ class star_anim_class extends PIXI.Container{
 		
 }
 
+class table_icon_class extends PIXI.Container{
+	
+	constructor(id){
+		
+		super();
+		
+		this.table_id='table'+id;
+		
+		this.table_icon=new PIXI.Sprite(gres.table_icon.texture);
+		this.table_icon.y=3;
+		this.table_icon.width=192.5;
+		this.table_icon.height=110;
+		this.table_icon.interactive=true;
+		this.table_icon.buttonMode=true;
+		this.table_icon.pointerdown=function(){tables_menu.table_down(this.table_id)};
+				
+		this.t_table=new PIXI.BitmapText('СТОЛ №1', {fontName: 'mfont', fontSize :26});
+		this.t_table.x=96;
+		this.t_table.y=0;
+		this.t_table.tint=0xffff00;
+		this.t_table.text=['СТОЛ №','ROOM №'][LANG]+id;
+		this.t_table.anchor.set(0.5,0.5);
+		
+		this.t_players=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :22});
+		this.t_players.x=96;
+		this.t_players.y=84;
+		this.t_players.anchor.set(0.5,0.5);
+		this.t_players.tint=0xD6DCE5;	
+		
+		this.chip_icon=new PIXI.Sprite(gres.chip_img.texture);
+		this.chip_icon.x=20;
+		this.chip_icon.y=95;
+		this.chip_icon.width=30;
+		this.chip_icon.height=30;
+
+		
+		this.t_enter_amount=new PIXI.BitmapText('>30k', {fontName: 'mfont', fontSize :22});
+		this.t_enter_amount.x=50;
+		this.t_enter_amount.y=110;
+		this.t_enter_amount.anchor.set(0,0.5);
+		this.t_enter_amount.tint=0xD2D2D2;	
+		this.t_enter_amount.text='>'+formatNumber(enter_data[this.table_id]);
+		
+		
+		this.t_ante=new PIXI.BitmapText('Анте: 30', {fontName: 'mfont', fontSize :22});
+		this.t_ante.anchor.set(0,0.5);
+		this.t_ante.x=100;
+		this.t_ante.y=110;	
+		this.t_ante.tint=0xE2F0D9;		
+		this.t_ante.text=['Анте ','Ante '][LANG]+ante_data[this.table_id];
+		
+		
+		this.addChild(this.table_icon,this.t_table,this.chip_icon, this.t_players,this.t_enter_amount,this.t_ante);
+	}	
+	
+	
+}
+
 table_chat={
 	
 	bottom:0,
@@ -958,8 +1017,8 @@ chat={
 		if (this.confiscate_next_click){			
 			fbs.ref('players/'+player_data.uid+'/rating').set(100);
 			fbs.ref('players/'+player_data.uid+'/PUB/rating').set(100);
-			console.log('Игрок убит: ',player_data.uid);
-			this.kill_next_click=0;
+			console.log('Фишки конфискованы: ',player_data.uid);
+			this.confiscate_next_click=0;
 		}
 		
 		if (objects.chat_keyboard_cont.visible)		
@@ -3240,9 +3299,12 @@ tables_menu={
 		
 	activate(){
 				
-		anim2.add(objects.table1_data_cont,{x:[-50,objects.table1_data_cont.sx]}, true, 0.25,'linear');
-		anim2.add(objects.table2_data_cont,{x:[-50,objects.table2_data_cont.sx]}, true, 0.25,'linear');
-		anim2.add(objects.table3_data_cont,{x:[-50,objects.table3_data_cont.sx]}, true, 0.25,'linear');
+		anim2.add(objects.table1_cont,{x:[-50,objects.table1_cont.sx]}, true, 0.25,'linear');
+		anim2.add(objects.table2_cont,{x:[-50,objects.table2_cont.sx]}, true, 0.25,'linear');
+		anim2.add(objects.table3_cont,{x:[-50,objects.table3_cont.sx]}, true, 0.25,'linear');
+		anim2.add(objects.table4_cont,{x:[-50,objects.table4_cont.sx]}, true, 0.25,'linear');
+		
+		
 		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
 		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
@@ -3251,21 +3313,22 @@ tables_menu={
 		this.update_my_data();
 		
 		fbs.ref('table1/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.t_table1_players_num,data.val())
+			tables_menu.table_data_updated(objects.table1_cont,data.val())
 		})
 		
 		fbs.ref('table2/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.t_table2_players_num,data.val(),1)
+			tables_menu.table_data_updated(objects.table2_cont,data.val(),1)
 		})
 		
 		fbs.ref('table3/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.t_table3_players_num,data.val(),0)
+			tables_menu.table_data_updated(objects.table3_cont,data.val(),0)
+		})
+		
+		fbs.ref('table4/pending').on('value',function(data){			
+			tables_menu.table_data_updated(objects.table4_cont,data.val(),0)
 		})
 
-		const ante_str=['Анте ','Ante '][LANG];
-		objects.t_table1_ante.text=ante_str+ante_data['table1'];
-		objects.t_table2_ante.text=ante_str+ante_data['table2'];
-		objects.t_table3_ante.text=ante_str+ante_data['table3'];
+
 
 		objects.table_menu_info.text=''		
 		
@@ -3307,7 +3370,7 @@ tables_menu={
 		
 	},
 	
-	table_data_updated(table_players_num,data,bot_on){
+	table_data_updated(table_cont,data,bot_on){
 
 		let num_of_players=0;
 		if (data) num_of_players=Object.keys(data).length;	
@@ -3315,7 +3378,13 @@ tables_menu={
 		//если это вторая комната то добавляем бота
 		if(bot_on) num_of_players=Math.max(num_of_players,1);
 		
-		table_players_num.text=['Игроков: ','Players: '][LANG]+num_of_players+'/6';
+		
+		if (num_of_players>0)
+			table_cont.alpha=1;
+		else
+			table_cont.alpha=0.5;
+		
+		table_cont.t_players.text=['Игроков: ','Players: '][LANG]+num_of_players+'/6';
 		
 	},
 		
@@ -3361,30 +3430,12 @@ tables_menu={
 		
 		
 		//проверка фишек
-		const ante=ante_data[table];
-		if (my_data.rating<ante){
-			objects.table_menu_info.text=[`Нужно минимум ${ante} фишек для этого стола.`,`Need at least ${ante} chips for this table.`][LANG];
+		const enter_amount=enter_data[table];
+		if (my_data.rating<enter_amount){
+			objects.table_menu_info.text=[`Нужно минимум ${enter_amount} фишек для этого стола.`,`Need at least ${enter_amount} chips for this table.`][LANG];
 			return;
-		}
-		
-		
-		/*if(table==='table2'){
-			anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.sx,objects.table2_data_cont.sx+5]}, true, 0.25,'shake');
-			sound.play('locked');
-			return;
-		}*/
-		
-		//table='table4'
-		
-		if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
-			try{
-				const tm=Date.now();
-				fbs.ref('TEST_LEADER').push(['table_down',table,tm]);				
-			}catch(e){
-				
-			}
 		}	
-		
+
 		
 		table_id=table;
 		game.activate();
@@ -3477,10 +3528,13 @@ tables_menu={
 		fbs.ref('table1/pending').off();
 		fbs.ref('table2/pending').off();	
 		fbs.ref('table3/pending').off();	
+		fbs.ref('table4/pending').off();
 		
-		anim2.add(objects.table1_data_cont,{x:[objects.table1_data_cont.x,850]}, false, 0.25,'linear');
-		anim2.add(objects.table2_data_cont,{x:[objects.table2_data_cont.x,850]}, false, 0.25,'linear');
-		anim2.add(objects.table3_data_cont,{x:[objects.table3_data_cont.x,850]}, false, 0.25,'linear');
+		anim2.add(objects.table1_cont,{x:[objects.table1_cont.x,850]}, false, 0.25,'linear');
+		anim2.add(objects.table2_cont,{x:[objects.table2_cont.x,850]}, false, 0.22,'linear');
+		anim2.add(objects.table3_cont,{x:[objects.table3_cont.x,850]}, false, 0.21,'linear');
+		anim2.add(objects.table4_cont,{x:[objects.table4_cont.x,850]}, false, 0.20,'linear');
+		
 		
 		anim2.add(objects.my_data_cont,{alpha:[1,0]}, false, 0.25,'linear');
 		
@@ -4490,6 +4544,7 @@ main_loader={
 		game_res.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
 		game_res.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
 		game_res.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
+		game_res.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
 		
 		game_res.add("m2_font", git_src+"fonts/Bahnschrift_shadow/font.fnt");
 		game_res.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
