@@ -3021,13 +3021,12 @@ ad = {
 		}			
 		
 		if (game_platform==='CRAZYGAMES') {				
-			try {
-				const crazysdk = window.CrazyGames.CrazySDK.getInstance();
-				crazysdk.init();
-				crazysdk.requestAd('midgame');		
-			} catch (e) {			
-				console.error(e);
-			}	
+			const callbacks = {
+				adFinished: () => console.log("End midgame ad (callback)"),
+				adError: (error) => console.log("Error midgame ad (callback)", error),
+				adStarted: () => console.log("Start midgame ad (callback)"),
+			};
+			window.CrazyGames.SDK.ad.requestAd("midgame", callbacks);	
 		}	
 		
 		if (game_platform==='GM') {
