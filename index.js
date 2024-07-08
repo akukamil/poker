@@ -3354,7 +3354,7 @@ tables_menu={
 		
 		//проверяем и показываем инфо от админа и потом удаляем
 		this.next_admin_info_check=Date.now()+200000;
-		const admin_msg_path=`player/${my_data.uid}/PRV/admin_info`;
+		const admin_msg_path=`players/${my_data.uid}/PRV/admin_info`;
 		const data=await fbs_once(admin_msg_path);
 		if (data){
 			if (data.type='KILL_CHIPS'){
