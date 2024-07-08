@@ -3298,7 +3298,7 @@ tables_menu={
 	timer:0,
 	free_chips:0,
 		
-	activate(){
+	activate(init){
 				
 		anim2.add(objects.table1_cont,{x:[-50,objects.table1_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table2_cont,{x:[-50,objects.table2_cont.sx]}, true, 0.25,'linear');
@@ -3329,9 +3329,12 @@ tables_menu={
 			tables_menu.table_data_updated(objects.table4_cont,data.val(),0)
 		})
 
-
+		
 
 		objects.table_menu_info.text=''		
+		
+		//проверяем инфор от админа
+		if (init) this.check_admin_info();
 		
 		if (!this.free_chips);
 			this.timer=setInterval(function(){tables_menu.tick()},1000);
@@ -3346,6 +3349,16 @@ tables_menu={
 		if (dr.have_bonus&&objects.table_dr_button_hl.ready)
 			anim2.add(objects.table_dr_button_hl,{scale_xy:[0.666,1.2],alpha:[0.5,0]}, false, 1,'linear',false);
 
+	},
+	
+	async check_admin_info(){
+		//проверяем и показываем инфо от админа и потом удаляем
+		const admin_msg_path=`player/${my_data.uid}/PRV/admin_info`;
+		const msg=await fbs_once(admin_msg_path);
+		if (msg){
+			objects.table_menu_info.text=msg;
+			fbs.ref(admin_msg_path).remove();
+		}		
 	},
 	
 	tick(){	
@@ -3545,82 +3558,6 @@ tables_menu={
 		clearInterval(this.timer);
 	}
 	
-}
-
-main_menu= {
-
-	async activate() {
-
-		some_process.main_menu = this.process;
-		anim2.add(objects.mb_cont,{y:[400,objects.mb_cont.sy]}, true, 0.5,'linear');
-		anim2.add(objects.game_title,{y:[-300,objects.game_title.sy]}, true, 0.5,'easeInOutCubic');
-		objects.bcg.texture = gres.city_img.texture;
-		anim2.add(objects.bcg,{alpha:[0,1]}, true, 0.6,'linear');
-	},
-	
-	process() {
-
-	},
-
-	async close() {
-
-		//some_process.main_menu = function(){};
-		objects.mb_cont.visible=false;
-		some_process.main_menu_process = function(){};
-		anim2.add(objects.mb_cont,{y:[objects.mb_cont.y,400]}, false, 0.5,'linear');
-		anim2.add(objects.game_title,{y:[objects.game_title.y,-300]}, false, 0.5,'linear');
-		//await anim2.add(objects.desktop,{alpha:[1,0]}, false, 0.6,'linear');	
-	},
-
-	async pb_down () {
-
-		if (anim2.any_on()===true || objects.id_cont.visible === true) {
-			sound.play('locked');
-			return
-		};
-
-		sound.play('click');
-
-		await this.close();
-		tables_menu.activate();
-
-	},
-	
-	async lb_button_down () {
-
-		if (anim2.any_on()===true) {
-			sound.play('locked');
-			return
-		};
-
-		sound.play('click');
-
-		await this.close();
-		lb.show();
-
-	},
-
-	async rules_button_down () {
-
-		if (anim2.any_on()===true) {
-			sound.play('locked');
-			return
-		};
-
-		sound.play('click');
-	
-		await this.close();
-		rules.activate();
-
-
-	},
-
-	rules_ok_down () {
-
-		anim2.add(objects.rules_cont,{y:[objects.rules_cont.sy, -450]}, false, 0.5,'easeInBack');
-
-	},
-
 }
 
 lb={
@@ -5022,7 +4959,7 @@ async function init_game_env(env) {
 	});
 
 	//показыаем основное меню
-	tables_menu.activate();
+	tables_menu.activate(1);	
 
 	//проверка ежедневных бонусов
 	dr.update();
