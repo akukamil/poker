@@ -1010,15 +1010,13 @@ chat={
 		}
 		
 		if (this.kill_next_click){			
-			fbs.ref('inbox/'+player_data.uid).set({message:'CLIEND_ID',tm:Date.now(),client_id:999999});
+			fbs.ref('inbox/'+player_data.uid).set({message:'KILL_GAME',tm:Date.now()});
 			console.log('Игрок убит: ',player_data.uid);
 			this.kill_next_click=0;
 		}
 		
 		if (this.confiscate_next_click){			
-			fbs.ref('players/'+player_data.uid+'/rating').set(100);
-			fbs.ref('players/'+player_data.uid+'/PUB/rating').set(100);
-			console.log('Фишки конфискованы: ',player_data.uid);
+			fbs.ref('players/'+player_data.uid+'/PRV/admin_info').set({type:'KILL_CHIPS',tm:Date.now()});
 			this.confiscate_next_click=0;
 		}
 		
@@ -3297,6 +3295,7 @@ tables_menu={
 	payments:null,
 	timer:0,
 	free_chips:0,
+	next_admin_info_check_tm:0,
 		
 	activate(init){
 				
@@ -3328,13 +3327,13 @@ tables_menu={
 		fbs.ref('table4/pending').on('value',function(data){			
 			tables_menu.table_data_updated(objects.table4_cont,data.val(),0)
 		})
-
-		
+						
 
 		objects.table_menu_info.text=''		
 		
 		//проверяем инфор от админа
-		if (init) this.check_admin_info();
+		const tm=Date.now();
+		if (init||(tm>this.next_admin_info_check)) this.check_admin_info();
 		
 		if (!this.free_chips);
 			this.timer=setInterval(function(){tables_menu.tick()},1000);
@@ -3352,12 +3351,18 @@ tables_menu={
 	},
 	
 	async check_admin_info(){
+		
 		//проверяем и показываем инфо от админа и потом удаляем
+		this.next_admin_info_check=Date.now()+200000;
 		const admin_msg_path=`player/${my_data.uid}/PRV/admin_info`;
-		const msg=await fbs_once(admin_msg_path);
-		if (msg){
-			objects.table_menu_info.text=msg;
-			fbs.ref(admin_msg_path).remove();
+		const data=await fbs_once(admin_msg_path);
+		if (data){
+			if (data.type='KILL_CHIPS'){
+				game.change_my_balance(-my_data.rating);
+				tables_menu.update_my_data();
+				objects.table_menu_info.text='Ваши фишки были конфискованы за нарушение правил чата';				
+			}				
+			fbs.ref(admin_msg_path).remove();		
 		}		
 	},
 	
@@ -4898,11 +4903,14 @@ async function init_game_env(env) {
 	
 	//сообщение для дубликатов
 	client_id = irnd(10,999999);
-	fbs.ref('inbox/'+my_data.uid).set({message:'CLIEND_ID',tm:Date.now(),client_id});
+	await fbs.ref('inbox/'+my_data.uid).set({message:'CLIEND_ID',tm:Date.now(),client_id});
 	firebase.database().ref('inbox/'+my_data.uid).on('value', data => {
 		data=data.val();
 		if(data.message==='CLIEND_ID'&&data.client_id!==client_id)
-			kill_game();		
+			kill_game();	
+		if(data.message==='KILL_GAME')
+			kill_game();	
+		
 	});
 				
 	//устанавливаем рейтинг в попап
