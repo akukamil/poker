@@ -4396,6 +4396,10 @@ auth2 = {
 			my_data.uid 	= "vk"+_player.id;
 			my_data.orig_pic_url = _player.photo_100;
 			
+			//убираем ё
+			my_data.name=my_data.name.replace(/ё/g, 'е');
+			my_data.name=my_data.name.replace(/Ё/g, 'Е');
+			
 			return;
 			
 		}
