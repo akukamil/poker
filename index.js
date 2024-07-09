@@ -4304,8 +4304,7 @@ auth2 = {
 		return undefined;	
 		
 	},
-	
-	
+		
 	async search_in_crazygames(){
 		if(!window.CrazyGames.SDK)
 			return {};
@@ -4319,8 +4318,7 @@ auth2 = {
 		const user = window.jwt_decode(token);
 		return user || {};
 	},
-	
-	
+		
 	async init() {	
 				
 		if (game_platform === 'GM') {
@@ -4374,8 +4372,10 @@ auth2 = {
 			}else{
 				my_data.yndx_auth=1;
 			}
-
-
+			
+			//убираем ё
+			my_data.name=my_data.name.replace(/ё/g, 'е');
+			my_data.name=my_data.name.replace(/Ё/g, 'Е');
 			
 			return;
 		}
