@@ -3296,6 +3296,7 @@ tables_menu={
 	timer:0,
 	free_chips:0,
 	next_admin_info_check_tm:0,
+	my_avatar_clicks:0,
 		
 	activate(init){
 				
@@ -3539,6 +3540,17 @@ tables_menu={
 		
 		players_cache.players[my_data.uid].name=my_data.name
 		players_cache.players[my_data.uid].card_id=my_data.card_id
+		
+	},
+	
+	my_avatar_clicked(){
+		
+		this.my_avatar_clicks++;
+		if (this.my_avatar_clicks%5===0){
+			game.no_pending=1-game.no_pending;
+			objects.table_menu_info.text='no pending: '+game.no_pending;
+		}
+			
 		
 	},
 	
