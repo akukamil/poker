@@ -484,10 +484,13 @@ class player_card_class extends PIXI.Container {
 	
 	set_rating(rating){
 		
-		if (rating>=1000000)
+		if (rating>=1000000){
 			this.chip_icon.tint=0xFFD700;
-		else
+			this.t_rating.tint=0xFFD700;
+		}else{
 			this.chip_icon.tint=0xFFFFFF;
+			this.t_rating.tint=0xFFFFFF;
+		}
 		
 		this.rating=rating;
 		this.t_rating.text=formatNumber(rating);		
