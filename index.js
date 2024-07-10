@@ -484,6 +484,11 @@ class player_card_class extends PIXI.Container {
 	
 	set_rating(rating){
 		
+		if (rating>=1000000)
+			this.chip_icon.tint=0xFFD700;
+		else
+			this.chip_icon.tint=0xFFFFFF;
+		
 		this.rating=rating;
 		this.t_rating.text=formatNumber(rating);		
 		this.chip_icon.x=this.t_rating.x-this.t_rating.width-10;
@@ -495,10 +500,7 @@ class player_card_class extends PIXI.Container {
 		
 		this.set_rating(this.rating+amount);
 		
-		if (this.rating>=1000000)
-			this.chip_icon.tint=0xFFD700;
-		else
-			this.chip_icon.tint=0xFFFFFF;	
+	
 		
 		if(this.uid===my_data.uid){		
 		
@@ -1656,7 +1658,7 @@ game={
 			pcard.my_pot=0;
 			pcard.rating=0;
 			pcard.my_card_icon.visible=player.uid===my_data.uid;
-			pcard.hand_value=0;
+			pcard.hand_value=0;			
 			pcard.set_cards(player.cards)
 			this.uid_to_pcards[player.uid]=pcard;			
 			pcard.update_data();
