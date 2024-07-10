@@ -495,6 +495,11 @@ class player_card_class extends PIXI.Container {
 		
 		this.set_rating(this.rating+amount);
 		
+		if (this.rating>=1000000)
+			this.chip_icon.tint=0xFFD700;
+		else
+			this.chip_icon.tint=0xFFFFFF;	
+		
 		if(this.uid===my_data.uid){		
 		
 			game.update_my_balance_info(amount);			
@@ -1569,6 +1574,7 @@ game={
 		
 		my_data.rating+=amount;
 		if(my_data.rating<0)my_data.rating=0;
+		
 		fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
 		fbs.ref('players/' + my_data.uid + '/PUB/rating').set(my_data.rating);	
 			
