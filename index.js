@@ -102,9 +102,7 @@ class table_chat_record_class extends PIXI.Container {
 		this.name_text.text=name+':';
 		this.name_text.tint=color||0xFFFFFF;	
 		this.visible=true;
-
-
-		
+	
 	}	
 	
 	hide(){
@@ -4902,7 +4900,7 @@ async function init_game_env(env) {
 	//если новый игрок
 	if (!other_data){
 		if (game_platform==='VK'||my_data.yndx_auth)
-			my_data.rating=1500;
+			my_data.rating=5000;
 		else
 			my_data.rating=100;
 	}
