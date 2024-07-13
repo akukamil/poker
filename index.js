@@ -11,7 +11,7 @@ const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['
 let table_id='table1';
 let cards_suit_texture=''
 const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
-const enter_data={'table1':50,'table2':50,'table3':5000,'table4':30000};
+const enter_data={'table1':25000,'table2':50,'table3':5000,'table4':30000};
 fbs_once=async function(path){
 	const info=await fbs.ref(path).once('value');
 	return info.val();	
@@ -826,8 +826,10 @@ class table_icon_class extends PIXI.Container{
 		this.t_enter_amount.y=110;
 		this.t_enter_amount.anchor.set(0,0.5);
 		this.t_enter_amount.tint=0xD2D2D2;	
-		this.t_enter_amount.text='>'+formatNumber(enter_data[this.table_id]);
-		
+		if (id===1)
+			this.t_enter_amount.text='<'+formatNumber(enter_data[this.table_id]);
+		else
+			this.t_enter_amount.text='>'+formatNumber(enter_data[this.table_id]);
 		
 		this.t_ante=new PIXI.BitmapText('Анте: 30', {fontName: 'mfont', fontSize :22});
 		this.t_ante.anchor.set(0,0.5);
@@ -1494,16 +1496,7 @@ game={
 	my_balance:0,
 	
 	activate(){
-		
-		
-		if (my_data.uid==='vk167248992'||my_data.uid==='debug100'){			
-			try{
-				const tm=Date.now();
-				fbs.ref('TEST_LEADER').push(['game_activate',my_data.rating,tm]);				
-			}catch(e){
-				
-			}
-		}	
+			
 		
 		//текущее состояние стола
 		fbs.ref(table_id).once('value',function(s){			
@@ -3323,11 +3316,11 @@ tables_menu={
 		this.update_my_data();
 		
 		fbs.ref('table1/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.table1_cont,data.val())
+			tables_menu.table_data_updated(objects.table1_cont,data.val(),1)
 		})
 		
 		fbs.ref('table2/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.table2_cont,data.val(),1)
+			tables_menu.table_data_updated(objects.table2_cont,data.val())
 		})
 		
 		fbs.ref('table3/pending').on('value',function(data){			
@@ -3460,10 +3453,18 @@ tables_menu={
 		
 		//проверка фишек
 		const enter_amount=enter_data[table];
-		if (my_data.rating<enter_amount){
-			objects.table_menu_info.text=[`Нужно минимум ${enter_amount} фишек для этого стола.`,`Need at least ${enter_amount} chips for this table.`][LANG];
-			return;
-		}	
+		if (table==='table1'){
+			if (my_data.rating>=enter_amount){
+				objects.table_menu_info.text=[`Нужно не более ${enter_amount} фишек для этого стола.`,`Need no more than ${enter_amount} chips for this table.`][LANG];
+				return;
+			}				
+		}else{
+			if (my_data.rating<enter_amount){
+				objects.table_menu_info.text=[`Нужно минимум ${enter_amount} фишек для этого стола.`,`Need at least ${enter_amount} chips for this table.`][LANG];
+				return;
+			}	
+		}
+
 
 		
 		table_id=table;
