@@ -1492,7 +1492,7 @@ game={
 	my_card:null,
 	recent_msg:[],
 	fold_kick_out_tm:0,
-	no_pending:0,
+	watch_mode:0,
 	my_balance:0,
 	
 	activate(){
@@ -1577,7 +1577,7 @@ game={
 	},
 	
 	update_pending(){
-		if (game.no_pending) return;
+		if (game.watch_mode) return;
 		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 	},
 		
@@ -3454,12 +3454,12 @@ tables_menu={
 		//проверка фишек
 		const enter_amount=enter_data[table];
 		if (table==='table1'){
-			if (my_data.rating>=enter_amount){
+			if (my_data.rating>=enter_amount&&!game.watch_mode){
 				objects.table_menu_info.text=[`Нужно не более ${enter_amount} фишек для этого стола.`,`Need no more than ${enter_amount} chips for this table.`][LANG];
 				return;
 			}				
 		}else{
-			if (my_data.rating<enter_amount){
+			if (my_data.rating<enter_amount&&!game.watch_mode){
 				objects.table_menu_info.text=[`Нужно минимум ${enter_amount} фишек для этого стола.`,`Need at least ${enter_amount} chips for this table.`][LANG];
 				return;
 			}	
@@ -3557,8 +3557,8 @@ tables_menu={
 		
 		this.my_avatar_clicks++;
 		if (this.my_avatar_clicks%5===0){
-			game.no_pending=1-game.no_pending;
-			objects.table_menu_info.text='no pending: '+game.no_pending;
+			game.watch_mode=1-game.watch_mode;
+			objects.table_menu_info.text='watch_mode: '+game.watch_mode;
 		}
 			
 		
