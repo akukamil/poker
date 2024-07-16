@@ -313,6 +313,9 @@ class player_card_class extends PIXI.Container {
 		this.bcg.width=150;
 		this.bcg.height=120;
 		this.bcg.visible=true;
+		this.bcg.interactive=true;
+		this.bcg.buttonMode=true;
+		this.bcg.pointerdown=this.card_down.bind(this);
 		
 		this.hl=new PIXI.Sprite(gres.bcg_hl.texture);
 		this.hl.width=150;
@@ -569,6 +572,15 @@ class player_card_class extends PIXI.Container {
 		objects.timer_bar.tm=Date.now();
 		objects.timer_bar.visible=true;
 
+	}
+	
+	async card_down(){
+		
+		if(!game.watch_mode) return;
+		
+		const player_data=await fbs_once('players/'+this.uid);
+		console.log(this.uid);
+		console.log(player_data);
 	}
 	
 	open_cards(){
@@ -4936,6 +4948,8 @@ async function init_game_env(env) {
 			kill_game();	
 		if(data.message==='KILL_GAME')
 			kill_game();	
+		if(data.message==='RELOAD')
+			window.location.reload();	
 		
 	});
 				
