@@ -917,7 +917,7 @@ chat={
 
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
 		objects.bcg.texture=gres.city_img.texture;
-		objects.chat_enter_button.visible=(!my_data.blocked)&&my_data.rating>=this.chips_to_chat;
+		objects.chat_enter_button.visible=true;//(!my_data.blocked)&&my_data.rating>=this.chips_to_chat;
 
 	},
 	
