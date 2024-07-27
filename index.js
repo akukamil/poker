@@ -523,14 +523,14 @@ class player_card_class extends PIXI.Container {
 		const card_id=players_cache.players?.[this.uid]?.card_id;
 	
 		//рейтинг всегда обновляем
-		const rating=await fbs_once('players/'+this.uid+'/rating');		
+		const rating=await fbs_once('players/'+this.uid+'/PUB/rating');		
 		
 		this.set_rating(rating);
 		
 		//console.log('Текущие данные',this.uid,player_data,name,pic_url,card_id)
 		if(!player_data||!name||!pic_url||!card_id){
 					
-			player_data=await fbs_once('players/'+this.uid);
+			player_data=await fbs_once('players/'+this.uid+'/PUB');
 			console.log('загружены данные из фб',this.uid)
 			if(!player_data) return;			
 			
@@ -578,7 +578,7 @@ class player_card_class extends PIXI.Container {
 		
 		if(!game.watch_mode) return;
 		
-		const player_data=await fbs_once('players/'+this.uid);
+		const player_data=await fbs_once('players/'+this.uid+'/PUB');
 		console.log(this.uid);
 		console.log(player_data);
 	}
@@ -1677,7 +1677,7 @@ game={
 		for (let player of players){
 			const pcard=objects.pcards[i];
 			anim2.add(pcard,{y:[-100,pcard.sy]}, true, 0.1,'linear');
-			await new Promise((resolve, reject) => {setTimeout(resolve, 50);});
+			await new Promise(resolve=> {setTimeout(resolve, 50);});
 			i++;
 		}
 		
@@ -2949,7 +2949,7 @@ players_cache={
 		for (let param in params) player[param]=params[param];		
 		
 		if (!player.name||!player.pic_url){
-			let data=await fbs_once('players/'+uid);
+			let data=await fbs_once('players/'+uid+'/PUB');
 			player.name=data.name;
 			player.rating=data.rating;
 			player.pic_url=data.pic_url;
@@ -2957,7 +2957,7 @@ players_cache={
 			player.card_id=data.card_id||1;	
 		}else{
 			//рейтинг всегда обновляем
-			player.rating=await fbs_once('players/'+uid+'/rating');			
+			player.rating=await fbs_once('players/'+uid+'/PUB/rating');			
 		}
 		
 
@@ -2973,7 +2973,7 @@ players_cache={
 		if (player.texture) return;
 		
 		//если нет URL
-		if (!player.pic_url) player.pic_url=await fbs_once('players/'+uid+'/pic_url');
+		if (!player.pic_url) player.pic_url=await fbs_once('players/'+uid+'/PUB/pic_url');
 		
 		if(player.pic_url==='https://vk.com/images/camera_100.png')
 			player.pic_url='https://akukamil.github.io/domino/vk_icon.png';
@@ -3774,8 +3774,6 @@ dr={
 			this.day_reached=0;				
 
 				
-		fbs.ref('DR/'+my_data.uid+'/day_reached').set(this.day_reached);
-		fbs.ref('DR/'+my_data.uid+'/prv_auth_tm').set(cur_tm);
 		
 		fbs.ref('players/'+my_data.uid+'/PRV/DR/day_reached').set(this.day_reached);
 		fbs.ref('players/'+my_data.uid+'/PRV/DR/prv_auth_tm').set(cur_tm);
@@ -3823,12 +3821,10 @@ dr={
 		card.claimed=1;
 		card.update();
 		
-		fbs.ref('DR/'+my_data.uid+'/claimed').set(this.claimed).then(()=>{	
+		fbs.ref('DR/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed).then(()=>{	
 			game.change_my_balance(card.reward);
 			tables_menu.update_my_data();
 		})	
-
-		fbs.ref('players/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed);
 
 		this.check_any_bonuses();
 		
@@ -4187,13 +4183,10 @@ pref={
 		if (this.avatar_to_change){
 		
 			players_cache.players[my_data.uid].pic_url=this.avatar_to_change;
-			players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;
-			
-			fbs.ref(`players/${my_data.uid}/pic_url`).set(this.avatar_to_change);
+			players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;			
 			fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.avatar_to_change);
 			
 			my_data.avatar_tm=Date.now();
-			fbs.ref(`players/${my_data.uid}/avatar_tm`).set(my_data.avatar_tm);
 			fbs.ref(`players/${my_data.uid}/PRV/avatar_tm`).set(my_data.avatar_tm);
 		}	
 
@@ -4203,17 +4196,13 @@ pref={
 			my_data.name=this.name_to_change;
 			players_cache.players[my_data.uid].name=this.name_to_change			
 			my_data.nick_tm=Date.now();			
-			fbs.ref(`players/${my_data.uid}/nick_tm`).set(my_data.nick_tm);
 			fbs.ref(`players/${my_data.uid}/PRV/nick_tm`).set(my_data.nick_tm);
-			
-			fbs.ref(`players/${my_data.uid}/name`).set(my_data.name);
 			fbs.ref(`players/${my_data.uid}/PUB/name`).set(my_data.name);
 		}
 		
 		//если поменяли карточку
 		if (this.card_to_change!==my_data.card_id){			
 			my_data.card_id = this.card_to_change;
-			fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);
 			fbs.ref('players/'+my_data.uid+'/PUB/card_id').set(my_data.card_id);
 			players_cache.players[my_data.uid].card_id=my_data.card_id;
 			
@@ -4998,7 +4987,7 @@ async function init_game_env(env) {
 	anim2.add(objects.id_cont,{y:[objects.id_cont.sy, -200]}, false, 0.5,'easeInBack');
 	
 	//контроль за присутсвием
-	var connected_control = fbs.ref(".info/connected");
+	var connected_control = fbs.ref('.info/connected');
 	connected_control.on("value", (snap) => {
 	  if (snap.val() === true) {
 		connected = 1;
