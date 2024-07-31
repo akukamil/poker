@@ -3836,18 +3836,19 @@ dr={
 		if (anim2.any_on()) {
 			sound.play('locked');return};
 		
+		if (this.claimed) {
+			sound.play('locked');
+			objects.dr_info.text=['Эта награда уже получена','This reward has already been claimed'][LANG];
+			return
+		}
+				
 		if (!this.reached) {
 			sound.play('locked');
 			objects.dr_info.text=['Вы еще не достигли до этого дня','You have not reached this day yet'][LANG];
 			return
 		}
 		
-		if (this.claimed) {
-			sound.play('locked');
-			objects.dr_info.text=['Эта награда уже получена','This reward has already been claimed'][LANG];
-			return
-		}
-		
+	
 		
 		dr.take_reward(this);
 		sound.play('confirm_dialog');
