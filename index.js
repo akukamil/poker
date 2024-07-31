@@ -3831,7 +3831,7 @@ dr={
 		card.claimed=1;
 		card.update();
 		
-		fbs.ref('DR/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed).then(()=>{	
+		fbs.ref('players/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed).then(()=>{	
 			game.change_my_balance(card.reward);
 			tables_menu.update_my_data();
 		})			
