@@ -1583,7 +1583,7 @@ game={
 		my_data.rating+=amount;
 		if(my_data.rating<0)my_data.rating=0;
 		
-		fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
+		//fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
 		fbs.ref('players/' + my_data.uid + '/PUB/rating').set(my_data.rating);	
 			
 	},
@@ -4883,14 +4883,13 @@ async function init_game_env(env) {
 	let other_data = _other_data.val();
 		
 	//определяем базовые параметры
-	my_data.rating = other_data?.rating || 100;
-	my_data.games = other_data?.games || 0;
-	my_data.name=other_data?.name || my_data.name;
+	my_data.rating = other_data?.PUB?.rating || 100;
+	my_data.name=other_data?.PUB?.name || my_data.name;
 	my_data.blocked=await fbs_once('blocked/'+my_data.uid);
-	my_data.country = other_data?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
-	my_data.nick_tm = other_data?.nick_tm || 0;
-	my_data.avatar_tm = other_data?.avatar_tm || 0;
-	my_data.card_id = other_data?.card_id || 1;
+	my_data.country = other_data?.PUB?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
+	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
+	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
+	my_data.card_id = other_data?.PUB?.card_id || 1;
 		
 	//убираем страну из имени
 	if (auth2.get_country_from_name(my_data.name))
@@ -4908,8 +4907,8 @@ async function init_game_env(env) {
 	}
 	
 	//правильно определяем аватарку
-	if (other_data?.pic_url && other_data.pic_url.includes('mavatar'))
-		my_data.pic_url=other_data.pic_url
+	if (other_data?.PUB?.pic_url && other_data.PUB.pic_url.includes('mavatar'))
+		my_data.pic_url=other_data.PUB.pic_url
 	else
 		my_data.pic_url=my_data.orig_pic_url
 		
@@ -4946,12 +4945,12 @@ async function init_game_env(env) {
 	objects.id_rating.text=my_data.rating;
 	
 	//обновляем базовые данные в файербейс так могло что-то поменяться
-	fbs.ref('players/'+my_data.uid+'/name').set(my_data.name);
+	/*fbs.ref('players/'+my_data.uid+'/name').set(my_data.name);
 	fbs.ref('players/'+my_data.uid+'/country').set(my_data.country);
 	fbs.ref('players/'+my_data.uid+'/pic_url').set(my_data.pic_url);				
 	fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
 	fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);	
-	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
+	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);*/
 	
 	//новая версия
 	fbs.ref('players/'+my_data.uid+'/PUB/name').set(my_data.name);
