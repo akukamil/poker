@@ -3787,10 +3787,11 @@ dr={
 			//записываем в параметры карточки
 			card.reward=reward;
 			card.target_day=target_day;
-						
+			card.claimed=this.claimed?.[target_day]||0;
+			
 			if (this.day_reached>=target_day){		
 				card.reached=1;
-				card.claimed=this.claimed?.[target_day]||0;
+				
 			}else{
 				card.reached=0;
 			}		
