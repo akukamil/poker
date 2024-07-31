@@ -3756,7 +3756,7 @@ dr={
 	
 	async update(){
 		
-		const dr_data=await fbs_once('DR/'+my_data.uid);
+		const dr_data=await fbs_once(`players/${my_data.uid}/PRV/DR`);
 		this.claimed=dr_data?.claimed||[0,0,0];
 		const prv_auth_tm=dr_data?.prv_auth_tm||0;
 		this.day_reached=dr_data?.day_reached||0;
