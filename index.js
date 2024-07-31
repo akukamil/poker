@@ -3754,6 +3754,13 @@ dr={
 		d.setMilliseconds(0);
 	},
 	
+	all_claimed(){		
+		for (let rew of this.rewards)
+			if (!this.claimed[rew.day])
+				return false
+		return true;		
+	},
+	
 	async update(){
 		
 		const dr_data=await fbs_once(`players/${my_data.uid}/PRV/DR`);
@@ -3768,12 +3775,9 @@ dr={
 				
 		if (cur_tm-prv_auth_tm===86400000)
 			this.day_reached++;
-
 		
 		if (cur_tm-prv_auth_tm>86400000)
 			this.day_reached=0;				
-
-				
 		
 		fbs.ref('players/'+my_data.uid+'/PRV/DR/day_reached').set(this.day_reached);
 		fbs.ref('players/'+my_data.uid+'/PRV/DR/prv_auth_tm').set(cur_tm);
@@ -3790,8 +3794,7 @@ dr={
 			card.claimed=this.claimed?.[target_day]||0;
 			
 			if (this.day_reached>=target_day){		
-				card.reached=1;
-				
+				card.reached=1;				
 			}else{
 				card.reached=0;
 			}		
@@ -3803,6 +3806,13 @@ dr={
 		this.check_any_bonuses();
 		
 		objects.dr_logs_info.text=['Текущий день: ','Current day:'][LANG]+this.day_reached;
+		
+		//если дошли до конца то удаляем все чтобы начать сначала
+		if(this.all_claimed()){
+			fbs.ref(`players/${my_data.uid}/PRV/DR`).remove();			
+			objects.dr_info.text=['Вы получили все награды!','You have received all the rewards!'][LANG];
+		}
+		
 		
 	},
 	
@@ -3816,8 +3826,7 @@ dr={
 	},
 	
 	take_reward(card){		
-			
-		
+					
 		this.claimed[card.target_day]=1;			
 		card.claimed=1;
 		card.update();
@@ -3825,9 +3834,12 @@ dr={
 		fbs.ref('DR/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed).then(()=>{	
 			game.change_my_balance(card.reward);
 			tables_menu.update_my_data();
-		})	
-
+		})			
+		
 		this.check_any_bonuses();
+		
+
+
 		
 	},
 	
@@ -3847,9 +3859,7 @@ dr={
 			objects.dr_info.text=['Вы еще не достигли до этого дня','You have not reached this day yet'][LANG];
 			return
 		}
-		
-	
-		
+				
 		dr.take_reward(this);
 		sound.play('confirm_dialog');
 		
