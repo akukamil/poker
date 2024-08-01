@@ -3659,7 +3659,7 @@ lb={
 
 	async update() {
 
-		let leaders=await fbs.ref('players').orderByChild('rating').limitToLast(20).once('value');
+		let leaders=await fbs.ref('players').orderByChild('PUB/rating').limitToLast(20).once('value');
 		leaders=leaders.val();
 
 		const top={
@@ -3733,6 +3733,8 @@ dr={
 	
 	claimed:0,
 	
+	recheck_timer:0,
+	
 	activate(){
 		
 		for (let i=0;i<8;i++){
@@ -3763,6 +3765,11 @@ dr={
 	
 	async update(){
 		
+		
+		if(!this.recheck_timer)			
+			this.recheck_timer=setInterval(function(){dr.update()},10800000);			
+		
+		console.log('Обновляем бонусы')
 		const dr_data=await fbs_once(`players/${my_data.uid}/PRV/DR`);
 		this.claimed=dr_data?.claimed||[0,0,0];
 		const prv_auth_tm=dr_data?.prv_auth_tm||0;
