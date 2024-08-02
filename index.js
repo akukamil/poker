@@ -4718,7 +4718,7 @@ async function define_platform_and_language(env) {
 		return;	
 	}	
 	
-	if (s.includes('telegram')) {
+	if (s.includes('tgWebAppData')) {
 			
 		game_platform = 'TELEGRAM';	
 		LANG = await language_dialog.show();
