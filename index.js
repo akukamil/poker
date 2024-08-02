@@ -4785,7 +4785,8 @@ async function init_game_env(env) {
 
 				
 	//создаем приложение пикси и добавляем тень
-	app = new PIXI.Application({width:M_WIDTH, height:M_HEIGHT,antialias:true});
+	const opts={width:M_WIDTH, height:M_HEIGHT,antialias:true};
+	app = new PIXI.Application(opts);
 	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #999999";					
 
 				
