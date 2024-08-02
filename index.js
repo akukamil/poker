@@ -3680,7 +3680,7 @@ lb={
 		Object.keys(leaders).forEach(uid => {
 			
 			const leader_data=leaders[uid];
-			const leader_params={uid,name:leader_data.name, rating:leader_data.rating, pic_url:leader_data.pic_url};
+			const leader_params={uid,name:leader_data.PUB.name, rating:leader_data.PUB.rating, pic_url:leader_data.PUB.pic_url};
 			leaders_array.push(leader_params);
 			
 			//добавляем в кэш
