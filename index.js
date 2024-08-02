@@ -4495,7 +4495,7 @@ auth2 = {
 			
 			try {await this.load_script('https://telegram.org/js/telegram-web-app.js')} catch (e) {alert(e)};
 			const player_data=window.Telegram.WebApp.initDataUnsafe.user;
-			my_data.uid = player_data='tlgm'+player_data.id;
+			my_data.uid = 'tlgm'+player_data.id;
 			my_data.name = player_data.username || player_data.first_name || this.get_random_name(my_data.uid);
 			my_data.orig_pic_url = 'mavatar'+my_data.uid;	
 			return;
