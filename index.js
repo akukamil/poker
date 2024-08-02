@@ -1038,7 +1038,7 @@ chat={
 		}
 		
 		if (this.confiscate_next_click){			
-			fbs.ref('players/'+player_data.uid+'/PRV/admin_info').set({type:'KILL_CHIPS',tm:Date.now()});
+				
 			this.confiscate_next_click=0;
 		}
 		
@@ -3768,8 +3768,7 @@ dr={
 		
 		if(!this.recheck_timer)			
 			this.recheck_timer=setInterval(function(){dr.update()},10800000);			
-		
-		console.log('Обновляем бонусы')
+
 		const dr_data=await fbs_once(`players/${my_data.uid}/PRV/DR`);
 		this.claimed=dr_data?.claimed||[0,0,0];
 		const prv_auth_tm=dr_data?.prv_auth_tm||0;
@@ -4492,6 +4491,12 @@ auth2 = {
 			return;
 		}
 		
+		if (game_platform === 'TELEGRAM') {			
+			
+			try {await this.load_script('https://telegram.org/js/telegram-web-app.js')} catch (e) {alert(e)};	
+			return;
+		}
+		
 		
 		if (game_platform === 'UNKNOWN') {
 			
@@ -4711,6 +4716,13 @@ async function define_platform_and_language(env) {
 		game_platform = 'RUSTORE';	
 		LANG = 0;
 		return;	
+	}	
+	
+	if (s.includes('telegram')) {
+			
+		game_platform = 'TELEGRAM';	
+		LANG = await language_dialog.show();
+		return;
 	}	
 	
 	if (s.includes('crazygames')) {
