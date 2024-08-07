@@ -2950,11 +2950,11 @@ players_cache={
 		
 		if (!player.name||!player.pic_url){
 			let data=await fbs_once('players/'+uid+'/PUB');
-			player.name=data.name;
-			player.rating=data.rating;
-			player.pic_url=data.pic_url;
-			player.country=data.country||'';	
-			player.card_id=data.card_id||1;	
+			player.name=data?.name||'имя';
+			player.rating=data?.rating||100;
+			player.pic_url=data?.pic_url||'';
+			player.country=data?.country||'';	
+			player.card_id=data?.card_id||1;	
 		}else{
 			//рейтинг всегда обновляем
 			player.rating=await fbs_once('players/'+uid+'/PUB/rating');			
