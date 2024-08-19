@@ -203,23 +203,27 @@ function all_players() {
 	let max_players = document.getElementById("max_players").value * 1;
 	document.body.innerHTML = "";
 
-	firebase.database().ref("players").orderByChild("tm").limitToLast(max_players).once("value").then((snapshot) => {
+	firebase.database().ref("players").orderByChild("tm").limitToLast(max_players).once("value").then(snapshot => {
 		var data = snapshot.val();
 		
 		//меняем дату на нормальный вид
-		Object.keys(data).forEach(k=>{data[k].tm2 = new Date(data[k].tm).toLocaleString();delete data[k].pic_url});
+		for (const key in data){
+			data[key].tm2 = new Date(data[key]?.tm).toLocaleString();
+			delete data[key]?.PUB?.pic_url;
+		
+		}
 		
 		//создаем массив для последующей работы
 		let uids = Object.keys(data);
 		let _data = [];
 		for (let i = 0 ; i < uids.length ; i++) {
 					
-			_data.push([uids[i], data[uids[i]].name, data[uids[i]].rating, data[uids[i]].games, data[uids[i]].level, data[uids[i]].tm2, data[uids[i]].tm])		
+			_data.push([uids[i], data[uids[i]]?.PUB?.name, data[uids[i]]?.PUB?.rating, data[uids[i]]?.tm2, data[uids[i]]?.tm])		
 			
 		}	
 		
 		//это заголовки
-		let header = ['uid','name','rating','games','level','last_seen','ts'];
+		let header = ['uid','name','rating','last_seen','ts'];
 
 		my_table.create(_data, header, 'none', 'list');	
 	})
@@ -269,7 +273,7 @@ async function delete_old_players() {
 	data.forEach(p=>{
 		
 		//проверяем на валидность рейтинга
-		if (p[1] === undefined) {
+		if (p[1] === undefined || p) {
 			firebase.database().ref("players/"+p[0]).remove();
 			total_removed++;
 		}
