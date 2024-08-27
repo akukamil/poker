@@ -3774,6 +3774,7 @@ dr={
 	
 	async update(){
 		
+		if (my_data.days_in_game>30) return;
 		
 		if(!this.recheck_timer)			
 			this.recheck_timer=setInterval(function(){dr.update()},10800000);			
