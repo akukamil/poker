@@ -3324,6 +3324,8 @@ tables_menu={
 		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
 		objects.bcg.texture = gres.city_img.texture;
 		
+
+				
 		this.update_my_data();
 		
 		fbs.ref('table1/pending').on('value',function(data){			
@@ -3349,8 +3351,16 @@ tables_menu={
 		const tm=Date.now();
 		if (init||(tm>this.next_admin_info_check)) this.check_admin_info();
 		
-		if (!this.free_chips);
-			this.timer=setInterval(function(){tables_menu.tick()},1000);
+		if (my_data.days_in_game>30){
+			objects.free_chips_button.visible=false;
+			objects.table_dr_button.visible=false;
+			
+		}else{
+			if (!this.free_chips);
+				this.timer=setInterval(function(){tables_menu.tick()},1000);			
+		}
+		
+
 			
 		some_process.table=function(){tables_menu.process()};
 		
@@ -3985,9 +3995,6 @@ shop={
 		
 		};	
 			
-			
-		
-		
 	}
 	
 	
@@ -4759,8 +4766,6 @@ var kill_game = function() {
 
 async function init_game_env(env) {			
 
-
-
 	git_src="https://akukamil.github.io/poker/"
 	//git_src=""
 
@@ -5000,6 +5005,12 @@ async function init_game_env(env) {
 	
 	if(!other_data?.PRV?.first_log_tm)
 	fbs.ref('players/'+my_data.uid+'/PRV/first_log_tm').set(firebase.database.ServerValue.TIMESTAMP);
+	
+	//провряем сколько мы в игре
+	const tm1=await fbs_once('players/'+my_data.uid+'/tm');
+	const tm2=await fbs_once('players/'+my_data.uid+'/PRV/first_log_tm');
+	my_data.days_in_game=Math.floor((tm1-tm2)/1000/60/60/24)
+	
 	
 		
 	//устанавлием мое имя в карточки
