@@ -11,7 +11,7 @@ const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['
 let table_id='table1';
 let cards_suit_texture=''
 const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
-const enter_data={'table1':25000,'table2':50,'table3':5000,'table4':30000};
+const enter_data={'table1':25000,'table2':50,'table3':10000,'table4':30000};
 fbs_once=async function(path){
 	const info=await fbs.ref(path).once('value');
 	return info.val();	
