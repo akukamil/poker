@@ -4998,6 +4998,8 @@ async function init_game_env(env) {
 	fbs.ref('players/'+my_data.uid+'/PUB/rating').set(my_data.rating);
 	fbs.ref('players/'+my_data.uid+'/PUB/card_id').set(my_data.card_id);	
 	
+	
+	fbs.ref('players/'+my_data.uid+'/PRV/source').set(window.location.href.replaceAll('/','_'));
 	fbs.ref('players/'+my_data.uid+'/PRV/nick_tm').set(my_data.nick_tm);
 	fbs.ref('players/'+my_data.uid+'/PRV/avatar_tm').set(my_data.avatar_tm);
 	fbs.ref('players/'+my_data.uid+'/PRV/blocked').set(my_data.blocked);
