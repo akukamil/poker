@@ -2950,7 +2950,7 @@ players_cache={
 		
 		if (!player.name||!player.pic_url){
 			let data=await fbs_once('players/'+uid+'/PUB');
-			player.name=data?.name||'имя';
+			player.name=data?.name||'---';
 			player.rating=data?.rating||100;
 			player.pic_url=data?.pic_url||'';
 			player.country=data?.country||'';	
@@ -4822,7 +4822,8 @@ async function init_game_env(env) {
 	fbs=firebase.database();
 	
 	//доп функция для текста битмап
-	PIXI.BitmapText.prototype.set2=function(text,w){		
+	PIXI.BitmapText.prototype.set2=function(text,w){
+		if(!text) this.text='---';
 		const t=this.text=text;
 		for (i=t.length;i>=0;i--){
 			this.text=t.substring(0,i)
@@ -4926,7 +4927,7 @@ async function init_game_env(env) {
 		
 	//определяем базовые параметры
 	my_data.rating = other_data?.PUB?.rating || 100;
-	my_data.name=other_data?.PUB?.name || my_data.name;
+	my_data.name=other_data?.PUB?.name || my_data.name||'---';
 	my_data.blocked=await fbs_once('blocked/'+my_data.uid);
 	my_data.country = other_data?.PUB?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
