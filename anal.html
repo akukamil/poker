@@ -442,14 +442,14 @@ var my_table = {
 	
 		document.body.innerHTML = "";
 		my_table.table_element = document.createElement('table');
-		my_table.table_element.style.tableLayout='fixed';
+		my_table.table_element.style.tableLayout='auto';
 		my_table.table_element.style.width='100%';
 		my_table.table_element.style.borderCollapse='collapse';
 		
 		
 		this.data.forEach(r => {
 			var row = my_table.table_element.insertRow(-1);		
-			row.style.fontSize = '20px';
+			row.style.fontSize = 15px';
 			row.style.height = '40px';
 			r.forEach((c, i) => {		
 
