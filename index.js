@@ -11,7 +11,7 @@ const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['
 let table_id='table1';
 let cards_suit_texture=''
 const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
-const enter_data={'table1':25000,'table2':50,'table3':10000,'table4':30000};
+const enter_data={'table1':25000,'table2':50000,'table3':10000,'table4':20000};
 fbs_once=async function(path){
 	const info=await fbs.ref(path).once('value');
 	return info.val();	
@@ -320,23 +320,12 @@ class player_card_class extends PIXI.Container {
 		this.hl=new PIXI.Sprite(gres.bcg_hl.texture);
 		this.hl.width=150;
 		this.hl.height=120;
-		this.hl.visible=false;
+		this.hl.visible=false;		
 		
-		/*this.avatar_mask=new PIXI.Sprite(gres.avatar_mask.texture);
-		this.avatar_mask.width=this.avatar_mask.height=70;
-		this.avatar_mask.x=5;
-		this.avatar_mask.y=25;*/
-		
-		this.avatar_mask=new PIXI.Graphics;
-		this.avatar_mask.beginFill(0xff0000);
-		this.avatar_mask.drawCircle(40,60,25);		
-		
-		this.avatar=new PIXI.Sprite();
-		this.avatar.width=this.avatar.height=50;
+		this.avatar=new PIXI.Graphics();
+		this.avatar.w=this.avatar.h=50;
 		this.avatar.x=15;
 		this.avatar.y=35;
-		
-		this.avatar.mask=this.avatar_mask;
 		
 		this.avatar_frame=new PIXI.Sprite(gres.avatar_frame.texture);
 		this.avatar_frame.width=this.avatar_frame.height=70;
@@ -354,8 +343,7 @@ class player_card_class extends PIXI.Container {
 		this.chip_icon.y=96;
 		this.chip_icon.width=25;
 		this.chip_icon.height=25;
-		this.chip_icon.anchor.set(0.5,0.5);		
-						
+		this.chip_icon.anchor.set(0.5,0.5);								
 						
 		this.t_rating=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :24});
 		this.t_rating.x=120;
@@ -399,18 +387,31 @@ class player_card_class extends PIXI.Container {
 		this.t_won.tint=0xffffff;
 		this.t_won.anchor.set(0.5,0.5);
 		this.t_won.visible=false;	
-		
+				
 		this.added_chips=0;
 		this.hand_value=0;
 		this.in_game=0;
 		this.bank=0;
 		this.place=-1;
 		this.my_pot=0;
-		this.rating=0;
+		this.rating=0;		
+		this.anim_on=0;
+		this.sticker_tm=0;
+		this.sticker_on=0;
+		
+		this.prv_anim_tm=0;
+		this.anims=[];
+		for (let i=0;i<5;i++){
+			const spr=new PIXI.Sprite();
+			spr.anchor.set(0.5,0.5);	
+			spr.visible=false;
+			this.anims.push(spr);			
+		}
+			
 			
 		this.visible=false;
 		
-		this.addChild(this.bcg,this.hl,this.avatar_mask,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_country,this.chip_icon,this.t_rating,this.t_comb,this.t_won,this.my_card_icon);
+		this.addChild(this.bcg,this.hl,this.avatar,this.avatar_frame,this.card0,this.card1,this.name,this.t_country,this.chip_icon,this.t_rating,this.t_comb,this.t_won,this.my_card_icon,...this.anims);
 		
 	}	
 	
@@ -426,6 +427,129 @@ class player_card_class extends PIXI.Container {
 		anim2.add(this.t_won,{y:[this.t_won.y,this.t_won.sy-50],alpha:[1,0]}, false, 0.25,'linear',false);
 	}
 	
+	show_sticker(sticker){
+		
+		this.clear_anim();
+		this.sticker_tm=game_tick;
+		this.sticker_on=1;
+		
+		switch (sticker){
+			
+			case 1: //heart
+				sound.play('magic');
+				this.anim_on=1;
+				this.anim_texture=gres.heart.texture;
+			break;		
+			
+			case 2: //cat
+				sound.play('magic');
+				this.anim_on=1;
+				this.anim_texture=gres.cat.texture;
+			break;
+			
+			case 3: //stars
+				sound.play('magic');
+				this.anim_on=1;
+				this.anim_texture=gres.star.texture;
+			break;
+			
+			case 4: //tomato
+				sound.play('tomato_snd');
+				this.add_tomato_emotion();
+			break;
+			
+			case 5: //egg
+				sound.play('egg_snd');
+				this.add_egg_emotion();
+			break;
+			
+			case 6: //brick
+				sound.play('brick_snd');
+				this.add_brick_emotion();
+			break;
+			
+		}		
+		
+	}
+	
+	process_anim(){		
+	
+		if (this.sticker_on){
+			if (game_tick-this.sticker_tm>10)
+				this.clear_anim();			
+		}
+	
+				
+		if (!this.anim_on) return;
+
+		if (game_tick>this.prv_anim_tm+1.5){
+			this.prv_anim_tm=game_tick;
+			const free_anim_spr=this.anims.find(a=>a.visible===false);
+			free_anim_spr.texture=this.anim_texture;
+			free_anim_spr.x=75+irnd(-20,20);
+			free_anim_spr.y=60+irnd(-20,20);
+			free_anim_spr.tint=Math.floor((Math.random()*0.5+0.5) * 0xFFFFFF);
+			anim2.add(free_anim_spr,{alpha:[1, 0.5],scale_xy:[0.2,0.9],angle:[0,irnd(-20,20)]}, false, 4,'linear',false);
+		}		
+	}	
+	
+	add_egg_emotion(){
+		
+		const splash=this.anims[0];
+		const egg_with_shell=this.anims[1];
+		
+		splash.texture=gres.egg_splash.texture;
+		splash.x=75;
+		splash.y=60;
+		splash.tint=0xffffff;
+		
+		egg_with_shell.texture=gres.egg_with_shell.texture;
+		egg_with_shell.x=75;
+		egg_with_shell.y=70;
+		egg_with_shell.width=100;
+		egg_with_shell.height=100;
+		egg_with_shell.visible=true;
+		egg_with_shell.tint=0xffffff;
+		
+		anim2.add(splash,{alpha:[0,1],scale_xy:[0,0.666]}, true, 0.1,'linear');	
+		
+	}
+	
+	add_tomato_emotion(){			
+		
+		const splash=this.anims[0];
+		const tomato=this.anims[1];
+		
+		splash.texture=gres.tomato_splash.texture;
+		splash.x=75;
+		splash.y=60;
+		splash.tint=0xffffff;
+		
+		tomato.texture=gres.tomato.texture;
+		tomato.x=75;
+		tomato.y=60;
+		tomato.width=70;
+		tomato.height=70;
+		tomato.visible=true;
+		tomato.tint=0xffffff;
+		
+		anim2.add(splash,{alpha:[0,1],scale_xy:[0,0.666]}, true, 0.1,'linear');			
+		
+	}
+	
+	add_brick_emotion(){
+						
+		const pic=this.anims[0];
+		pic.x=75;
+		pic.y=60;
+		pic.width=150;
+		pic.height=120;
+		pic.tint=0xffffff;
+		pic.texture=gres.brick_smash.texture;
+		anim2.add(pic,{alpha:[0,1]}, true, 0.1,'linear');
+		
+	}
+		
 	show_action(event){		
 		
 		const action=event.data;
@@ -515,6 +639,16 @@ class player_card_class extends PIXI.Container {
 		}		
 	}
 	
+	clear_anim(){
+		
+		this.anim_on=0;
+		this.sticker_on=0;
+		this.anims.forEach(a=>{
+			if (a.visible)
+				anim2.add(a,{alpha:[a.alpha, 0]}, false, 0.2,'linear');	
+		});		
+	}
+	
 	async update_data(){	
 	
 		let player_data=players_cache.players?.[this.uid];
@@ -581,6 +715,8 @@ class player_card_class extends PIXI.Container {
 		const player_data=await fbs_once('players/'+this.uid+'/PUB');
 		console.log(this.uid);
 		console.log(player_data);
+		
+		stickers.activate(this);
 	}
 	
 	open_cards(){
@@ -749,53 +885,6 @@ class daily_reward_class extends PIXI.Container{
 		
 }
 
-class star_anim_class extends PIXI.Container{
-		
-	constructor(cx,cy){
-		
-		super();
-		this.next_tm=0;
-		this.cen_x=cx;
-		this.cen_y=cy;
-		this.stars=[];
-		
-		for (let i=0;i<10;i++){
-			const star=new PIXI.Sprite(gres.star_img.texture);
-			star.anchor.set(0.5,0.5);
-			star.visible=false;			
-			this.stars.push(star);	
-			this.addChild(star);
-		}		
-	}	
-	
-	add_star(){
-		
-		const star=this.stars.find(s=>!s.visible);
-		if(!star) return;
-		const ang=Math.random()*Math.PI*2;	
-		const tx=this.cen_x+60*Math.cos(ang);;
-		const ty=this.cen_y+60*Math.sin(ang);
-		const tar_scale=Math.random()*0.5+0.4;
-		star.tint=(Math.random()*0.1+0.9)*0xffffff;
-		const tm=Math.random()*2+1;
-		anim2.add(star,{x:[this.cen_x, tx],y:[this.cen_y, ty],angle:[0,120],scale_xy:[0.1,tar_scale],alpha:[1,0]}, false, tm,'linear',false);	
-		
-	}
-	
-	process(){
-		
-		//добавляем новые звезды
-		const tm=Date.now();
-		if (tm>this.next_tm){
-			this.next_tm=Date.now()+500;
-			this.add_star();
-		}			
-		
-		
-	}
-		
-}
-
 class table_icon_class extends PIXI.Container{
 	
 	constructor(id){
@@ -838,7 +927,8 @@ class table_icon_class extends PIXI.Container{
 		this.t_enter_amount.y=110;
 		this.t_enter_amount.anchor.set(0,0.5);
 		this.t_enter_amount.tint=0xD2D2D2;	
-		if (id===1)
+		
+		if (id<3)
 			this.t_enter_amount.text='<'+formatNumber(enter_data[this.table_id]);
 		else
 			this.t_enter_amount.text='>'+formatNumber(enter_data[this.table_id]);
@@ -1246,46 +1336,46 @@ confirm_dialog = {
 
 }
 
-anim2 = {
+anim2={
 		
 	c1: 1.70158,
 	c2: 1.70158 * 1.525,
 	c3: 1.70158 + 1,
 	c4: (2 * Math.PI) / 3,
 	c5: (2 * Math.PI) / 4.5,
-	empty_spr : {x:0, visible:false, ready:true, alpha:0},
+	empty_spr : {x:0,visible:false,ready:true, alpha:0},
 		
 	slot: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-		
 	
-	any_on : function() {		
+	any_on() {
+		
 		for (let s of this.slot)
 			if (s !== null&&s.block)
 				return true
-		return false;			
+		return false;		
 	},
 	
-	linear: function(x) {
+	wait(seconds){		
+		return this.add(this.empty_spr,{x:[0,1]}, false, seconds,'linear');		
+	},
+	
+	linear(x) {
 		return x
 	},
 	
-	kill_anim: function(obj) {
+	kill_anim(obj) {
 		
 		for (var i=0;i<this.slot.length;i++)
 			if (this.slot[i]!==null)
-				if (this.slot[i].obj===obj){
-					this.slot[i].p_resolve('finished');		
-					this.slot[i].obj.ready=true;					
-					this.slot[i]=null;	
-				}
-	
+				if (this.slot[i].obj===obj)
+					this.slot[i]=null;		
 	},
 	
-	easeOutBack: function(x) {
+	easeOutBack(x) {
 		return 1 + this.c3 * Math.pow(x - 1, 3) + this.c1 * Math.pow(x - 1, 2);
 	},
 	
-	easeOutElastic: function(x) {
+	easeOutElastic(x) {
 		return x === 0
 			? 0
 			: x === 1
@@ -1293,23 +1383,32 @@ anim2 = {
 			: Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * this.c4) + 1;
 	},
 	
-	easeOutSine: function(x) {
+	easeOutSine(x) {
 		return Math.sin( x * Math.PI * 0.5);
 	},
 	
-	easeOutCubic: function(x) {
+	easeOutCubic(x) {
 		return 1 - Math.pow(1 - x, 3);
 	},
 	
-	easeInBack: function(x) {
+	easeInBack(x) {
 		return this.c3 * x * x * x - this.c1 * x * x;
 	},
 	
-	easeInQuad: function(x) {
+	easeInQuad(x) {
 		return x * x;
 	},
 	
-	easeOutBounce: function(x) {
+	easeBridge(x){
+		
+		if(x<0.1)
+			return x*10;
+		if(x>0.9)
+			return (1-x)*10;
+		return 1		
+	},
+		
+	easeOutBounce(x) {
 		const n1 = 7.5625;
 		const d1 = 2.75;
 
@@ -1324,49 +1423,49 @@ anim2 = {
 		}
 	},
 	
-	easeBridge(x){
-		
-		if(x<0.1)
-			return x*10;
-		if(x>0.9)
-			return (1-x)*10;
-		return 1		
-	},
-	
-	easeInCubic: function(x) {
+	easeInCubic(x) {
 		return x * x * x;
 	},
 	
-	ease2back : function(x) {
-		return Math.sin(x*Math.PI*2);
+	ease2back(x) {
+		return Math.sin(x*Math.PI);
 	},
 	
-	easeInOutCubic: function(x) {
+	easeInOutCubic(x) {
 		
 		return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 	},
 	
-	shake : function(x) {
+	easeInOutBack(x) {
+
+		return x < 0.5
+		  ? (Math.pow(2 * x, 2) * ((this.c2 + 1) * 2 * x - this.c2)) / 2
+		  : (Math.pow(2 * x - 2, 2) * ((this.c2 + 1) * (x * 2 - 2) + this.c2) + 2) / 2;
+	},
+	
+	shake(x) {
 		
-		return Math.sin(x*Math.PI*2);
+		return Math.sin(x*2 * Math.PI);	
 		
 		
 	},	
 	
-	add : function(obj, params, vis_on_end, time, func, block=true) {
+	add (obj,params,vis_on_end,time,func,block) {
 				
 		//если уже идет анимация данного спрайта то отменяем ее
 		anim2.kill_anim(obj);
+		/*if (anim3_origin === undefined)
+			anim3.kill_anim(obj);*/
 
 		let f=0;
 		//ищем свободный слот для анимации
 		for (var i = 0; i < this.slot.length; i++) {
 
 			if (this.slot[i] === null) {
-				
+
 				obj.visible = true;
 				obj.ready = false;
-
+				
 				//добавляем дельту к параметрам и устанавливаем начальное положение
 				for (let key in params) {
 					params[key][2]=params[key][1]-params[key][0];					
@@ -1374,15 +1473,15 @@ anim2 = {
 				}
 				
 				//для возвратных функцие конечное значение равно начальному
-				if (func === 'ease2back' || func === 'shake')
+				if (func === 'ease2back'||func==='shake')
 					for (let key in params)
 						params[key][1]=params[key][0];					
 					
 				this.slot[i] = {
-					obj,
-					block,
-					params,
-					vis_on_end,
+					obj: obj,
+					block:block===undefined,
+					params: params,
+					vis_on_end: vis_on_end,
 					func: this[func].bind(anim2),
 					speed: 0.01818 / time,
 					progress: 0
@@ -1415,12 +1514,9 @@ anim2 = {
 			
 		}
 
-		
-		
-
 	},	
-		
-	process: function () {
+	
+	process () {
 		
 		for (var i = 0; i < this.slot.length; i++)
 		{
@@ -1437,7 +1533,7 @@ anim2 = {
 				if (s.progress>=0.999) {
 					for (let key in s.params)				
 						s.obj[key]=s.params[key][1];
-									
+					
 					s.obj.visible=s.vis_on_end;
 					if (s.vis_on_end === false)
 						s.obj.alpha = 1;
@@ -1449,13 +1545,225 @@ anim2 = {
 			}			
 		}
 		
+	}
+	
+}
+
+anim3={
+		
+	c1: 1.70158,
+	c2: 1.70158 * 1.525,
+	c3: 1.70158 + 1,
+	c4: (2 * Math.PI) / 3,
+	c5: (2 * Math.PI) / 4.5,
+	empty_spr : {x:0,visible:false,ready:true, alpha:0},
+			
+	slots: new Array(20).fill().map(u => ({obj:{},on:0,params_num:0,p_resolve:0,progress:0,vis_on_end:false,blocking:false,tm:0,params:new Array(10).fill().map(u => ({param:'x',s:0,f:0,d:0,func:this.linear}))})),
+	
+	any_on() {
+		
+		for (let s of this.slots)
+			if (s !== null&&s.block)
+				return true
+		return false;		
 	},
 	
-	wait : async function(time) {
+	wait(seconds){		
+		return this.add(this.empty_spr,{x:[0,1]}, false, seconds,'linear');		
+	},
+	
+	linear(x) {
+		return x
+	},
+	
+	kill_anim(obj) {
 		
-		await this.add(this.empty_spr,{x:[0, 1]}, false, time,'linear');	
+		for (var i=0;i<this.slots.length;i++){
+			const slot=this.slots[i];
+			if (slot.on&&slot.obj===obj){
+				slot.p_resolve(2);
+				slot.on=0;				
+			}
+		}	
+	},
+	
+	easeOutBack(x) {
+		return 1 + this.c3 * Math.pow(x - 1, 3) + this.c1 * Math.pow(x - 1, 2);
+	},
+	
+	easeOutElastic(x) {
+		return x === 0
+			? 0
+			: x === 1
+			? 1
+			: Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * this.c4) + 1;
+	},
+	
+	easeOutSine(x) {
+		return Math.sin( x * Math.PI * 0.5);
+	},
+	
+	easeOutCubic(x) {
+		return 1 - Math.pow(1 - x, 3);
+	},
+	
+	easeInBack(x) {
+		return this.c3 * x * x * x - this.c1 * x * x;
+	},
+	
+	easeInQuad(x) {
+		return x * x;
+	},
+	
+	easeOutBounce(x) {
+		const n1 = 7.5625;
+		const d1 = 2.75;
+
+		if (x < 1 / d1) {
+			return n1 * x * x;
+		} else if (x < 2 / d1) {
+			return n1 * (x -= 1.5 / d1) * x + 0.75;
+		} else if (x < 2.5 / d1) {
+			return n1 * (x -= 2.25 / d1) * x + 0.9375;
+		} else {
+			return n1 * (x -= 2.625 / d1) * x + 0.984375;
+		}
+	},
+	
+	easeInCubic(x) {
+		return x * x * x;
+	},
+	
+	ease2back(x) {
+		return Math.sin(x*Math.PI);
+	},
+	
+	easeInOutCubic(x) {
 		
-	}
+		return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+	},
+	
+	easeInOutBack(x) {
+
+		return x < 0.5
+		  ? (Math.pow(2 * x, 2) * ((this.c2 + 1) * 2 * x - this.c2)) / 2
+		  : (Math.pow(2 * x - 2, 2) * ((this.c2 + 1) * (x * 2 - 2) + this.c2) + 2) / 2;
+	},
+	
+	shake(x) {
+		
+		return Math.sin(x*2 * Math.PI);	
+		
+		
+	},	
+	
+	add (obj, inp_params, vis_on_end, time, blocking) {
+				
+		//если уже идет анимация данного спрайта то отменяем ее
+		anim3.kill_anim(obj);
+
+
+		let found=false;
+		//ищем свободный слот для анимации
+		for (let i = 0; i < this.slots.length; i++) {
+
+			const slot=this.slots[i];
+			if (slot.on) continue;
+			
+			found=true;
+			
+			obj.visible = true;
+			obj.ready = false;
+					
+			//заносим базовые параметры слота
+			slot.on=1;
+			slot.params_num=Object.keys(inp_params).length;			
+			slot.obj=obj;
+			slot.vis_on_end=vis_on_end;
+			slot.blocking=blocking||false;
+			slot.speed=0.01818 / time;
+			slot.progress=0;			
+			
+			//добавляем дельту к параметрам и устанавливаем начальное положение
+			let ind=0;
+			for (const param in inp_params) {
+				
+				const s=inp_params[param][0];
+				let f=inp_params[param][1];
+				const d=f-s;					
+
+								
+				//для возвратных функцие конечное значение равно начальному что в конце правильные значения присвоить
+				const func=anim3[inp_params[param][2]];	
+				if (func === anim3.ease2back||func===anim3.shake) f=s;				
+				
+				slot.params[ind].param=param;
+				slot.params[ind].s=s;
+				slot.params[ind].f=f;
+				slot.params[ind].d=d;
+				slot.params[ind].func=func;
+				ind++;
+
+				//фиксируем начальное значение параметра
+				obj[param]=s;
+			}
+			
+			return new Promise(resolve=>{
+				slot.p_resolve = resolve;	  		  
+			});		
+		}
+
+		console.log("Кончились слоты анимации");	
+		
+		//сразу записываем конечные параметры анимации
+		for (let param in params)
+			obj[param]=params[param][1];
+		obj.visible=vis_on_end;
+		obj.alpha = 1;
+		obj.ready=true;
+
+
+	},	
+	
+	process () {
+		
+		for (var i = 0; i < this.slots.length; i++) {
+			const slot=this.slots[i];
+			const obj=slot.obj;
+			if (slot.on) {
+				
+				slot.progress+=slot.speed;		
+				
+				for (let i=0;i<slot.params_num;i++){
+					
+					const param_data=slot.params[i];
+					const param=param_data.param;
+					const s=param_data.s;
+					const d=param_data.d;
+					const func=param_data.func;
+					slot.obj[param]=s+d*func(slot.progress);					
+				}
+				
+				//если анимация завершилась то удаляем слот
+				if (slot.progress>=0.999) {
+					
+					//заносим конечные параметры
+					for (let i=0;i<slot.params_num;i++){
+						const param=slot.params[i].param;
+						const f=slot.params[i].f;
+						slot.obj[param]=f;
+					}
+					
+					slot.obj.visible=slot.vis_on_end;
+					slot.obj.alpha = 1*slot.vis_on_end;
+					
+					slot.obj.ready=true;
+					slot.p_resolve(1);
+					slot.on = 0;
+				}
+			}			
+		}		
+	}	
 }
 
 sound={	
@@ -1573,11 +1881,108 @@ game={
 
 			if(event.type==='new_round')
 				game.new_round_event(event);	
+			
+			if(event.type==='sticker')
+				game.add_sticker(event);	
 
 		});
+		
+		
 				
 	},
 	
+	async add_sticker(data){
+		
+		const s_card=this.uid_to_pcards[data.s_uid]||objects.pcards[0];
+		const t_card=this.uid_to_pcards[data.t_uid];
+		
+		//если карточки не статичны
+		if (!s_card.visible||!t_card.visible||!s_card.ready||!t_card.ready) return;
+		
+		const sticker=data.sticker;
+		
+		const spr=objects.stickers.find(e=>e.visible===false);
+				
+		switch (sticker){
+			
+			case 1://heart
+				spr.texture=gres.heart.texture;
+				spr.tx=t_card.x+75;
+				spr.ty=t_card.y+60;
+			break;
+			
+			case 2://cat
+				spr.texture=gres.cat.texture;
+				spr.tx=t_card.x+75;
+				spr.ty=t_card.y+60;
+			break;
+			
+			case 3://star
+				spr.texture=gres.star.texture;
+				spr.tx=t_card.x+75;
+				spr.ty=t_card.y+60;
+			break;
+			
+			case 4://tomato
+				spr.texture=gres.tomato.texture;
+				spr.width=70;
+				spr.height=70;
+				spr.tx=t_card.x+75;
+				spr.ty=t_card.y+60;
+			break;
+			
+			case 5://egg
+				spr.texture=gres.egg.texture;
+				spr.width=80;
+				spr.height=80;
+				spr.tx=t_card.x+70;
+				spr.ty=t_card.y+68;
+			break;
+			
+			case 6://brick
+				spr.texture=gres.brick.texture;
+				spr.width=80;
+				spr.height=80;
+				spr.tx=t_card.x+75;
+				spr.ty=t_card.y+60;
+
+			break;
+		}
+		
+		
+		sound.play('sticker');
+		
+		//подсветка на карточке инициатора
+		const orb_spr=s_card.anims.find(e=>e.visible===false);
+		orb_spr.texture=gres.orb.texture;
+		orb_spr.x=75;
+		orb_spr.y=60;
+		orb_spr.width=100;
+		orb_spr.height=100;	
+		orb_spr.alpha=1;
+		
+
+		
+		//целевое положение
+		const sx=s_card.x+75;
+		const sy=s_card.y+60;
+		const tm=Math.abs(s_card.x-t_card.x)/1200+0.15;
+		
+		//двигаем на целевую карточку
+		spr.x=sx;
+		spr.y=sy;
+		spr.alpha=1;
+
+		const cur_scale_xy=spr.scale_xy;		
+		anim3.add(spr,{scale_xy:[cur_scale_xy,cur_scale_xy*1.75,'ease2back'],angle:[0,-10,'ease2back']}, true, 0.75);
+		await anim3.add(orb_spr,{angle:[0,400,'linear'],scale_xy:[0.666,1.2,'ease2back']}, false, 0.75);
+		await anim3.add(spr,{x:[sx, spr.tx,'linear'],y:[sy,sy+50,'ease2back'],angle:[0,720,'linear'],scale_xy:[cur_scale_xy,cur_scale_xy*2,'ease2back']}, false, tm,'linear');	
+		
+		
+		t_card.show_sticker(sticker);
+				
+	},
+		
 	change_my_balance(amount){
 		
 		my_data.rating+=amount;
@@ -1648,7 +2053,7 @@ game={
 		if(!players) return;
 		
 		//сначала убираем все карточки
-		objects.pcards.forEach(c=>{c.visible=false;c.uid='xxx'});
+		objects.pcards.forEach(c=>{c.visible=false;c.uid='xxx';c.clear_anim()});
 		
 		this.uid_to_pcards={};
 		
@@ -1687,7 +2092,7 @@ game={
 	async load_avatar (params = {uid : 0, tar_obj : 0}) {
 		
 		await players_cache.update_avatar(params.uid);
-		params.tar_obj.texture=players_cache.players[params.uid].texture;
+		params.tar_obj.set_texture(players_cache.players[params.uid].texture);
 		
 	},
 			
@@ -1811,6 +2216,12 @@ game={
 		}
 		this.prv_time=cur_time;*/
 		
+		//обработка анимаций
+		for (let i=0;i<objects.pcards.length;i++){
+			const card=objects.pcards[i];
+			if (card.visible)
+				card.process_anim();			
+		}
 		
 		//обработка таймера
 		if (objects.timer_bar.visible){
@@ -1820,7 +2231,6 @@ game={
 				objects.timer_bar.x=objects.timer_bar.sx-objects.timer_bar.width*0.5;			
 			}			
 		}
-
 		
 		if (objects.table_status_cont.visible){			
 			objects.table_status_circle.rotation+=0.2;				
@@ -1855,7 +2265,7 @@ game={
 			objects.sound_switch_button.texture=gres.no_sound_icon.texture;
 		
 	},
-	
+			
 	async send_message_down(){		
 		
 		if(anim2.any_on()||!this.iam_in_game){
@@ -2261,6 +2671,7 @@ game={
 		objects.table_chat_cont.visible=false;
 		objects.cen_cards_cont.visible=false;		
 		objects.exit_game_button.visible=false;
+		objects.stickers_cont.visible=false;
 		objects.timer_bar.visible=false;
 		some_process.timer_bar=function(){};
 		clearInterval(this.pending_timer);
@@ -2270,6 +2681,123 @@ game={
 	}
 		
 }
+
+stickers={	
+	
+	stickers_data:[
+		[250,260,350,330,'heart',1],
+		[350,260,450,330,'thumbup',2],
+		[450,260,550,330,'star',3],
+		[250,330,350,400,'tomato',4],
+		[350,330,450,400,'egg',5],
+		[450,330,550,400,'brick',6]
+	],
+	
+	cur_card:0,
+	
+	activate(card){
+		
+		if (!game.iam_in_game) return
+		
+		
+		if (anim2.any_on()||anim3.any_on()||objects.stickers_cont.visible) {
+			sound.play('locked');
+			return;			
+		}
+		
+		sound.play('click');
+		
+		
+		anim2.add(objects.stickers_cont,{y:[-450, objects.stickers_cont.sy]}, true, 0.25,'linear');	
+		
+		this.cur_card=card;
+		const p_data=players_cache.players[card.uid];
+		
+		objects.stickers_avatar.set_texture(p_data.texture);
+		objects.t_stickers_name.text=p_data.name;
+		objects.t_stickers_rating.text=card.t_rating.text;
+		objects.stickers_hl.visible=false;
+		
+		objects.t_stickers_left.text=['Осталось стикеров: ','Stickers left: '][LANG]+my_data.stickers_num;
+		
+	},
+	
+	change_stickers_num(delta){
+		
+		my_data.stickers_num+=delta;
+		objects.t_stickers_left.text='Осталось стикеров: '+my_data.stickers_num;
+		fbs.ref('players/'+my_data.uid+'/PRV/stickers_num').set(my_data.stickers_num);
+		
+	},
+	
+	close_btn_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return;			
+		}
+		this.close();
+		
+	},
+	
+	pointerdown(e){
+		
+		if (!my_data.stickers_num) {
+			sound.play('locked');
+			anim2.add(objects.t_stickers_left,{x:[objects.t_stickers_left.x, objects.t_stickers_left.x+10]}, true, 0.15,'shake');	
+			return;
+		}
+		
+		if (anim2.any_on()||anim3.any_on()) {
+			sound.play('locked');
+			return;
+		}
+		
+		if (this.cur_card.uid===my_data.uid){
+			objects.t_stickers_left.text=['Нельзя отправить самому себе','Can not send to yourself'][LANG];
+			anim2.add(objects.t_stickers_left,{x:[objects.t_stickers_left.x, objects.t_stickers_left.x+10]}, true, 0.15,'shake');	
+			return;
+		}
+		
+		
+		
+		//координаты указателя
+		const mx = e.data.global.x/app.stage.scale.x;
+		const my = e.data.global.y/app.stage.scale.y;
+	
+		let sticker_data=0;
+		for (let p of this.stickers_data){			
+			if (mx>p[0]&&my>p[1]&&mx<p[2]&&my<p[3]){
+				sticker_data=p;
+				break;
+			}			
+		}
+		
+		if(!sticker_data) return;
+		
+		//подсвета
+		objects.stickers_hl.x=sticker_data[0]-objects.stickers_cont.sx-10;
+		objects.stickers_hl.y=sticker_data[1]-objects.stickers_cont.sy-10;
+		objects.stickers_hl.visible=true;
+
+		fbs.ref(table_id+'/events').set({s_uid:my_data.uid,t_uid:this.cur_card.uid,type:'sticker',tm:Date.now(),sticker:sticker_data[5]});	
+		
+		
+		this.change_stickers_num(-1);
+		
+		//this.cur_card.show_emotion(sticker);
+		this.close();
+	},
+	
+	close(){
+		
+		sound.play('close');
+		anim2.add(objects.stickers_cont,{y:[objects.stickers_cont.y, 450]}, false, 0.25,'linear');	
+		
+	}	
+	
+	
+},
 
 hand_check = {
 	
@@ -2922,23 +3450,23 @@ make_text = function (obj, text, max_width) {
 players_cache={
 	
 	players:{},
-	
-	async load_pic(uid,pic_url){
+		
+	async my_texture_from(pic_url){
 		
 		//если это мультиаватар
-		if(pic_url.includes('mavatar'))
-			return PIXI.Texture.from(multiavatar(pic_url));
-		
-		const loader=new PIXI.Loader;
-		loader.add(uid, pic_url,{loadType: PIXI.LoaderResource.LOAD_TYPE.IMAGE, timeout: 5000});	
-		await new Promise(resolve=> loader.load(resolve))		
-		return loader.resources[uid].texture;
+		if(pic_url.includes('mavatar')) pic_url=multiavatar(pic_url);
+	
+		try{
+			const texture = await PIXI.Texture.fromURL(pic_url);				
+			return texture;
+		}catch(er){
+			return PIXI.Texture.WHITE;
+		}
+
 	},
 	
 	async update(uid,params={}){
 				
-		if(uid==='BOT') return;
-		
 		//если игрока нет в кэше то создаем его
 		if (!this.players[uid]) this.players[uid]={}
 							
@@ -2946,22 +3474,18 @@ players_cache={
 		const player=this.players[uid];
 		
 		//заполняем параметры которые дали
-		for (let param in params) player[param]=params[param];		
+		for (let param in params) player[param]=params[param];
 		
-		if (!player.name||!player.pic_url){
-			let data=await fbs_once('players/'+uid+'/PUB');
-			player.name=data?.name||'---';
-			player.rating=data?.rating||100;
-			player.pic_url=data?.pic_url||'';
-			player.country=data?.country||'';	
-			player.card_id=data?.card_id||1;	
-		}else{
-			//рейтинг всегда обновляем
-			player.rating=await fbs_once('players/'+uid+'/PUB/rating');			
+		if (!player.name) player.name=await fbs_once('players/'+uid+'/PUB/name');
+		if (!player.rating) player.rating=await fbs_once('players/'+uid+'/PUB/rating');
+	
+		//извлекаем страну если она есть в отдельную категорию и из имени убираем
+		const country =auth2.get_country_from_name(player.name);
+		if (country){			
+			player.country=country;
+			player.name=player.name.slice(0, -4);
 		}
-		
-
-
+	
 	},
 	
 	async update_avatar(uid){
@@ -2979,9 +3503,26 @@ players_cache={
 			player.pic_url='https://akukamil.github.io/domino/vk_icon.png';
 				
 		//загружаем и записываем текстуру
-		if (player.pic_url) player.texture=await this.load_pic(uid, player.pic_url);
+		if (player.pic_url) player.texture=await this.my_texture_from(player.pic_url);		
 		
-	}	
+	},
+	
+	async update_avatar_forced(uid, pic_url){
+		
+		const player=this.players[uid];
+		if(!player) alert('Не загружены базовые параметры '+uid);
+						
+		if(pic_url==='https://vk.com/images/camera_100.png')
+			pic_url='https://akukamil.github.io/domino/vk_icon.png';
+				
+		//сохраняем
+		player.pic_url=pic_url;
+		
+		//загружаем и записываем текстуру
+		if (player.pic_url) player.texture=await this.my_texture_from(player.pic_url);	
+		
+	},
+	
 }
 
 social_dialog = {
@@ -3323,9 +3864,7 @@ tables_menu={
 		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
 		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
 		objects.bcg.texture = gres.city_img.texture;
-		
-
-				
+						
 		this.update_my_data();
 		
 		fbs.ref('table1/pending').on('value',function(data){			
@@ -3368,7 +3907,6 @@ tables_menu={
 	
 	process(){
 		
-		objects.star_anim.process();
 		if (dr.have_bonus&&objects.table_dr_button_hl.ready)
 			anim2.add(objects.table_dr_button_hl,{scale_xy:[0.666,1.2],alpha:[0.5,0]}, false, 1,'linear',false);
 
@@ -3474,7 +4012,7 @@ tables_menu={
 		
 		//проверка фишек
 		const enter_amount=enter_data[table];
-		if (table==='table1'){
+		if (table==='table1'||table==='table2'){
 			if (my_data.rating>=enter_amount&&!game.watch_mode){
 				objects.table_menu_info.text=[`Нужно не более ${enter_amount} фишек для этого стола.`,`Need no more than ${enter_amount} chips for this table.`][LANG];
 				return;
@@ -3564,7 +4102,7 @@ tables_menu={
 		//обновляем инфу
 		objects.player_name.set2(my_data.name,130);
 		objects.player_chips.text=my_data.rating;
-		objects.player_avatar.texture=players_cache.players[my_data.uid].texture;
+		objects.player_avatar.set_texture(players_cache.players[my_data.uid].texture);
 		objects.card_pic.name.set2(my_data.name,110);
 		
 		objects.card_pic.set_rating(my_data.rating);
@@ -4143,7 +4681,7 @@ pref={
 		this.card_to_change+=dir;
 		
 		if (this.card_to_change<1) this.card_to_change=1;
-		if (this.card_to_change>11) this.card_to_change=11;
+		if (this.card_to_change>10) this.card_to_change=10;
 		objects.card_pic.bcg.texture=gres['card'+this.card_to_change].texture;
 		
 		//проверяем нужно ли предъявить счет за изменения карточки
@@ -4611,6 +5149,12 @@ main_loader={
 		game_res.add('inst_msg',git_src+'sounds/inst_msg.mp3');
 		game_res.add('fold',git_src+'sounds/fold.mp3');
 		game_res.add('money',git_src+'sounds/money.mp3');
+		game_res.add('sticker',git_src+'sounds/sticker.mp3');
+		game_res.add('magic',git_src+'sounds/magic.mp3');
+		
+		game_res.add('egg_snd',git_src+'sounds/egg.mp3');
+		game_res.add('brick_snd',git_src+'sounds/brick.mp3');
+		game_res.add('tomato_snd',git_src+'sounds/tomato.mp3');
 		
 		//добавляем из листа загрузки
 		for (var i = 0; i < load_list.length; i++)
@@ -4831,6 +5375,31 @@ async function init_game_env(env) {
 		}	
 	}
 	
+	//доп функция для применения текстуры к графу
+	PIXI.Graphics.prototype.set_texture=function(texture){		
+	
+		if(!texture) return;
+		// Get the texture's original dimensions
+		const textureWidth = texture.baseTexture.width;
+		const textureHeight = texture.baseTexture.height;
+
+		// Calculate the scale to fit the texture to the circle's size
+		const scaleX = this.w / textureWidth;
+		const scaleY = this.h / textureHeight;
+
+		// Create a new matrix for the texture
+		const matrix = new PIXI.Matrix();
+
+		// Scale and translate the matrix to fit the circle
+		matrix.scale(scaleX, scaleY);
+		const radius=this.w*0.5;
+		this.clear();
+		this.beginTextureFill({texture,matrix});		
+		this.drawCircle(radius, radius, radius);		
+		this.endFill();		
+		
+	}
+		
     //создаем спрайты и массивы спрайтов и запускаем первую часть кода
     for (var i = 0; i < load_list.length; i++) {
         const obj_class = load_list[i].class;
@@ -4897,7 +5466,7 @@ async function init_game_env(env) {
     }
 
 	//запускаем главный цикл
-	main_loop();
+	main_loop.run();
 
 	//анимация лупы
 	anim2.add(objects.id_cont,{y:[-200,objects.id_cont.sy]}, true, 0.5,'easeOutBack');
@@ -4933,6 +5502,7 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
 	my_data.card_id = other_data?.PUB?.card_id || 1;
+	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
 		
 	//убираем страну из имени
 	if (auth2.get_country_from_name(my_data.name))
@@ -4944,6 +5514,7 @@ async function init_game_env(env) {
 	//если новый игрок
 	if (!other_data){
 		my_data.rating=5000;
+		my_data.stickers_num=10;
 	}
 	
 	//правильно определяем аватарку
@@ -4960,7 +5531,7 @@ async function init_game_env(env) {
 	app_start_time=Date.now();
 
 	//устанавливаем фотки в попап
-	objects.id_avatar.texture=players_cache.players[my_data.uid].texture;
+	objects.id_avatar.set_texture(players_cache.players[my_data.uid].texture);
 	objects.id_name.set2(my_data.name,150);	
 	
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
@@ -5004,6 +5575,7 @@ async function init_game_env(env) {
 	fbs.ref('players/'+my_data.uid+'/PRV/nick_tm').set(my_data.nick_tm);
 	fbs.ref('players/'+my_data.uid+'/PRV/avatar_tm').set(my_data.avatar_tm);
 	fbs.ref('players/'+my_data.uid+'/PRV/blocked').set(my_data.blocked);
+	fbs.ref('players/'+my_data.uid+'/PRV/stickers_num').set(my_data.stickers_num);
 	fbs.ref('players/'+my_data.uid+'/PRV/session_tm').set(firebase.database.ServerValue.TIMESTAMP);
 	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
 	
@@ -5063,17 +5635,34 @@ async function init_game_env(env) {
 	
 }
 
-function main_loop() {
-
-
-	game_tick+=0.016666666;
-	anim2.process();
+main_loop={	
 	
-	//обрабатываем минипроцессы
-	for (let key in some_process)
-		some_process[key]();
+	prv_time:0,
+	delta:1,
+	
+	run(){
 		
-	requestAnimationFrame(main_loop);
-	
+		//пересчитываем параметры фрейма
+		const tm=performance.now();
+		game_tick=tm*0.001;
+		if (!this.prv_time) this.prv_time=tm-16.666;
+		const frame_time=Math.min(100,tm-this.prv_time);
+		main_loop.delta=frame_time/16.66666;
+		this.prv_time=tm;							
+
+		//обрабатываем мини процессы
+		for (let key in some_process) some_process[key](main_loop.delta);	
+		
+		//обрабатываем анимации
+		anim2.process(main_loop.delta);		
+		anim3.process(main_loop.delta);	
+		
+		//отображаем сцену
+		app.renderer.render(app.stage);		
+		
+		//вызываем следующий фрейм
+		requestAnimationFrame(main_loop.run);			
+
+	}	
 	
 }
