@@ -710,13 +710,14 @@ class player_card_class extends PIXI.Container {
 	
 	async card_down(){
 		
-		if(!game.watch_mode) return;
+		stickers.activate(this);		
 		
-		const player_data=await fbs_once('players/'+this.uid+'/PUB');
-		console.log(this.uid);
-		console.log(player_data);
-		
-		stickers.activate(this);
+		if (game.watch_mode){
+			const player_data=await fbs_once('players/'+this.uid+'/PUB');
+			console.log(this.uid);
+			console.log(player_data);			
+		} 	
+
 	}
 	
 	open_cards(){
