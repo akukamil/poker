@@ -4104,6 +4104,7 @@ tables_menu={
 		//обновляем инфу
 		objects.player_name.set2(my_data.name,130);
 		objects.player_chips.text=my_data.rating;
+		objects.player_stickers.text=my_data.stickers_num;
 		objects.player_avatar.set_texture(players_cache.players[my_data.uid].texture);
 		objects.card_pic.name.set2(my_data.name,110);
 		
