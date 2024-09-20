@@ -3855,6 +3855,7 @@ tables_menu={
 		
 	activate(init){
 				
+			
 		anim2.add(objects.table1_cont,{x:[-50,objects.table1_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table2_cont,{x:[-50,objects.table2_cont.sx]}, true, 0.25,'linear');
 		anim2.add(objects.table3_cont,{x:[-50,objects.table3_cont.sx]}, true, 0.25,'linear');
@@ -3900,7 +3901,7 @@ tables_menu={
 				this.timer=setInterval(function(){tables_menu.tick()},1000);			
 		}
 		
-
+		objects.shop_button.visible=false;
 			
 		some_process.table=function(){tables_menu.process()};
 		
@@ -4442,12 +4443,13 @@ dr={
 shop={
 	
 	data:[
-		{x:53,y:218,w:100,h:100,id:'chips1000',amount:1000},
-		{x:170,y:218,w:100,h:100,id:'chips5000',amount:5000},
-		{x:287,y:218,w:100,h:100,id:'chips10000',amount:10000},
-		{x:404,y:218,w:100,h:100,id:'chips50000',amount:50000},
-		{x:521,y:218,w:100,h:100,id:'chips100000',amount:100000},
-		{x:638,y:218,w:100,h:100,id:'chips500000',amount:500000},
+		{x:50,y:250,w:80,h:80,name:'chips',id:'chips1000',amount:1000},
+		{x:150,y:250,w:80,h:80,name:'chips',id:'chips5000',amount:5000},
+		{x:250,y:250,w:80,h:80,name:'chips',id:'chips10000',amount:10000},
+		{x:350,y:250,w:80,h:80,name:'chips',id:'chips50000',amount:50000},
+		{x:480,y:250,w:80,h:80,name:'stickers',id:'stickers20',amount:20},
+		{x:570,y:250,w:80,h:80,name:'stickers',id:'stickers50',amount:50},
+		{x:660,y:250,w:80,h:80,name:'stickers',id:'stickers100',amount:100},
 	],
 	
 	payments:0,
@@ -4504,19 +4506,34 @@ shop={
 		
 		if(!item) return;
 		
-		objects.shop_sel_hl.x=item.x-20;
-		objects.shop_sel_hl.y=item.y-20;
+		objects.shop_sel_hl.x=item.x-30;
+		objects.shop_sel_hl.y=item.y-30;
 		anim2.add(objects.shop_sel_hl,{alpha:[1, 0]}, true, 0.5,'linear');	
 			
 		if (game_platform==='YANDEX') {
 			
-			this.payments.purchase({ id: item.id }).then(purchase => {
-				objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
-				game.change_my_balance(item.amount);
-				tables_menu.update_my_data();
-				sound.play('confirm_dialog');
-
+			this.payments.purchase({id: item.id }).then(purchase => {
 				
+				//если купили фишки
+				if (item.name==='chips'){
+					objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
+					game.change_my_balance(item.amount);	
+					tables_menu.update_my_data();
+					
+					//дополнительный бонус за покупку множества фишек
+					if (item.id==='chips50000')
+						stickers.change_stickers_num(100);
+
+				}
+				
+				//если купили стикеры
+				if (id.name==='stickers'){
+					objects.shop_info.text=[`Вы купили ${item.amount} стикеров!`,`you bought ${item.amount} stickers!`][LANG];
+					stickers.change_stickers_num(item.amount);						
+				}
+								
+				
+				sound.play('confirm_dialog');				
 			}).catch(err => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
 			})			
@@ -4525,10 +4542,34 @@ shop={
 		
 		if (game_platform==='VK') {
 			
-			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: item.id}).then((data) =>{
-				objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
-				game.change_my_balance(item.amount)
-				tables_menu.update_my_data();
+			
+			
+			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: item.id}).then(data =>{
+				
+				//если купили фишки
+				if (item.name==='chips'){
+					
+					objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
+					game.change_my_balance(item.amount);	
+					tables_menu.update_my_data();
+					
+					//дополнительный бонус за покупку множества фишек
+					if (item.id==='chips50000')
+						stickers.change_stickers_num(100);					
+					
+				}
+				
+				//если купили стикеры
+				if (id.name==='stickers'){
+					
+					objects.shop_info.text=[`Вы купили ${item.amount} стикеров!`,`you bought ${item.amount} stickers!`][LANG];
+					stickers.change_stickers_num(item.amount);		
+					
+				}
+				
+
+				
+				
 			}).catch((err) => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
 			});			
