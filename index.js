@@ -4531,19 +4531,17 @@ shop={
 				if (item.name==='stickers'){
 					objects.shop_info.text=[`Вы купили ${item.amount} стикеров!`,`you bought ${item.amount} stickers!`][LANG];
 					stickers.change_stickers_num(item.amount);						
-				}
-								
+				}								
 				
-				sound.play('confirm_dialog');				
+				sound.play('confirm_dialog');
+				
 			}).catch(err => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
 			})			
 		};	
 		
 		
-		if (game_platform==='VK') {
-			
-			
+		if (game_platform==='VK') {			
 			
 			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: item.id}).then(data =>{
 				
@@ -4566,7 +4564,9 @@ shop={
 					objects.shop_info.text=[`Вы купили ${item.amount} стикеров!`,`you bought ${item.amount} stickers!`][LANG];
 					stickers.change_stickers_num(item.amount);	
 					
-				}				
+				}	
+				
+				sound.play('confirm_dialog');
 				
 			}).catch((err) => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
