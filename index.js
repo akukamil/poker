@@ -4527,7 +4527,7 @@ shop={
 				}
 				
 				//если купили стикеры
-				if (id.name==='stickers'){
+				if (item.name==='stickers'){
 					objects.shop_info.text=[`Вы купили ${item.amount} стикеров!`,`you bought ${item.amount} stickers!`][LANG];
 					stickers.change_stickers_num(item.amount);						
 				}
@@ -4555,20 +4555,17 @@ shop={
 					
 					//дополнительный бонус за покупку множества фишек
 					if (item.id==='chips50000')
-						stickers.change_stickers_num(100);					
+						stickers.change_stickers_num(100);	
 					
 				}
 				
 				//если купили стикеры
-				if (id.name==='stickers'){
-					
+				if (item.name==='stickers'){	
+				
 					objects.shop_info.text=[`Вы купили ${item.amount} стикеров!`,`you bought ${item.amount} stickers!`][LANG];
-					stickers.change_stickers_num(item.amount);		
+					stickers.change_stickers_num(item.amount);	
 					
-				}
-				
-
-				
+				}				
 				
 			}).catch((err) => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
