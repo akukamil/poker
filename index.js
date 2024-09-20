@@ -3901,7 +3901,7 @@ tables_menu={
 				this.timer=setInterval(function(){tables_menu.tick()},1000);			
 		}
 		
-		objects.shop_button.visible=false;
+		//objects.shop_button.visible=false;
 			
 		some_process.table=function(){tables_menu.process()};
 		
