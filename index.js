@@ -4083,6 +4083,19 @@ tables_menu={
 		
 	},
 	
+	pref_btn_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
+		sound.play('click');
+		this.close();
+		pref.activate();
+		
+	},
+	
 	shop_button_down(){
 		
 		if (anim2.any_on()) {
@@ -4629,20 +4642,18 @@ pref={
 	cards_prices:[0,0,1000,2000,5000,30000,50000,100000,200000,500000,700000,1000000],
 	change_price:{avatar:0,name:0,card:0},
 	name_to_change:0,
-	avatar_to_change:0,
 	card_to_change:0,
+	tex_loading:0,
+	avatar_switch_center:0,
+	avatar_swtich_cur:0,
+	
 	
 	activate(){
 		
-		if(anim2.any_on()||objects.pref_cont.visible){
-			sound.play('locked');
-			return;			
-		}
 		
 		this.add_info(['Менять аватар и имя можно 1 раз в 30 дней!','You can change name and avatar once per month'][LANG]);
 		
-		sound.play('click');
-		anim2.add(objects.pref_cont,{scale_x:[0,1]}, true, 0.2,'linear');
+		anim2.add(objects.pref_cont,{alpha:[0,1]}, true, 0.2,'linear');
 		
 		this.avatar_changed=0;
 		objects.pref_cont.visible=true;
@@ -4658,6 +4669,8 @@ pref={
 		this.name_to_change=0;
 		this.avatar_to_change=0;
 		this.update_prices();
+		
+		this.avatar_switch_center=this.avatar_swtich_cur=irnd(9999,999999);
 		
 	},
 	
@@ -4700,21 +4713,44 @@ pref={
 	async reset_avatar(){
 		
 		this.add_info(['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG]);		
-		this.avatar_to_change=my_data.orig_pic_url;		
-		objects.card_pic.avatar.texture=await players_cache.load_pic(my_data.uid,my_data.orig_pic_url);		
+		this.avatar_changed=1;	
+		this.cur_pic_url=my_data.orig_pic_url;
+		
+		this.tex_loading=1;
+		const t=await players_cache.my_texture_from(my_data.orig_pic_url);
+		this.tex_loading=0;
+		
+		objects.card_pic.avatar.set_texture(t);		
 		this.change_price.avatar=0;
 		this.update_prices();
 	},
 	
-	change_avatar(){
+	async change_avatar(dir){
 		
-		if(!this.check_time(my_data.avatar_tm)) return;
-		this.avatar_to_change='mavatar'+irnd(10,999999);
-		objects.card_pic.avatar.texture=PIXI.Texture.from(multiavatar(this.avatar_to_change));			
-		//players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;		
+		if (anim2.any_on()||this.tex_loading) {
+			sound.play('blocked');
+			return;
+		}
+				
+		//if(!this.check_time(my_data.avatar_tm)) return;
+		this.avatar_changed=1;
+				
+		//перелистываем аватары
+		this.avatar_swtich_cur+=dir;
+		if (this.avatar_swtich_cur===this.avatar_switch_center){
+			this.cur_pic_url=players_cache.players[my_data.uid].pic_url
+		}else{
+			this.cur_pic_url='mavatar'+this.avatar_swtich_cur;
+		}		
 		
-		this.change_price.avatar=100;
-		this.update_prices();
+		this.tex_loading=1;		
+		const t=await players_cache.my_texture_from(multiavatar(this.cur_pic_url));
+		this.tex_loading=0;
+		
+		objects.card_pic.avatar.set_texture(t);
+		objects.pref_info.text=['Нажмите ОК чтобы сохранить','Press OK to confirm'][LANG];
+		objects.pref_info.visible=true;	
+		
 	},
 		
 	change_card(dir){
@@ -4759,7 +4795,7 @@ pref={
 		}
 		sound.switch();
 		sound.play('click');
-		const tar_x=sound.on?435:395; //-38
+		const tar_x=sound.on?477:453; //-24
 		anim2.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x]}, true, 0.1,'linear');	
 		
 	},
@@ -4780,18 +4816,23 @@ pref={
 		}
 		
 		sound.play('click');
-		anim2.add(objects.pref_cont,{scale_x:[1,0]}, false, 0.2,'linear');	
+		
 				
 				
 		//если поменяли аватар
-		if (this.avatar_to_change){
-		
-			players_cache.players[my_data.uid].pic_url=this.avatar_to_change;
-			players_cache.players[my_data.uid].texture=objects.card_pic.avatar.texture;			
-			fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.avatar_to_change);
+		if (this.avatar_changed){					
+				
+			players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
+			fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.cur_pic_url);
 			
 			my_data.avatar_tm=Date.now();
 			fbs.ref(`players/${my_data.uid}/PRV/avatar_tm`).set(my_data.avatar_tm);
+			
+			//обновляем аватар в кэше
+			players_cache.update_avatar_forced(my_data.uid,this.cur_pic_url).then(()=>{
+				tables_menu.update_my_data();			
+			})	
+			
 		}	
 
 		//если поменяли имя
@@ -4815,12 +4856,19 @@ pref={
 		
 		//меняем рейтинг чипов
 		game.change_my_balance(-total_price);
-		tables_menu.update_my_data();
+		tables_menu.activate();
+		this.close();
 		
 		
 	},
 	
-	async close_button_down(){
+	close(){
+		
+		anim2.add(objects.pref_cont,{alpha:[1,0]}, false, 0.2,'linear');	
+		
+	},
+	
+	async close_btn_down(){
 		
 		if(anim2.any_on()){
 			sound.play('locked');
@@ -4828,7 +4876,8 @@ pref={
 		}
 		
 		sound.play('click');
-		anim2.add(objects.pref_cont,{scale_x:[1,0]}, false, 0.2,'linear');	
+		this.close();
+		tables_menu.activate();
 		
 	}
 
