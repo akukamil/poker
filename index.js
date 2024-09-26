@@ -730,12 +730,15 @@ class player_card_class extends PIXI.Container {
 		anim2.kill_anim(this.t_comb)	
 		
 		//если это фолд и не показываем карты
-		if (!fin&&!this.show_fold)			
-			return;
+		if (!fin&&!this.show_fold){
+			this.t_comb.visible=true;
+			this.t_comb.text='XXX\n(HIDDEN)'
+			return;			
+		}	
+
 				
 		this.card0.open();
-		this.card1.open();	
-							
+		this.card1.open();								
 
 		this.t_comb.visible=true;
 		this.update_comb_data();
@@ -744,7 +747,7 @@ class player_card_class extends PIXI.Container {
 	
 	update_comb_data(){
 		
-		if(!this.t_comb.visible) return;
+		if(!this.t_comb.visible || !this.show_fold) return;
 		
 		//определяем комбинацию
 		const cen_cards_opened=objects.cen_cards.filter(c=>c.opened)||[];
