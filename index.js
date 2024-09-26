@@ -308,6 +308,7 @@ class player_card_class extends PIXI.Container {
 		this.place=0;
 		this.uid=0;
 		this.card_id=1;
+		this.show_fold=1;
 		
 		this.bcg=new PIXI.Sprite(gres.card1.texture);
 		this.bcg.width=150;
@@ -655,7 +656,7 @@ class player_card_class extends PIXI.Container {
 		const name=players_cache.players?.[this.uid]?.name;
 		const pic_url=players_cache.players?.[this.uid]?.pic_url;
 		const card_id=players_cache.players?.[this.uid]?.card_id;
-	
+		
 		//рейтинг всегда обновляем
 		const rating=await fbs_once('players/'+this.uid+'/PUB/rating');		
 		
@@ -673,22 +674,26 @@ class player_card_class extends PIXI.Container {
 			players_cache.players[this.uid].name=player_data.name;
 			players_cache.players[this.uid].pic_url=player_data.pic_url;
 			players_cache.players[this.uid].card_id=player_data.card_id||1;		
-			players_cache.players[this.uid].country=player_data.country||'';			
+			players_cache.players[this.uid].country=player_data.country||'';		
+			players_cache.players[this.uid].show_fold=player_data.show_fold||0;				
 			
 		}			
 		
 		const cached_player_data=players_cache.players[this.uid];
-
 		
 		//устанавливаем данные карточки
 		this.t_country.text=cached_player_data.country||'';
 		this.name.set2(cached_player_data.name,110);
 		this.card_id=cached_player_data.card_id||1;
-
+		
 		game.load_avatar({uid:this.uid,tar_obj:this.avatar})
 				
 		//устанавливаем карточку
 		this.bcg.texture=gres['card'+this.card_id].texture;		
+		
+		//обновляем статус открытия карты после фолда
+		const show_fold=await fbs_once('players/'+this.uid+'/PUB/show_fold');		
+		this.show_fold=show_fold??1;
 		
 	}
 	
@@ -720,12 +725,18 @@ class player_card_class extends PIXI.Container {
 
 	}
 	
-	open_cards(){
+	open_cards(fin){
 		
+		anim2.kill_anim(this.t_comb)	
+		
+		//если это фолд и не показываем карты
+		if (!fin&&!this.show_fold)			
+			return;
+				
 		this.card0.open();
 		this.card1.open();	
 							
-		anim2.kill_anim(this.t_comb)
+
 		this.t_comb.visible=true;
 		this.update_comb_data();
 		
@@ -2422,7 +2433,7 @@ game={
 		if (event.data==='FOLD'){
 						
 			const pcard=this.uid_to_pcards[event.uid];	
-			pcard.open_cards();
+			pcard.open_cards(0);
 			pcard.alpha=0.5;	
 			pcard.in_game=0;
 			if (event.uid===my_data.uid)
@@ -2480,9 +2491,11 @@ game={
 		//открываем карты игроков и создем массив для проверки
 		let players=[];
 		objects.pcards.forEach(p=>{
-			if(p.visible){
-				p.open_cards();
-				if (p.in_game) players.push(p)
+			if(p.visible){				
+				if (p.in_game) {
+					p.open_cards(1);
+					players.push(p)
+				}
 			}			
 		})		
 						
@@ -5589,6 +5602,7 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
 	my_data.card_id = other_data?.PUB?.card_id || 1;
+	my_data.show_fold = other_data?.PUB?.show_fold || 0;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
 		
 	//убираем страну из имени
@@ -5611,7 +5625,7 @@ async function init_game_env(env) {
 		my_data.pic_url=my_data.orig_pic_url
 		
 	//загружаем мои данные в кэш
-	await players_cache.update(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
+	await players_cache.update(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,show_fold:my_data.show_fold,name:my_data.name,rating:my_data.rating});
 	await players_cache.update_avatar(my_data.uid);
 
 	//время начала игры
