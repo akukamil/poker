@@ -4647,6 +4647,7 @@ pref={
 	
 	cur_pic_url:'',
 	avatar_changed:0,
+	show_fold:0,
 	payments:null,
 
 	cards_prices:[0,0,1000,2000,5000,30000,50000,100000,200000,500000,700000,1000000],
@@ -4674,6 +4675,10 @@ pref={
 		this.change_card(0)
 		objects.card_pic.uid=my_data.uid;
 		objects.card_pic.update_data();
+		
+		//положение ползунка
+		objects.pref_show_fold_slider.x=this.show_fold?215 :184;
+		
 
 		this.change_price={avatar:0,name:0,card:0};
 		this.name_to_change=0;
@@ -4805,8 +4810,24 @@ pref={
 		}
 		sound.switch();
 		sound.play('click');
-		const tar_x=sound.on?477:453; //-24
+		const tar_x=sound.on?538:514; //-24
 		anim2.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x]}, true, 0.1,'linear');	
+		
+	},
+	
+	show_fold_switch(){
+		
+		if(anim2.any_on()){
+			sound.play('locked');
+			return;			
+		}
+		
+		this.show_fold=1-this.show_fold;
+		
+		
+		const tar_x=this.show_fold?215 :184; //-31
+		sound.play('click');
+		anim2.add(objects.pref_show_fold_slider,{x:[objects.pref_show_fold_slider.x,tar_x]}, true, 0.1,'linear');	
 		
 	},
 	
@@ -4827,6 +4848,8 @@ pref={
 		
 		sound.play('click');
 		
+		//обновляем информацио о показе сброса карт
+		fbs.ref('players/'+my_data.uid+'/PRV/show_fold').set(this.show_fold);
 				
 				
 		//если поменяли аватар
@@ -5602,7 +5625,7 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
 	my_data.card_id = other_data?.PUB?.card_id || 1;
-	my_data.show_fold = other_data?.PUB?.show_fold || 0;
+	pref.show_fold = other_data?.PUB?.show_fold || 0;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
 		
 	//убираем страну из имени
@@ -5625,7 +5648,7 @@ async function init_game_env(env) {
 		my_data.pic_url=my_data.orig_pic_url
 		
 	//загружаем мои данные в кэш
-	await players_cache.update(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,show_fold:my_data.show_fold,name:my_data.name,rating:my_data.rating});
+	await players_cache.update(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
 	await players_cache.update_avatar(my_data.uid);
 
 	//время начала игры
