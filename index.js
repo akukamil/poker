@@ -4409,9 +4409,6 @@ dr={
 		
 		this.check_any_bonuses();
 		
-
-
-		
 	},
 	
 	card_down(){
@@ -4732,7 +4729,7 @@ pref={
 			return;
 		}
 				
-		//if(!this.check_time(my_data.avatar_tm)) return;
+		if(!this.check_time(my_data.avatar_tm)) return;
 		this.avatar_changed=1;
 				
 		//перелистываем аватары
