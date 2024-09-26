@@ -4677,6 +4677,7 @@ pref={
 		objects.card_pic.update_data();
 		
 		//положение ползунка
+		this.show_fold=my_data.show_fold;
 		objects.pref_show_fold_slider.x=this.show_fold?215 :184;
 		
 
@@ -4850,7 +4851,7 @@ pref={
 		
 		//обновляем информацио о показе сброса карт
 		fbs.ref('players/'+my_data.uid+'/PUB/show_fold').set(this.show_fold);
-				
+		my_data.show_fold=this.show_fold;
 				
 		//если поменяли аватар
 		if (this.avatar_changed){					
@@ -5625,7 +5626,7 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
 	my_data.card_id = other_data?.PUB?.card_id || 1;
-	pref.show_fold = other_data?.PUB?.show_fold ?? 1;
+	my_data.show_fold=pref.show_fold = other_data?.PUB?.show_fold ?? 1;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
 		
 	//убираем страну из имени
