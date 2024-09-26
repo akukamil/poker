@@ -4403,7 +4403,7 @@ dr={
 		
 		fbs.ref('players/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed).then(()=>{	
 			game.change_my_balance(card.reward);
-			game.change_stickers_num(10);
+			stickers.change_stickers_num(10);
 			tables_menu.update_my_data();
 		})			
 		
