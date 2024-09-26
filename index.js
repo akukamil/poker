@@ -4849,7 +4849,7 @@ pref={
 		sound.play('click');
 		
 		//обновляем информацио о показе сброса карт
-		fbs.ref('players/'+my_data.uid+'/PRV/show_fold').set(this.show_fold);
+		fbs.ref('players/'+my_data.uid+'/PUB/show_fold').set(this.show_fold);
 				
 				
 		//если поменяли аватар
