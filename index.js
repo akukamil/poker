@@ -2489,11 +2489,15 @@ game={
 		this.show_status_window();			
 		
 		//открываем карты игроков и создем массив для проверки
+		const num_of_players_in_game=objects.pcards.filter(p=>p.in_game&&p.visible).length;
 		let players=[];
 		objects.pcards.forEach(p=>{
 			if(p.visible){				
 				if (p.in_game) {
-					p.open_cards(1);
+					if (num_of_players_in_game===1)
+						p.open_cards(0);
+					else
+						p.open_cards(1);
 					players.push(p)
 				}
 			}			
