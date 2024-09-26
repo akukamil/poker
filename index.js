@@ -5625,7 +5625,7 @@ async function init_game_env(env) {
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
 	my_data.card_id = other_data?.PUB?.card_id || 1;
-	pref.show_fold = other_data?.PUB?.show_fold || 0;
+	pref.show_fold = other_data?.PUB?.show_fold || 1;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
 		
 	//убираем страну из имени
