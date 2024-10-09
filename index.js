@@ -735,19 +735,18 @@ class player_card_class extends PIXI.Container {
 			this.t_comb.text='XXX\n(HIDDEN)'
 			return;			
 		}	
-
 				
 		this.card0.open();
 		this.card1.open();								
-
 		this.t_comb.visible=true;
-		this.update_comb_data();
+		this.update_comb_data(fin);
 		
 	}
 	
-	update_comb_data(){
+	update_comb_data(fin){
 		
-		if(!this.t_comb.visible || !this.show_fold) return;
+		if(!this.t_comb.visible) return;		
+		if(!fin&&!this.show_fold) return;
 		
 		//определяем комбинацию
 		const cen_cards_opened=objects.cen_cards.filter(c=>c.opened)||[];
@@ -2652,7 +2651,7 @@ game={
 		//обновляем информацию по скинутым игрокам посмотреть чтобы было
 		for (let uid in this.uid_to_pcards){		
 			const pcard=this.uid_to_pcards[uid];
-			pcard.update_comb_data();
+			pcard.update_comb_data(0);
 		}
 		
 	},
