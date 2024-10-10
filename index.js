@@ -634,8 +634,8 @@ class player_card_class extends PIXI.Container {
 		if(this.uid===my_data.uid){		
 		
 			game.update_my_balance_info(amount);			
-			game.change_my_balance(amount);			
-			fbs.ref(`${table_id}/pending/${my_data.uid}/rating`).set(my_data.rating);
+			game.change_my_balance(amount);		
+			game.update_pending();
 
 		}		
 	}
