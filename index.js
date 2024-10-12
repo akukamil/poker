@@ -5645,7 +5645,7 @@ async function init_game_env(env) {
 	//если новый игрок
 	if (!other_data){
 		my_data.rating=5000;
-		my_data.stickers_num=10;
+		my_data.stickers_num=30;
 	}
 	
 	//правильно определяем аватарку
