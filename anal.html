@@ -65,7 +65,6 @@
 
 
   		<div class="two_buttons_area">
-
 			<div class="button_with_text">
 				<button class="button" id ="but_ref1" onclick="states_room('states')">Комната №1</button>
 			</div>
@@ -77,10 +76,12 @@
 			<div class="button_with_text">
 				<button class="button" id ="but_ref3"  onclick="states_room('states3')">Комната №3</button>
 			</div>
-
+			
+			<div class="button_with_text">
+				<button class="button" id ="but_ref4"  onclick="states_room('states4')">Комната №4</button>
+			</div>
 		</div>
 		
-
   		<div class="two_buttons_area">
 
 			<div class="button_with_text">
@@ -166,17 +167,20 @@ async function update_room_quick_stat() {
 	
 
 	firebase.database().ref('table1/pending').on('value',snapshot => {
-		document.getElementById("but_ref1").textContent = Object.keys(snapshot.val()).length;
+		document.getElementById("but_ref1").textContent = Object.keys(snapshot.val()||[]).length;
 	})
 	
 	firebase.database().ref('table2/pending').on('value',snapshot => {
-		document.getElementById("but_ref2").textContent = Object.keys(snapshot.val()).length;
+		document.getElementById("but_ref2").textContent = Object.keys(snapshot.val()||[]).length;
 	})
 
 	firebase.database().ref('table3/pending').on('value',snapshot => {
-		document.getElementById("but_ref3").textContent = Object.keys(snapshot.val()).length;
+		document.getElementById("but_ref3").textContent = Object.keys(snapshot.val()||[]).length;
 	})
 	
+	firebase.database().ref('table4/pending').on('value',snapshot => {
+		document.getElementById("but_ref4").textContent = Object.keys(snapshot.val()||[]).length;
+	})
 }
 
 async function show_last() {
