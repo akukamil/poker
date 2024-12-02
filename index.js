@@ -24,6 +24,7 @@ irnd = function(min,max) {
 }
 
 formatNumber=function(num) {
+
     if (num >= 1e9) {
         return (num / 1e9).toFixed(1) + 'b';
     } else if (num >= 1e6) {
@@ -4981,29 +4982,27 @@ auth2 = {
 	},	
 	
 	async get_country_code() {
-
 		let country_code = ''
 		try {
-			let resp1 = await fetch("https://ipinfo.io/json?token=a3455d3185ba47");
+			let resp1 = await fetch("https://ipinfo.io/json?token=63f43de65702b8");
 			let resp2 = await resp1.json();			
 			country_code = resp2.country || '';			
-		} catch(e){}
-
-		return country_code;
-		
+		} catch(e){
+			return country_code
+		}
+		return country_code;		
 	},
 	
 	async get_country_code2() {
-
 		let country_code = ''
 		try {
-			let resp1 = await fetch("https://api.ipgeolocation.io/ipgeo?apiKey=1efc1ba695434f2ab24129a98a72a1d4");
+			let resp1 = await fetch("https://ipapi.co/json");
 			let resp2 = await resp1.json();			
-			country_code = resp2.country_code2 || '';			
-		} catch(e){}
-
-		return country_code;
-		
+			country_code = resp2.country_code || '';			
+		} catch(e){
+			return country_code
+		}
+		return country_code;		
 	},
 	
 	search_in_local_storage() {
@@ -5281,6 +5280,7 @@ main_loader={
 		game_res.add('money',git_src+'sounds/money.mp3');
 		game_res.add('sticker',git_src+'sounds/sticker.mp3');
 		game_res.add('magic',git_src+'sounds/magic.mp3');
+		
 		
 		game_res.add('egg_snd',git_src+'sounds/egg.mp3');
 		game_res.add('brick_snd',git_src+'sounds/brick.mp3');
