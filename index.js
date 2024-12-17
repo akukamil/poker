@@ -1122,7 +1122,6 @@ chat={
 
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
 		objects.bcg.texture=assets.bcg;
-		objects.chat_enter_button.visible=my_data.games>=this.games_to_chat;
 		
 		if(my_data.blocked)		
 			objects.chat_enter_button.texture=assets.chat_blocked_img;
