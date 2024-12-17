@@ -1,5 +1,5 @@
 var M_WIDTH=800, M_HEIGHT=450;
-var app, gdata={}, game_res,app_start_time=0, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, chat_path='chat', connected = 1, client_id =0, h_state = 0, game_platform = "",
+var app, assets={}, app_start_time=0, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, chat_path='chat', connected = 1, client_id =0, h_state = 0, game_platform = "",
 hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''},
 opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
 
@@ -41,7 +41,7 @@ class lb_player_card_class extends PIXI.Container{
 	constructor(x,y,place) {
 		super();
 
-		this.bcg=new PIXI.Sprite(game_res.resources.lb_player_card_bcg.texture);
+		this.bcg=new PIXI.Sprite(assets.lb_player_card_bcg);
 		this.bcg.interactive=true;
 		this.bcg.pointerover=function(){this.tint=0x55ffff};
 		this.bcg.pointerout=function(){this.tint=0xffffff};
@@ -121,90 +121,189 @@ class chat_record_class extends PIXI.Container {
 		super();
 		
 		this.tm=0;
-		this.hash=0;
 		this.index=0;
-		this.uid='';	
+		this.uid='';		
 		
-		this.msg_bcg = new PIXI.NineSlicePlane(gres.msg_bcg.texture,90,50,45,50);
-		this.msg_bcg.width=200;
-		this.msg_bcg.height=70;	
-		this.msg_bcg.x=100;	
-		this.msg_bcg.alpha=0.4;
 
-		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: gdata.chat_record_name_font_size});
-		this.name.anchor.set(0.5,0.5);
-		this.name.x=60;
-		this.name.y=60;	
-		this.name.tint=0xffff00;
 		
-		
-		this.avatar = new PIXI.Sprite(PIXI.Texture.WHITE);
-		this.avatar.width=40;
-		this.avatar.height=40;
-		this.avatar.x=40;
-		this.avatar.y=10;
-		this.avatar.interactive=true;
-		const this_card=this;
-		this.avatar.pointerdown=function(){chat.avatar_down(this_card)};		
-		this.avatar.anchor.set(0,0)
+		this.avatar = new PIXI.Graphics();
+		this.avatar.w=50;
+		this.avatar.h=50;
+		this.avatar.x=30;
+		this.avatar.y=13;		
 				
+		this.avatar_bcg = new PIXI.Sprite(assets.chat_avatar_bcg_img);
+		this.avatar_bcg.width=70;
+		this.avatar_bcg.height=70;
+		this.avatar_bcg.x=this.avatar.x-10;
+		this.avatar_bcg.y=this.avatar.y-10;
+		this.avatar_bcg.interactive=true;
+		this.avatar_bcg.pointerdown=()=>chat.avatar_down(this);		
+					
+		this.avatar_frame = new PIXI.Sprite(assets.chat_avatar_frame_img);
+		this.avatar_frame.width=70;
+		this.avatar_frame.height=70;
+		this.avatar_frame.x=this.avatar.x-10;
+		this.avatar_frame.y=this.avatar.y-10;
 		
-		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: gdata.chat_record_text_font_size,align: 'left'}); 
-		this.msg.x=150;
-		this.msg.y=35;
+		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 17});
+		this.name.anchor.set(0,0.5);
+		this.name.x=this.avatar.x+72;
+		this.name.y=this.avatar.y-1;	
+		this.name.tint=0xFBE5D6;
+		
+		this.gif=new PIXI.Sprite();
+		this.gif.x=this.avatar.x+65;	
+		this.gif.y=22;
+		
+		this.gif_bcg=new PIXI.Graphics();
+		this.gif_bcg.beginFill(0x111111)
+		this.gif_bcg.drawRect(0,0,1,1);
+		this.gif_bcg.x=this.gif.x+3;	
+		this.gif_bcg.y=this.gif.y+3;
+		this.gif_bcg.alpha=0.5;
+		
+		
+				
+		this.msg_bcg = new PIXI.NineSlicePlane(assets.msg_bcg,50,18,50,28);
+		//this.msg_bcg.width=160;
+		//this.msg_bcg.height=65;	
+		this.msg_bcg.scale_xy=0.66666;		
+		this.msg_bcg.x=this.avatar.x+45;	
+		this.msg_bcg.y=this.avatar.y+2;
+		
+		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 19,lineSpacing:55,align: 'left'}); 
+		this.msg.x=this.avatar.x+75;
+		this.msg.y=this.avatar.y+30;
 		this.msg.maxWidth=450;
 		this.msg.anchor.set(0,0.5);
 		this.msg.tint = 0xffffff;
 		
-		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: gdata.chat_record_tm_font_size}); 
-		this.msg_tm.x=200;		
-		this.msg_tm.y=45;
-		this.msg_tm.tint=0xaabbaa;
-		this.msg_tm.anchor.set(0,0);
+		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: 15}); 		
+		this.msg_tm.tint=0x999999;
+		this.msg_tm.anchor.set(1,0);
 		
 		this.visible = false;
-		this.addChild(this.msg_bcg,this.avatar,this.name,this.msg,this.msg_tm);
+		this.addChild(this.msg_bcg,this.gif_bcg,this.gif,this.avatar_bcg,this.avatar,this.avatar_frame,this.name,this.msg,this.msg_tm);
 		
 	}
-	
+		
+	nameToColor(name) {
+		  // Create a hash from the name
+		  let hash = 0;
+		  for (let i = 0; i < name.length; i++) {
+			hash = name.charCodeAt(i) + ((hash << 5) - hash);
+			hash = hash & hash; // Convert to 32bit integer
+		  }
+
+		  // Generate a color from the hash
+		  let color = ((hash >> 24) & 0xFF).toString(16) +
+					  ((hash >> 16) & 0xFF).toString(16) +
+					  ((hash >> 8) & 0xFF).toString(16) +
+					  (hash & 0xFF).toString(16);
+
+		  // Ensure the color is 6 characters long
+		  color = ('000000' + color).slice(-6);
+
+		  // Convert the hex color to an RGB value
+		  let r = parseInt(color.slice(0, 2), 16);
+		  let g = parseInt(color.slice(2, 4), 16);
+		  let b = parseInt(color.slice(4, 6), 16);
+
+		  // Ensure the color is bright enough for a black background
+		  // by normalizing the brightness.
+		  if ((r * 0.299 + g * 0.587 + b * 0.114) < 128) {
+			r = Math.min(r + 128, 255);
+			g = Math.min(g + 128, 255);
+			b = Math.min(b + 128, 255);
+		  }
+
+		  return (r << 16) + (g << 8) + b;
+	}
+		
 	async update_avatar(uid, tar_sprite) {		
 	
 		//определяем pic_url
 		await players_cache.update(uid);
 		await players_cache.update_avatar(uid);
-		tar_sprite.texture=players_cache.players[uid].texture;	
+		tar_sprite.set_texture(players_cache.players[uid].texture);	
 	}
 	
 	async set(msg_data) {
 						
 		//получаем pic_url из фб
-		this.avatar.texture=PIXI.Texture.WHITE;
+		this.avatar.set_texture(PIXI.Texture.WHITE);
 				
-		this.uid=msg_data.uid;
-		this.tm = msg_data.tm;			
-		this.hash = msg_data.hash;
-		this.index = msg_data.index;		
-		
 		await this.update_avatar(msg_data.uid, this.avatar);
 
-
+		this.uid=msg_data.uid;
+		this.tm = msg_data.tm;			
+		this.index = msg_data.index;		
 		
-		
-		this.name.set2(msg_data.name,110)
-		this.msg.text=msg_data.msg;		
-		
-		const msg_bcg_width=Math.max(this.msg.width,100)+100;		
-		
-		//бэкграунд сообщения в зависимости от длины
-		this.msg_bcg.width=msg_bcg_width				
-				
-		this.msg_tm.x=msg_bcg_width-15;
+		this.name.set2(msg_data.name,150);
+		this.name.tint=this.nameToColor(msg_data.name);
 		this.msg_tm.text = new Date(msg_data.tm).toLocaleString();
-		this.visible = true;	
 		
+		this.visible = true;
 		
-	}	
-	
+		if (msg_data.msg.startsWith('GIF')){			
+			
+			const mp4BaseT=await new Promise((resolve, reject)=>{
+				const baseTexture = PIXI.BaseTexture.from('res/gifs/'+msg_data.msg+'.mp4');
+				if (baseTexture.width>1) resolve(baseTexture);
+				baseTexture.on('loaded', () => resolve(baseTexture));
+				baseTexture.on('error', (error) => resolve(null));
+			});
+			
+			if (!mp4BaseT) {
+				this.visible=false;
+				return 0;
+			}
+			
+			mp4BaseT.resource.source.play();
+			mp4BaseT.resource.source.loop=true;
+			
+			this.gif.texture=PIXI.Texture.from(mp4BaseT);
+			this.gif.visible=true;	
+			const aspect_ratio=mp4BaseT.width/mp4BaseT.height;
+			this.gif.height=90;
+			this.gif.width=this.gif.height*aspect_ratio;
+			this.msg_bcg.visible=false;
+			this.msg.visible=false;
+			this.msg_tm.anchor.set(0,0);
+			this.msg_tm.y=this.gif.height+9;
+			this.msg_tm.x=this.gif.width+102;
+			
+			this.gif_bcg.visible=true;
+			this.gif_bcg.height=this.gif.height;
+			this.gif_bcg.width=	this.gif.width;
+			return this.gif.height+30;
+			
+		}else{
+			
+			this.gif_bcg.visible=false;
+			this.gif.visible=false;	
+			this.msg_bcg.visible=true;
+			this.msg.visible=true;
+			
+			//бэкграунд сообщения в зависимости от длины
+			this.msg.text=msg_data.msg;	
+			const msg_bcg_width=Math.max(this.msg.width,100)+100;			
+			this.msg_bcg.width=msg_bcg_width*1.5;				
+					
+			if (msg_bcg_width>300){
+				this.msg_tm.anchor.set(1,0);
+				this.msg_tm.y=this.avatar.y+52;
+				this.msg_tm.x=msg_bcg_width+55;
+			}else{
+				this.msg_tm.anchor.set(0,0);
+				this.msg_tm.y=this.avatar.y+37;
+				this.msg_tm.x=msg_bcg_width+62;
+			}	
+			
+			return 70;
+		}		
+	}		
 }
 
 class playing_cards_class extends PIXI.Container {
@@ -223,7 +322,7 @@ class playing_cards_class extends PIXI.Container {
 		
 		this.visible = false;
 					
-		this.bcg = new PIXI.Sprite(gres.pcard_bcg.texture);
+		this.bcg = new PIXI.Sprite(assets.pcard_bcg);
 		this.bcg.anchor.set(0.5,0.5);	
 		this.bcg.width=90;
 		this.bcg.height=120;
@@ -274,7 +373,7 @@ class playing_cards_class extends PIXI.Container {
 				
 		await anim2.add(this,{scale_x:[1, 0]}, false, 0.2,'linear');		
 		this.t_value.visible = true;
-		this.suit_img.texture = gres[this.suit_txt + '_bcg'].texture;
+		this.suit_img.texture = assets[this.suit_txt + '_bcg'];
 		await anim2.add(this,{scale_x:[0, 1]}, true, 0.2,'linear');	
 		
 	}	
@@ -286,7 +385,7 @@ class action_info_class extends PIXI.Container{
 	constructor() {
 		
 		super();
-		this.bcg=new PIXI.Sprite(gres.action_bcg.texture);
+		this.bcg=new PIXI.Sprite(assets.action_bcg);
 		this.bcg.width=140;		
 		this.bcg.height=50;
 		this.bcg.anchor.set(0.5,0.5);
@@ -311,7 +410,7 @@ class player_card_class extends PIXI.Container {
 		this.card_id=1;
 		this.show_fold=1;
 		
-		this.bcg=new PIXI.Sprite(gres.card1.texture);
+		this.bcg=new PIXI.Sprite(assets.card1);
 		this.bcg.width=150;
 		this.bcg.height=120;
 		this.bcg.visible=true;
@@ -319,7 +418,7 @@ class player_card_class extends PIXI.Container {
 		this.bcg.buttonMode=true;
 		this.bcg.pointerdown=this.card_down.bind(this);
 		
-		this.hl=new PIXI.Sprite(gres.bcg_hl.texture);
+		this.hl=new PIXI.Sprite(assets.bcg_hl);
 		this.hl.width=150;
 		this.hl.height=120;
 		this.hl.visible=false;		
@@ -329,7 +428,7 @@ class player_card_class extends PIXI.Container {
 		this.avatar.x=15;
 		this.avatar.y=35;
 		
-		this.avatar_frame=new PIXI.Sprite(gres.avatar_frame.texture);
+		this.avatar_frame=new PIXI.Sprite(assets.avatar_frame);
 		this.avatar_frame.width=this.avatar_frame.height=70;
 		this.avatar_frame.x=5;
 		this.avatar_frame.y=25;
@@ -340,7 +439,7 @@ class player_card_class extends PIXI.Container {
 		this.name.y=23;
 		this.name.tint=0xFFFF00;						
 						
-		this.chip_icon=new PIXI.Sprite(gres.chip_img.texture);
+		this.chip_icon=new PIXI.Sprite(assets.chip_img);
 		this.chip_icon.x=100;
 		this.chip_icon.y=96;
 		this.chip_icon.width=25;
@@ -359,7 +458,7 @@ class player_card_class extends PIXI.Container {
 		this.t_country.tint=0x88ccff;
 		this.t_country.anchor.set(0,0.5);
 		
-		this.my_card_icon=new PIXI.Sprite(gres.my_card_icon_img.texture);
+		this.my_card_icon=new PIXI.Sprite(assets.my_card_icon_img);
 		this.my_card_icon.width=this.my_card_icon.height=40;
 		this.my_card_icon.x=5;
 		this.my_card_icon.y=24;
@@ -440,19 +539,19 @@ class player_card_class extends PIXI.Container {
 			case 1: //heart
 				sound.play('magic');
 				this.anim_on=1;
-				this.anim_texture=gres.heart.texture;
+				this.anim_texture=assets.heart;
 			break;		
 			
 			case 2: //cat
 				sound.play('magic');
 				this.anim_on=1;
-				this.anim_texture=gres.cat.texture;
+				this.anim_texture=assets.cat;
 			break;
 			
 			case 3: //stars
 				sound.play('magic');
 				this.anim_on=1;
-				this.anim_texture=gres.star.texture;
+				this.anim_texture=assets.star;
 			break;
 			
 			case 4: //tomato
@@ -500,12 +599,12 @@ class player_card_class extends PIXI.Container {
 		const splash=this.anims[0];
 		const egg_with_shell=this.anims[1];
 		
-		splash.texture=gres.egg_splash.texture;
+		splash.texture=assets.egg_splash;
 		splash.x=75;
 		splash.y=60;
 		splash.tint=0xffffff;
 		
-		egg_with_shell.texture=gres.egg_with_shell.texture;
+		egg_with_shell.texture=assets.egg_with_shell;
 		egg_with_shell.x=75;
 		egg_with_shell.y=70;
 		egg_with_shell.width=100;
@@ -522,12 +621,12 @@ class player_card_class extends PIXI.Container {
 		const splash=this.anims[0];
 		const tomato=this.anims[1];
 		
-		splash.texture=gres.tomato_splash.texture;
+		splash.texture=assets.tomato_splash;
 		splash.x=75;
 		splash.y=60;
 		splash.tint=0xffffff;
 		
-		tomato.texture=gres.tomato.texture;
+		tomato.texture=assets.tomato;
 		tomato.x=75;
 		tomato.y=60;
 		tomato.width=70;
@@ -547,7 +646,7 @@ class player_card_class extends PIXI.Container {
 		pic.width=150;
 		pic.height=120;
 		pic.tint=0xffffff;
-		pic.texture=gres.brick_smash.texture;
+		pic.texture=assets.brick_smash;
 		anim2.add(pic,{alpha:[0,1]}, true, 0.1,'linear');
 		
 	}
@@ -690,7 +789,7 @@ class player_card_class extends PIXI.Container {
 		game.load_avatar({uid:this.uid,tar_obj:this.avatar})
 				
 		//устанавливаем карточку
-		this.bcg.texture=gres['card'+this.card_id].texture;		
+		this.bcg.texture=assets['card'+this.card_id];		
 		
 		//обновляем статус открытия карты после фолда
 		const show_fold=await fbs_once('players/'+this.uid+'/PUB/show_fold');		
@@ -778,13 +877,13 @@ class mini_cards_calss extends PIXI.Container{
 		
 		this.card_index=0;
 		
-		this.bcg=new PIXI.Sprite(gres.mini_card_bcg_closed.texture);
+		this.bcg=new PIXI.Sprite(assets.mini_card_bcg_closed);
 		this.bcg.height=60;
 		this.bcg.width=50;
 		this.bcg.x=0;
 		this.bcg.y=0;
 				
-		this.suit_icon=new PIXI.Sprite(gres.h_mini_bcg.texture);
+		this.suit_icon=new PIXI.Sprite(assets.h_mini_bcg);
 		this.suit_icon.height=30;
 		this.suit_icon.width=30;
 		this.suit_icon.anchor.set(0.5,0.5);
@@ -822,9 +921,9 @@ class mini_cards_calss extends PIXI.Container{
 		else
 			this.t_value.tint = 0x000000;*/
 		
-		this.bcg.texture=gres.mini_card_bcg_opened.texture;		
+		this.bcg.texture=assets.mini_card_bcg_opened;		
 		
-		this.suit_icon.texture=gres[suit_txt+'_mini_bcg'].texture;
+		this.suit_icon.texture=assets[suit_txt+'_mini_bcg'];
 		this.suit_icon.visible=true;
 		
 		this.t_value.text=value_txt;
@@ -837,7 +936,7 @@ class mini_cards_calss extends PIXI.Container{
 		
 		this.suit_icon.visible=false;
 		this.t_value.visible=false;
-		this.bcg.texture=gres.mini_card_bcg_closed.texture;		
+		this.bcg.texture=assets.mini_card_bcg_closed;		
 		
 	}
 	
@@ -849,7 +948,7 @@ class daily_reward_class extends PIXI.Container{
 		
 		super();
 		
-		this.bcg=new PIXI.Sprite(gres.dr_card_bcg.texture);
+		this.bcg=new PIXI.Sprite(assets.dr_card_bcg);
 		this.bcg.width=100;
 		this.bcg.height=170;
 		this.bcg.interactive=true;
@@ -861,7 +960,7 @@ class daily_reward_class extends PIXI.Container{
 		this.t_day.y=10;
 		this.t_day.anchor.set(0.5,0);
 		
-		this.claimed_icon=new PIXI.Sprite(gres.dr_claimed_icon.texture);
+		this.claimed_icon=new PIXI.Sprite(assets.dr_claimed_icon);
 		this.claimed_icon.width=100;
 		this.claimed_icon.height=120;		
 		
@@ -870,7 +969,7 @@ class daily_reward_class extends PIXI.Container{
 		this.t_reward.y=83;
 		this.t_reward.anchor.set(0.5,0);
 		
-		this.claim_button=new PIXI.Sprite(gres.dr_claim_button_img.texture);
+		this.claim_button=new PIXI.Sprite(assets.dr_claim_button_img);
 		this.claim_button.width=100;
 		this.claim_button.height=50;	
 		this.claim_button.y=105;		
@@ -909,7 +1008,7 @@ class table_icon_class extends PIXI.Container{
 		this.table_id='table'+id;
 		const table_id='table'+id;
 		
-		this.table_icon=new PIXI.Sprite(gres.table_icon.texture);
+		this.table_icon=new PIXI.Sprite(assets.table_icon);
 		this.table_icon.y=3;
 		this.table_icon.width=192.5;
 		this.table_icon.height=110;
@@ -930,7 +1029,7 @@ class table_icon_class extends PIXI.Container{
 		this.t_players.anchor.set(0.5,0.5);
 		this.t_players.tint=0xD6DCE5;	
 		
-		this.chip_icon=new PIXI.Sprite(gres.chip_img.texture);
+		this.chip_icon=new PIXI.Sprite(assets.chip_img);
 		this.chip_icon.x=20;
 		this.chip_icon.y=95;
 		this.chip_icon.width=30;
@@ -1015,14 +1114,23 @@ chat={
 	moderation_mode:0,
 	block_next_click:0,
 	kill_next_click:0,
-	chips_to_chat:5000,
-	confiscate_next_click:0,
+	delete_message_mode:0,
+	games_to_chat:200,
+	payments:0,
 	
 	activate() {	
 
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
-		objects.bcg.texture=gres.city_img.texture;
-		objects.chat_enter_button.visible=true;//(!my_data.blocked)&&my_data.rating>=this.chips_to_chat;
+		objects.bcg.texture=assets.bcg;
+		objects.chat_enter_button.visible=my_data.games>=this.games_to_chat;
+		
+		if(my_data.blocked)		
+			objects.chat_enter_button.texture=assets.chat_blocked_img;
+		else
+			objects.chat_enter_button.texture=assets.chat_enter_button;
+
+		objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Отправлять сообщения в чат могут игроки сыгравшие более 200 онлайн партий.\n3. За нарушение правил игрок может попасть в черный список.'
+		if(my_data.blocked) objects.chat_rules.text='Вы не можете писать в чат, так как вы находитесь в черном списке';
 
 	},
 	
@@ -1039,16 +1147,32 @@ chat={
 			rec.visible = false;			
 			rec.msg_id = -1;	
 			rec.tm=0;
-		}			
+		}		
 		
-		
-		objects.chat_info.text=`Правила чата!\n\n1. Будьте вежливы! Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n\n2. Писать в чат могут игроки имеющие более ${this.chips_to_chat} фишек.\n\n3. Нарушители правил будут заблокированы, а их фишки конфискованы.`;
-
-		
-		//загружаем чат
+		//загружаем чат		
 		fbs.ref(chat_path).orderByChild('tm').limitToLast(20).once('value', snapshot => {chat.chat_load(snapshot.val());});		
 		
-	},			
+		this.init_yandex_payments();
+	},		
+
+	init_yandex_payments(){
+				
+		if (game_platform!=='YANDEX') return;			
+				
+		if(this.payments) return;
+		
+		ysdk.getPayments({ signed: true }).then(_payments => {
+			chat.payments = _payments;
+		}).catch(err => {})			
+		
+	},	
+
+	fix_name(uid){
+		
+		fbs.ref('players/'+uid+'/name').set(auth1.get_random_name(uid));
+		fbs.ref('players/'+uid+'/nick_tm').set(2728556930444);
+		
+	},
 
 	get_oldest_index () {
 		
@@ -1068,11 +1192,21 @@ chat={
 				return rec;
 		
 		//если пустых нет то выбираем самое старое
-		let oldest = {tm:9671801786406 ,visible:true};		
+		let oldest = {tm:9671801786406};		
 		for(let rec of objects.chat_records)
 			if (rec.visible===true && rec.tm < oldest.tm)
 				oldest = rec;	
 		return oldest;		
+		
+	},
+		
+	block_player(uid){
+		
+		fbs.ref('blocked/'+uid).set(Date.now());
+		fbs.ref('inbox/'+uid).set({message:'CHAT_BLOCK',tm:Date.now()});
+		
+		//увеличиваем количество блокировок
+		fbs.ref('players/'+uid+'/block_num').transaction(val=> {return (val || 0) + 1});
 		
 	},
 		
@@ -1099,25 +1233,27 @@ chat={
 		//console.log('receive message',data)
 		if(data===undefined) return;
 		
-		//если это сообщение уже есть в чате
-		if (objects.chat_records.find(obj => { return obj.hash === data.hash;}) !== undefined) return;
+		
+		//если это дубликат моего сообщения из-за таймстемпа
+		if (data.uid===my_data.uid)
+			if (objects.chat_records.find(obj => { return obj.msg.text===data.msg&&obj.index===data.index})) return;
 		
 		
 		//выбираем номер сообщения
-		const new_rec=objects.chat_records[data.index||0]
-		await new_rec.set(data);
+		const new_rec=this.get_oldest_or_free_msg();
+		const y_shift=await new_rec.set(data);
 		new_rec.y=this.last_record_end;
 		
-		this.last_record_end += gdata.chat_record_h;		
+		this.last_record_end += y_shift;		
 
 		//if (!first_load)
 		//	lobby.inst_message(data);
 		
 		//смещаем на одно сообщение (если чат не видим то без твина)
 		if (objects.chat_cont.visible)
-			await anim2.add(objects.chat_msg_cont,{y:[objects.chat_msg_cont.y,objects.chat_msg_cont.y-gdata.chat_record_h]},true, 0.05,'linear');		
+			await anim2.add(objects.chat_msg_cont,{y:[objects.chat_msg_cont.y,objects.chat_msg_cont.y-y_shift]},true, 0.05,'linear');		
 		else
-			objects.chat_msg_cont.y-=gdata.chat_record_h
+			objects.chat_msg_cont.y-=y_shift
 		
 	},
 						
@@ -1125,31 +1261,35 @@ chat={
 		
 		if (this.moderation_mode){
 			console.log(player_data.index,player_data.uid,player_data.name.text,player_data.msg.text);
-			fbs_once('players/'+player_data.uid).then((data)=>{
-				console.log('ИНФО: ',data)
+			fbs_once('players/'+player_data.uid+'/games').then((data)=>{
+				console.log('сыграно игр: ',data)
 			})
 		}
 		
 		if (this.block_next_click){			
-			fbs.ref('blocked/'+player_data.uid).set(Date.now())
+			this.block_player(player_data.uid);
 			console.log('Игрок заблокирован: ',player_data.uid);
 			this.block_next_click=0;
 		}
 		
 		if (this.kill_next_click){			
-			fbs.ref('inbox/'+player_data.uid).set({message:'KILL_GAME',tm:Date.now()});
+			fbs.ref('inbox/'+player_data.uid).set({message:'CLIEND_ID',tm:Date.now(),client_id:999999});
 			console.log('Игрок убит: ',player_data.uid);
 			this.kill_next_click=0;
 		}
 		
-		if (this.confiscate_next_click){			
-				
-			this.confiscate_next_click=0;
+		if(this.delete_message_mode){			
+			fbs.ref(`${chat_path}/${player_data.index}`).remove();
+			console.log(`сообщение ${player_data.index} удалено`)
 		}
+		
+		
+		if(this.moderation_mode||this.block_next_click||this.kill_next_click||this.delete_message_mode) return;
 		
 		if (objects.chat_keyboard_cont.visible)		
 			keyboard.response_message(player_data.uid,player_data.name.text);
-	
+		
+		
 	},
 			
 	get_abs_top_bottom(){
@@ -1235,9 +1375,9 @@ chat={
 		
 	wheel_event(delta) {
 		
-		objects.chat_msg_cont.y-=delta*gdata.chat_record_h*0.5;	
+		objects.chat_msg_cont.y-=delta*50;	
 		const chat_bottom = this.last_record_end;
-		const chat_top = this.last_record_end - objects.chat_records.filter(obj => obj.visible === true).length*gdata.chat_record_h;
+		const chat_top = this.last_record_end - objects.chat_records.filter(obj => obj.visible === true).length*70;
 		
 		if (objects.chat_msg_cont.y+chat_bottom<430)
 			objects.chat_msg_cont.y = 430-chat_bottom;
@@ -1256,13 +1396,6 @@ chat={
 	  return hash;
 	},
 		
-	show_chat_info(t){
-		
-		objects.chat_info.text=t;
-		anim2.add(objects.chat_info,{alpha:[0, 1]}, false, 5,'easeBridge',false);	
-		
-	},
-		
 	async write_button_down(){
 		
 		if (anim2.any_on()===true) {
@@ -1270,8 +1403,33 @@ chat={
 			return
 		};
 		
-		if (my_data.blocked){			
-			this.show_chat_info('Доступ закрыт');
+		
+		//оплата разблокировки чата
+		if (my_data.blocked){	
+		
+			let block_num=await fbs_once('players/'+my_data.uid+'/block_num');
+			block_num=block_num||1;
+			block_num=Math.min(6,block_num);
+		
+			if(game_platform==='YANDEX'){
+				
+				this.payments.purchase({ id: 'unblock'+block_num}).then(purchase => {
+					this.unblock_chat();
+				}).catch(err => {
+					message.add('Ошибка при покупке!');
+				})				
+			}
+			
+			if (game_platform==='VK') {
+				
+				vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item: 'unblock'+block_num}).then(data =>{
+					this.unblock_chat();
+				}).catch((err) => {
+					message.add('Ошибка при покупке!');
+				});			
+			
+			};			
+				
 			return;
 		}
 		
@@ -1283,7 +1441,7 @@ chat={
 		this.recent_msg = this.recent_msg.filter(d =>cur_dt-d<60000);
 				
 		if (this.recent_msg.length>3){
-			this.show_chat_info(['Подождите 1 минуту','Wait 1 minute'][LANG]);
+			message.add('Подождите 1 минуту')
 			return;
 		}		
 		
@@ -1293,11 +1451,19 @@ chat={
 		//пишем сообщение в чат и отправляем его		
 		const msg = await keyboard.read(70);		
 		if (msg) {			
-			const hash=this.make_hash();
-			const index=chat.get_oldest_index();
-			fbs.ref(chat_path+'/'+index).set({uid:my_data.uid,name:my_data.name,msg, tm:firebase.database.ServerValue.TIMESTAMP,index, hash});
+			const index=irnd(1,999);
+			fbs.ref(chat_path+'/'+index).set({uid:my_data.uid,name:my_data.name,msg,tm:firebase.database.ServerValue.TIMESTAMP,index});
 		}	
 		
+	},
+	
+	unblock_chat(){
+		objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Отправлять сообщения в чат могут игроки сыгравшие более 200 онлайн партий.\n3. За нарушение правил игрок может попасть в черный список.'
+		objects.chat_enter_button.texture=assets.chat_enter_img;	
+		fbs.ref('blocked/'+my_data.uid).remove();
+		my_data.blocked=0;
+		message.add('Вы разблокировали чат');
+		sound.play('mini_dialog');	
 	},
 		
 	close() {
@@ -1787,15 +1953,15 @@ sound={
 	
 	play(res_name, res_src) {
 		
-		res_src=res_src||gres;
+		res_src=res_src||assets;
 		
 		if (!this.on||document.hidden)
 			return;
 		
-		if (!res_src[res_name]?.data)
+		if (!assets[res_name])
 			return;
 		
-		res_src[res_name].sound.play();	
+		assets[res_name].play();	
 		
 	},
 	
@@ -1861,7 +2027,7 @@ game={
 		//показываем окошко статуса
 		this.show_status_window();
 		
-		objects.bcg.texture=gres[`bcg_${table_id}`].texture;
+		objects.bcg.texture=assets[`bcg_${table_id}`];
 		
 		objects.table_chat_cont.visible=true;
 		objects.avatars_cont.visible=true;
@@ -1921,25 +2087,25 @@ game={
 		switch (sticker){
 			
 			case 1://heart
-				spr.texture=gres.heart.texture;
+				spr.texture=assets.heart;
 				spr.tx=t_card.x+75;
 				spr.ty=t_card.y+60;
 			break;
 			
 			case 2://cat
-				spr.texture=gres.cat.texture;
+				spr.texture=assets.cat;
 				spr.tx=t_card.x+75;
 				spr.ty=t_card.y+60;
 			break;
 			
 			case 3://star
-				spr.texture=gres.star.texture;
+				spr.texture=assets.star;
 				spr.tx=t_card.x+75;
 				spr.ty=t_card.y+60;
 			break;
 			
 			case 4://tomato
-				spr.texture=gres.tomato.texture;
+				spr.texture=assets.tomato;
 				spr.width=70;
 				spr.height=70;
 				spr.tx=t_card.x+75;
@@ -1947,7 +2113,7 @@ game={
 			break;
 			
 			case 5://egg
-				spr.texture=gres.egg.texture;
+				spr.texture=assets.egg;
 				spr.width=80;
 				spr.height=80;
 				spr.tx=t_card.x+70;
@@ -1955,7 +2121,7 @@ game={
 			break;
 			
 			case 6://brick
-				spr.texture=gres.brick.texture;
+				spr.texture=assets.brick;
 				spr.width=80;
 				spr.height=80;
 				spr.tx=t_card.x+75;
@@ -1969,7 +2135,7 @@ game={
 		
 		//подсветка на карточке инициатора
 		const orb_spr=s_card.anims.find(e=>e.visible===false);
-		orb_spr.texture=gres.orb.texture;
+		orb_spr.texture=assets.orb;
 		orb_spr.x=75;
 		orb_spr.y=60;
 		orb_spr.width=100;
@@ -2128,10 +2294,10 @@ game={
 		if (objects.bet_dialog_cont.visible) objects.bet_dialog_cont.visible=false;
 		
 		//определяем рубашку		
-		if (table_id==='table1') cards_suit_texture=gres.cards_shirt.texture;
-		if (table_id==='table2') cards_suit_texture=gres.cards_shirt2.texture;
-		if (table_id==='table3') cards_suit_texture=gres.cards_shirt3.texture;
-		if (table_id==='table4') cards_suit_texture=gres.cards_shirt4.texture;
+		if (table_id==='table1') cards_suit_texture=assets.cards_shirt;
+		if (table_id==='table2') cards_suit_texture=assets.cards_shirt2;
+		if (table_id==='table3') cards_suit_texture=assets.cards_shirt3;
+		if (table_id==='table4') cards_suit_texture=assets.cards_shirt4;
 		
 		//Убираем окно статуса
 		this.close_status_window();			
@@ -2275,9 +2441,9 @@ game={
 		sound.play('click')
 		
 		if (sound.on)
-			objects.sound_switch_button.texture=gres.sound_switch_button.texture;
+			objects.sound_switch_button.texture=assets.sound_switch_button;
 		else
-			objects.sound_switch_button.texture=gres.no_sound_icon.texture;
+			objects.sound_switch_button.texture=assets.no_sound_icon;
 		
 	},
 			
@@ -3444,30 +3610,6 @@ bet_dialog = {
 	
 }
 
-make_text = function (obj, text, max_width) {
-
-	let sum_v=0;
-	let f_size=obj.fontSize;
-
-	for (let i=0;i<text.length;i++) {
-
-		let code_id=text.charCodeAt(i);
-		let char_obj=game_res.resources.m2_font.bitmapFont.chars[code_id];
-		if (char_obj===undefined) {
-			char_obj=game_res.resources.m2_font.bitmapFont.chars[83];
-			text = text.substring(0, i) + 'S' + text.substring(i + 1);
-		}
-
-		sum_v+=char_obj.xAdvance*f_size/64;
-		if (sum_v>max_width) {
-			obj.text =  text.substring(0,i-1);
-			return;
-		}
-	}
-
-	obj.text =  text;
-}
-
 players_cache={
 	
 	players:{},
@@ -3549,17 +3691,17 @@ players_cache={
 social_dialog = {
 	
 
-	invite_down : function() {
+	invite_down() {
 				
-		gres.click.sound.play();
+		assets.click.play();
 		vkBridge.send('VKWebAppShowInviteBox');		
 		
 	},
 	
-	share_down: function() {
+	share_down() {
 		
 		
-		gres.click.sound.play();
+		assets.click.play();
 		vkBridge.send('VKWebAppShowWallPostBox', {"message": `Помог пчелке защитить улей, теперь мой рейтинг ${my_data.rating}. Сможешь победить меня?`,
 		"attachments": "https://vk.com/app8220670"});
 
@@ -3704,8 +3846,9 @@ keep_alive= function() {
 
 keyboard={
 	
-	ru_keys:[[49.83,87.73,88.16,121.79,'1'],[100.93,87.73,139.26,121.79,'2'],[152.03,87.73,190.36,121.79,'3'],[203.14,87.73,241.47,121.79,'4'],[254.24,87.73,292.57,121.79,'5'],[305.34,87.73,343.67,121.79,'6'],[356.45,87.73,394.78,121.79,'7'],[407.55,87.73,445.88,121.79,'8'],[458.65,87.73,496.98,121.79,'9'],[509.76,87.73,548.09,121.79,'0'],[613.24,87.73,677.12,121.79,'<'],[75.38,130.31,113.71,164.37,'Й'],[126.48,130.31,164.81,164.37,'Ц'],[177.58,130.31,215.91,164.37,'У'],[228.69,130.31,267.02,164.37,'К'],[279.79,130.31,318.12,164.37,'Е'],[330.89,130.31,369.22,164.37,'Н'],[382,130.31,420.33,164.37,'Г'],[433.1,130.31,471.43,164.37,'Ш'],[484.21,130.31,522.54,164.37,'Щ'],[535.31,130.31,573.64,164.37,'З'],[586.41,130.31,624.74,164.37,'Х'],[637.52,130.31,675.85,164.37,'Ъ'],[100.93,172.88,139.26,206.94,'Ф'],[152.03,172.88,190.36,206.94,'Ы'],[203.14,172.88,241.47,206.94,'В'],[254.24,172.88,292.57,206.94,'А'],[305.34,172.88,343.67,206.94,'П'],[356.45,172.88,394.78,206.94,'Р'],[407.55,172.88,445.88,206.94,'О'],[458.65,172.88,496.98,206.94,'Л'],[509.76,172.88,548.09,206.94,'Д'],[560.86,172.88,599.19,206.94,'Ж'],[611.96,172.88,650.29,206.94,'Э'],[75.38,215.46,113.71,249.52,'!'],[126.48,215.46,164.81,249.52,'Я'],[177.58,215.46,215.91,249.52,'Ч'],[228.69,215.46,267.02,249.52,'С'],[279.79,215.46,318.12,249.52,'М'],[330.89,215.46,369.22,249.52,'И'],[382,215.46,420.33,249.52,'Т'],[433.1,215.46,471.43,249.52,'Ь'],[484.21,215.46,522.54,249.52,'Б'],[535.31,215.46,573.64,249.52,'Ю'],[638.79,215.46,677.12,249.52,')'],[562.14,87.73,600.47,121.79,'?'],[24.27,258.04,215.91,300,'ЗАКРЫТЬ'],[228.69,258.04,522.53,300,' '],[535.31,258.04,714.17,300,'ОТПРАВИТЬ'],[664.34,172.88,702.67,206.94,','],[587.69,215.46,626.02,249.52,'('],[24.27,172.88,88.15,206.94,'EN']],
-	en_keys:[[52.29,87.73,90.55,121.79,'1'],[103.31,87.73,141.57,121.79,'2'],[154.32,87.73,192.58,121.79,'3'],[205.34,87.73,243.6,121.79,'4'],[256.35,87.73,294.61,121.79,'5'],[307.37,87.73,345.63,121.79,'6'],[358.38,87.73,396.64,121.79,'7'],[409.4,87.73,447.66,121.79,'8'],[460.41,87.73,498.67,121.79,'9'],[511.43,87.73,549.69,121.79,'0'],[614.74,87.73,678.51,121.79,'<'],[128.81,130.31,167.07,164.37,'Q'],[179.83,130.31,218.09,164.37,'W'],[230.85,130.31,269.11,164.37,'E'],[281.86,130.31,320.12,164.37,'R'],[332.88,130.31,371.14,164.37,'T'],[383.89,130.31,422.15,164.37,'Y'],[434.91,130.31,473.17,164.37,'U'],[485.92,130.31,524.18,164.37,'I'],[536.94,130.31,575.2,164.37,'O'],[587.95,130.31,626.21,164.37,'P'],[154.32,172.88,192.58,206.94,'A'],[205.34,172.88,243.6,206.94,'S'],[256.35,172.88,294.61,206.94,'D'],[307.37,172.88,345.63,206.94,'F'],[358.38,172.88,396.64,206.94,'G'],[409.4,172.88,447.66,206.94,'H'],[460.41,172.88,498.67,206.94,'J'],[511.43,172.88,549.69,206.94,'K'],[562.45,172.88,600.71,206.94,'L'],[589.23,215.46,627.49,249.52,'('],[77.8,215.46,116.06,249.52,'!'],[179.83,215.46,218.09,249.52,'Z'],[230.85,215.46,269.11,249.52,'X'],[281.86,215.46,320.12,249.52,'C'],[332.88,215.46,371.14,249.52,'V'],[383.89,215.46,422.15,249.52,'B'],[434.91,215.46,473.17,249.52,'N'],[485.92,215.46,524.18,249.52,'M'],[640.24,215.46,678.5,249.52,')'],[563.72,87.73,601.98,121.79,'?'],[26.78,258.04,218.09,300,'CLOSE'],[230.85,258.04,524.19,300,' '],[536.94,258.04,715.49,300,'SEND'],[665.75,172.88,704.01,206.94,','],[26.78,172.88,90.55,206.94,'RU']],
+	ru_keys:[[38,105.05,72.02,144.12,'1'],[82.64,105.05,116.66,144.12,'2'],[127.27,105.05,161.29,144.12,'3'],[171.91,105.05,205.93,144.12,'4'],[216.55,105.05,250.57,144.12,'5'],[261.18,105.05,295.2,144.12,'6'],[305.82,105.05,339.84,144.12,'7'],[350.45,105.05,384.47,144.12,'8'],[395.09,105.05,429.11,144.12,'9'],[439.73,105.05,473.75,144.12,'0'],[529,105.05,579,144.12,'<'],[72,153.88,106.02,192.95,'Й'],[112.73,153.88,146.75,192.95,'Ц'],[153.45,153.88,187.47,192.95,'У'],[194.18,153.88,228.2,192.95,'К'],[234.91,153.88,268.93,192.95,'Е'],[275.64,153.88,309.66,192.95,'Н'],[316.36,153.88,350.38,192.95,'Г'],[357.09,153.88,391.11,192.95,'Ш'],[397.82,153.88,431.84,192.95,'Щ'],[438.55,153.88,472.57,192.95,'З'],[479.27,153.88,513.29,192.95,'Х'],[520,153.88,554.02,192.95,'Ъ'],[100.75,202.72,134.77,241.79,'Ф'],[141.5,202.72,175.52,241.79,'Ы'],[182.25,202.72,216.27,241.79,'В'],[223,202.72,257.02,241.79,'А'],[263.75,202.72,297.77,241.79,'П'],[304.5,202.72,338.52,241.79,'Р'],[345.25,202.72,379.27,241.79,'О'],[386,202.72,420.02,241.79,'Л'],[426.75,202.72,460.77,241.79,'Д'],[467.5,202.72,501.52,241.79,'Ж'],[508.25,202.72,542.27,241.79,'Э'],[76,251.56,110.02,290.63,'!'],[117.09,251.56,151.11,290.63,'Я'],[158.18,251.56,192.2,290.63,'Ч'],[199.27,251.56,233.29,290.63,'С'],[240.36,251.56,274.38,290.63,'М'],[281.45,251.56,315.47,290.63,'И'],[322.55,251.56,356.57,290.63,'Т'],[363.64,251.56,397.66,290.63,'Ь'],[404.73,251.56,438.75,290.63,'Б'],[445.82,251.56,479.84,290.63,'Ю'],[528,251.56,562.02,290.63,')'],[484.36,105.05,518.38,144.12,'?'],[29,300.4,179,339.47,'ЗАКРЫТЬ'],[200,300,421,339.07,' '],[441,300,590,339.07,'ОТПРАВИТЬ'],[549,202.72,583.02,241.79,','],[486.91,251.56,520.93,290.63,'('],[40,202.72,90,241.79,'EN']],
+	en_keys:[[40.7,106.05,78.5,145.12,'1'],[85.9,106.05,123.7,145.12,'2'],[131.09,106.05,168.89,145.12,'3'],[176.28,106.05,214.08,145.12,'4'],[221.48,106.05,259.28,145.12,'5'],[266.67,106.05,304.47,145.12,'6'],[311.86,106.05,349.66,145.12,'7'],[357.06,106.05,394.86,145.12,'8'],[402.25,106.05,440.05,145.12,'9'],[447.44,106.05,485.24,145.12,'0'],[537.83,106.05,589.43,145.12,'<'],[97.63,154.88,135.43,193.95,'Q'],[141.46,154.88,179.26,193.95,'W'],[185.3,154.88,223.1,193.95,'E'],[229.14,154.88,266.94,193.95,'R'],[272.97,154.88,310.77,193.95,'T'],[316.81,154.88,354.61,193.95,'Y'],[360.65,154.88,398.45,193.95,'U'],[404.48,154.88,442.28,193.95,'I'],[448.32,154.88,486.12,193.95,'O'],[492.16,154.88,529.96,193.95,'P'],[114.27,203.72,152.07,242.79,'A'],[158.17,203.72,195.97,242.79,'S'],[202.08,203.72,239.88,242.79,'D'],[245.98,203.72,283.78,242.79,'F'],[289.89,203.72,327.69,242.79,'G'],[333.8,203.72,371.6,242.79,'H'],[377.7,203.72,415.5,242.79,'J'],[421.61,203.72,459.41,242.79,'K'],[465.52,203.72,503.32,242.79,'L'],[486.19,252.56,523.99,291.63,'('],[73.34,252.56,111.14,291.63,'!'],[146.91,252.56,184.71,291.63,'Z'],[193.19,252.56,230.99,291.63,'X'],[239.47,252.56,277.27,291.63,'C'],[285.75,252.56,323.55,291.63,'V'],[332.03,252.56,369.83,291.63,'B'],[378.31,252.56,416.11,291.63,'N'],[424.59,252.56,462.39,291.63,'M'],[530.47,252.56,568.27,291.63,')'],[492.64,106.05,530.44,145.12,'?'],[31,300.93,185.8,340,'ЗАКРЫТЬ'],[196.12,300.93,433.49,340,' '],[443.81,300.93,588.29,340,'ОТПРАВИТЬ'],[549.11,203.72,586.91,242.79,','],[36.06,203.72,87.66,242.79,'RU']],
+	
 	layout:0,
 	resolver:0,
 	
@@ -3714,18 +3857,16 @@ keyboard={
 	read(max_symb){
 		
 		this.MAX_SYMBOLS=max_symb||60;
+		
 		if (!this.layout)this.switch_layout();	
 		
 		//если какой-то ресолвер открыт
-		if(this.resolver) {
-			this.resolver('');
-			this.resolver=0;
-		}
+		if(this.resolver) this.resolver('');
 		
 		objects.chat_keyboard_text.text ='';
-		objects.chat_keyboard_control.text = `0/${this.MAX_SYMBOLS}`
+		objects.chat_keyboard_control.text = this.MAX_SYMBOLS;
 				
-		anim2.add(objects.chat_keyboard_cont,{y:[450, objects.chat_keyboard_cont.sy]}, true, 0.2,'linear');	
+		anim2.add(objects.chat_keyboard_cont,{y:[450, objects.chat_keyboard_cont.sy],alpha:[0,1]}, true, 0.2,'linear');	
 
 
 		return new Promise(resolve=>{			
@@ -3742,7 +3883,7 @@ keyboard={
 		key = key.toUpperCase();
 		
 		if(key==='BACKSPACE') key ='<';
-		if(key==='ENTER') {this.layout===this.ru_keys?key ='ОТПРАВИТЬ':key='SEND'};
+		if(key==='ENTER') key ='ОТПРАВИТЬ';
 		if(key==='ESCAPE') key ='ЗАКРЫТЬ';
 		
 		var key2 = this.layout.find(k => {return k[4] === key})			
@@ -3770,11 +3911,11 @@ keyboard={
 		const [x,y,x2,y2,key]=key_data
 		
 		//подсвечиваем клавишу
-		objects.chat_keyboard_hl.width=x2-x+20;
-		objects.chat_keyboard_hl.height=y2-y+20;
+		objects.chat_keyboard_hl.width=20+x2-x;
+		objects.chat_keyboard_hl.height=20+y2-y;
 		
 		objects.chat_keyboard_hl.x = x+objects.chat_keyboard.x-10;
-		objects.chat_keyboard_hl.y = y+objects.chat_keyboard.y-10;	
+		objects.chat_keyboard_hl.y = y+objects.chat_keyboard.y-11;	
 		
 		anim2.add(objects.chat_keyboard_hl,{alpha:[1, 0]}, false, 0.5,'linear');
 		
@@ -3802,10 +3943,10 @@ keyboard={
 		
 		if (this.layout===this.ru_keys){			
 			this.layout=this.en_keys;
-			objects.chat_keyboard.texture=gres.eng_layout.texture;
+			objects.chat_keyboard.texture=assets.eng_layout;
 		}else{			
 			this.layout=this.ru_keys;
-			objects.chat_keyboard.texture=gres.rus_layout.texture;
+			objects.chat_keyboard.texture=assets.rus_layout;
 		}
 		
 	},
@@ -3821,8 +3962,7 @@ keyboard={
 		
 		const t=objects.chat_keyboard_text.text;
 		if ((key==='ОТПРАВИТЬ'||key==='SEND')&&t.length>0){
-			this.resolver(t);
-			this.resolver=0;
+			this.resolver(t);	
 			this.close();
 			key ='';		
 		}
@@ -3851,7 +3991,7 @@ keyboard={
 		//добавляем значение к слову
 		if (key.length===1) objects.chat_keyboard_text.text+=key;
 		
-		objects.chat_keyboard_control.text = `${objects.chat_keyboard_text.text.length}/${this.MAX_SYMBOLS}`		
+		objects.chat_keyboard_control.text=this.MAX_SYMBOLS-objects.chat_keyboard_text.text.length;		
 		
 	},
 	
@@ -3859,7 +3999,7 @@ keyboard={
 		
 		//на всякий случай уничтожаем резолвер
 		if (this.resolver) this.resolver(0);
-		anim2.add(objects.chat_keyboard_cont,{y:[objects.chat_keyboard_cont.y,450]}, false, 0.2,'linear');		
+		anim2.add(objects.chat_keyboard_cont,{y:[objects.chat_keyboard_cont.y,450],alpha:[1,0]}, false, 0.2,'linear');		
 		
 	},
 	
@@ -3885,7 +4025,7 @@ tables_menu={
 		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
 		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
-		objects.bcg.texture = gres.city_img.texture;
+		objects.bcg.texture = assets.bcg;
 						
 		this.update_my_data();
 		
@@ -4189,7 +4329,7 @@ lb={
 
 	activate() {
 
-		objects.bcg.texture=gres.lb_bcg.texture;
+		objects.bcg.texture=assets.lb_bcg;
 		anim2.add(objects.bcg,{alpha:[0,1]}, true, 0.5,'linear');
 		
 		anim2.add(objects.lb_1_cont,{x:[-150, objects.lb_1_cont.sx]}, true, 0.5,'easeOutBack');
@@ -4782,7 +4922,7 @@ pref={
 		
 		if (this.card_to_change<1) this.card_to_change=1;
 		if (this.card_to_change>10) this.card_to_change=10;
-		objects.card_pic.bcg.texture=gres['card'+this.card_to_change].texture;
+		objects.card_pic.bcg.texture=assets['card'+this.card_to_change];
 		
 		//проверяем нужно ли предъявить счет за изменения карточки
 		if (this.card_to_change!==my_data.card_id)
@@ -5203,40 +5343,52 @@ main_loader={
 	
 	async load1(){
 		
+		
+		const loader=new PIXI.Loader();	
+		
 		//подпапка с ресурсами
 		const lang_pack = ['RUS','ENG'][LANG];	
 		
 		//добавляем фон отдельно
-		game_res.add('city_img',git_src+'res/common/city_img.jpg');
-		game_res.add('game_title_img',git_src+`res/${lang_pack}/game_title.png`);	
-		game_res.add('loader_bcg_img',git_src+'res/common/loader_bcg_img.png');
-		game_res.add('loader_front_img',git_src+'res/common/loader_front_img.png');
+		loader.add('bcg',git_src+'res/common/bcg.jpg');
+		loader.add('game_title_img',git_src+`res/common/game_title_${lang_pack}.png`);	
+		loader.add('loader_bcg_img',git_src+'res/common/loader_bcg_img.png');
+		loader.add('loader_front_img',git_src+'res/common/loader_front_img.png');
 				
-		await new Promise(res=>game_res.load(res))
+		await new Promise(res=>loader.load(res))
+		
+		//переносим все в ассеты
+		await new Promise(res=>loader.load(res))
+		for (const res_name in loader.resources){
+			const res=loader.resources[res_name];			
+			assets[res_name]=res.texture||res.sound||res.data;			
+		}
+		
 		
 		//элементы загрузки
 		objects.loader_cont=new PIXI.Container();
 		
 		
-		objects.bcg=new PIXI.Sprite(gres.city_img.texture);
+		objects.bcg=new PIXI.Sprite(assets.bcg);
 		objects.bcg.width=820;
 		objects.bcg.height=470;
 		objects.bcg.x=-10;
 		objects.bcg.y=-10;
-		objects.title=new PIXI.Sprite(gres.game_title_img.texture);
+		
+		objects.title=new PIXI.Sprite(assets.game_title_img);
 		objects.title.x=400;
 		objects.title.y=220;
 		objects.title.anchor.set(0.5,0.5);
 		objects.title.width=780;
 		objects.title.height=420;
 		
-		objects.loader_bcg=new PIXI.Sprite(gres.loader_bcg_img.texture);
+		objects.loader_bcg=new PIXI.Sprite(assets.loader_bcg_img);
 		objects.loader_bcg.x=220;
 		objects.loader_bcg.y=380;
 		objects.loader_bcg.width=360;
 		objects.loader_bcg.height=50;
 		
-		objects.loader_front=new PIXI.NineSlicePlane(gres.loader_front_img.texture,20,20,20,20);
+		objects.loader_front=new PIXI.NineSlicePlane(assets.loader_front_img,20,20,20,20);
 		objects.loader_front.x=230;
 		objects.loader_front.y=390;
 		objects.loader_front.width=10;
@@ -5250,54 +5402,124 @@ main_loader={
 	
 	async load2(){
 		
+		
+		const loader=new PIXI.Loader();	
+		
 		//подпапка с ресурсами
 		const lang_pack = ['RUS','ENG'][LANG];	
 			
 		//добавляем фон отдельно
-		game_res.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
-		game_res.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
-		game_res.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
-		game_res.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
+		loader.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
+		loader.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
+		loader.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
+		loader.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
 		
-		game_res.add("m2_font", git_src+"fonts/Bahnschrift_shadow/font.fnt");
-		game_res.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
+		loader.add("m2_font", git_src+"fonts/Bahnschrift_shadow/font.fnt");
+		loader.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
 
-		game_res.add('check',git_src+'sounds/check.mp3');
-		game_res.add('raise',git_src+'sounds/raise.mp3');
-		game_res.add('lose',git_src+'sounds/lose.mp3');
-		game_res.add('win',git_src+'sounds/win.mp3');
-		game_res.add('click',git_src+'sounds/click.mp3');
-		game_res.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
-		game_res.add('close',git_src+'sounds/close.mp3');
-		game_res.add('locked',git_src+'sounds/locked.mp3');
-		game_res.add('clock',git_src+'sounds/clock.mp3');
-		game_res.add('card',git_src+'sounds/card.mp3');
-		game_res.add('card_open',git_src+'sounds/card_open.mp3');
-		game_res.add('dialog',git_src+'sounds/dialog.mp3');
-		game_res.add('keypress',git_src+'sounds/keypress.mp3');
-		game_res.add('inst_msg',git_src+'sounds/inst_msg.mp3');
-		game_res.add('fold',git_src+'sounds/fold.mp3');
-		game_res.add('money',git_src+'sounds/money.mp3');
-		game_res.add('sticker',git_src+'sounds/sticker.mp3');
-		game_res.add('magic',git_src+'sounds/magic.mp3');
-		
-		
-		game_res.add('egg_snd',git_src+'sounds/egg.mp3');
-		game_res.add('brick_snd',git_src+'sounds/brick.mp3');
-		game_res.add('tomato_snd',git_src+'sounds/tomato.mp3');
+		loader.add('check',git_src+'sounds/check.mp3');
+		loader.add('raise',git_src+'sounds/raise.mp3');
+		loader.add('lose',git_src+'sounds/lose.mp3');
+		loader.add('win',git_src+'sounds/win.mp3');
+		loader.add('click',git_src+'sounds/click.mp3');
+		loader.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
+		loader.add('close',git_src+'sounds/close.mp3');
+		loader.add('locked',git_src+'sounds/locked.mp3');
+		loader.add('clock',git_src+'sounds/clock.mp3');
+		loader.add('card',git_src+'sounds/card.mp3');
+		loader.add('card_open',git_src+'sounds/card_open.mp3');
+		loader.add('dialog',git_src+'sounds/dialog.mp3');
+		loader.add('keypress',git_src+'sounds/keypress.mp3');
+		loader.add('inst_msg',git_src+'sounds/inst_msg.mp3');
+		loader.add('fold',git_src+'sounds/fold.mp3');
+		loader.add('money',git_src+'sounds/money.mp3');
+		loader.add('sticker',git_src+'sounds/sticker.mp3');
+		loader.add('magic',git_src+'sounds/magic.mp3');
+				
+		loader.add('egg_snd',git_src+'sounds/egg.mp3');
+		loader.add('brick_snd',git_src+'sounds/brick.mp3');
+		loader.add('tomato_snd',git_src+'sounds/tomato.mp3');
 		
 		//добавляем из листа загрузки
 		for (var i = 0; i < load_list.length; i++)
 			if (load_list[i].class === "sprite" || load_list[i].class === "image" )
-				game_res.add(load_list[i].name, git_src+'res/'+lang_pack + '/' + load_list[i].name + "." +  load_list[i].image_format);
+				loader.add(load_list[i].name, git_src+'res/'+lang_pack + '/' + load_list[i].name + "." +  load_list[i].image_format);
 
-		game_res.onProgress.add(progress);
-		function progress(loader, resource) {
+		loader.onProgress.add(l=>{
 			objects.loader_front.width =  340*loader.progress*0.01;
+		})
+		
+		await new Promise(resolve=> loader.load(resolve))
+		
+		
+		//переносим все в ассеты
+		await new Promise(res=>loader.load(res))
+		for (const res_name in loader.resources){
+			const res=loader.resources[res_name];			
+			assets[res_name]=res.texture||res.sound||res.data;			
+		}	
+		
+		
+		//создаем спрайты и массивы спрайтов и запускаем первую часть кода
+		for (var i = 0; i < load_list.length; i++) {
+			const obj_class = load_list[i].class;
+			const obj_name = load_list[i].name;
+			console.log('Processing: ' + obj_name)
+
+			switch (obj_class) {
+			case "sprite":
+				objects[obj_name] = new PIXI.Sprite(assets[obj_name]);
+				eval(load_list[i].code0);
+				break;
+
+			case "block":
+				eval(load_list[i].code0);
+				break;
+							
+			case "cont":
+				eval(load_list[i].code0);
+				break;
+
+			case "array":
+				var a_size=load_list[i].size;
+				objects[obj_name]=[];
+				for (var n=0;n<a_size;n++)
+					eval(load_list[i].code0);
+				break;
+			}
 		}
-		
-		await new Promise((resolve, reject)=> game_res.load(resolve))
-		
+
+		//обрабатываем вторую часть кода в объектах
+		for (var i = 0; i < load_list.length; i++) {
+			const obj_class = load_list[i].class;
+			const obj_name = load_list[i].name;
+			console.log('Processing: ' + obj_name)
+					
+			switch (obj_class) {
+			case "sprite":
+				eval(load_list[i].code1);
+				break;
+
+			case "block":
+				eval(load_list[i].code1);
+				break;
+				
+			case "asprite":	
+				eval(load_list[i].code1);
+				break;
+				
+			case "cont":	
+				eval(load_list[i].code1);
+				break;
+
+			case "array":
+				var a_size=load_list[i].size;
+					for (var n=0;n<a_size;n++)
+						eval(load_list[i].code1);	;
+				break;
+			}
+		}
+
 		
 		anim2.add(objects.loader_cont,{alpha:[1,0],y:[0,450]}, false, 1,'easeInCubic');	
 		objects.loader_bcg.visible=false;
@@ -5448,9 +5670,6 @@ async function init_game_env(env) {
 	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
 	//return;
 	
-	//ресурсы
-	game_res=new PIXI.Loader();
-	gres=game_res.resources;
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);				
@@ -5530,70 +5749,6 @@ async function init_game_env(env) {
 		
 	}
 		
-    //создаем спрайты и массивы спрайтов и запускаем первую часть кода
-    for (var i = 0; i < load_list.length; i++) {
-        const obj_class = load_list[i].class;
-        const obj_name = load_list[i].name;
-		console.log('Processing: ' + obj_name)
-
-        switch (obj_class) {
-        case "sprite":
-            objects[obj_name] = new PIXI.Sprite(game_res.resources[obj_name].texture);
-            eval(load_list[i].code0);
-            break;
-
-        case "block":
-            eval(load_list[i].code0);
-            break;
-			
-        case "asprite":
-			objects[obj_name] = gres[obj_name].animation;
-            eval(load_list[i].code0);
-            break;
-			
-        case "cont":
-            eval(load_list[i].code0);
-            break;
-
-        case "array":
-			var a_size=load_list[i].size;
-			objects[obj_name]=[];
-			for (var n=0;n<a_size;n++)
-				eval(load_list[i].code0);
-            break;
-        }
-    }
-
-    //обрабатываем вторую часть кода в объектах
-    for (var i = 0; i < load_list.length; i++) {
-        const obj_class = load_list[i].class;
-        const obj_name = load_list[i].name;
-		console.log('Processing: ' + obj_name)
-				
-        switch (obj_class) {
-        case "sprite":
-            eval(load_list[i].code1);
-            break;
-
-        case "block":
-            eval(load_list[i].code1);
-            break;
-			
-        case "asprite":	
-			eval(load_list[i].code1);
-            break;
-			
-        case "cont":	
-			eval(load_list[i].code1);
-            break;
-
-        case "array":
-			var a_size=load_list[i].size;
-				for (var n=0;n<a_size;n++)
-					eval(load_list[i].code1);	;
-            break;
-        }
-    }
 
 	//запускаем главный цикл
 	main_loop.run();
@@ -5721,7 +5876,7 @@ async function init_game_env(env) {
 	
 		
 	//устанавлием мое имя в карточки
-	make_text(objects.id_name,my_data.name,150);
+	objects.id_name.set2(my_data.name,150);
 	
 	//keep-alive сервис
 	setInterval(function()	{keep_alive()}, 40000);
