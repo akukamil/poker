@@ -249,7 +249,7 @@ class chat_record_class extends PIXI.Container {
 		if (msg_data.msg.startsWith('GIF')){			
 			
 			const mp4BaseT=await new Promise((resolve, reject)=>{
-				const baseTexture = PIXI.BaseTexture.from('res/gifs/'+msg_data.msg+'.mp4');
+				const baseTexture = PIXI.BaseTexture.from('https://akukamil.github.io/common/gifs/'+msg_data.msg+'.mp4');
 				if (baseTexture.width>1) resolve(baseTexture);
 				baseTexture.on('loaded', () => resolve(baseTexture));
 				baseTexture.on('error', (error) => resolve(null));
