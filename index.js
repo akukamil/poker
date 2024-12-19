@@ -1266,6 +1266,8 @@ chat={
 		else
 			objects.chat_msg_cont.y-=y_shift
 		
+		this.processing=0;
+		
 	},
 						
 	avatar_down(player_data){
