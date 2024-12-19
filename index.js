@@ -243,7 +243,7 @@ class chat_record_class extends PIXI.Container {
 		this.name.set2(msg_data.name,150);
 		this.name.tint=this.nameToColor(msg_data.name);
 		this.msg_tm.text = new Date(msg_data.tm).toLocaleString();
-		
+		this.msg.text=msg_data.msg;
 		this.visible = true;
 		
 		if (msg_data.msg.startsWith('GIF')){			
@@ -287,7 +287,6 @@ class chat_record_class extends PIXI.Container {
 			this.msg.visible=true;
 			
 			//бэкграунд сообщения в зависимости от длины
-			this.msg.text=msg_data.msg;	
 			const msg_bcg_width=Math.max(this.msg.width,100)+100;			
 			this.msg_bcg.width=msg_bcg_width*1.5;				
 					
@@ -304,6 +303,7 @@ class chat_record_class extends PIXI.Container {
 			return 70;
 		}		
 	}		
+
 }
 
 class playing_cards_class extends PIXI.Container {
