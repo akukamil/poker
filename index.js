@@ -4686,7 +4686,7 @@ slots={
 	
 	bet_change_down(e){
 		
-		const mx=e.data.global.x;		
+		const mx=e.data.global.x/app.stage.scale.x;;		
 		const button_cen_x=objects.t_slots_bet.x;
 		const dir=mx>button_cen_x?1:-1;		
 		
