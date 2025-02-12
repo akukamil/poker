@@ -727,9 +727,7 @@ class player_card_class extends PIXI.Container {
 				
 		if(!amount) return;
 		
-		this.set_rating(this.rating+amount);
-		
-	
+		this.set_rating(this.rating+amount);	
 		
 		if(this.uid===my_data.uid){		
 		
@@ -1964,17 +1962,15 @@ sound={
 	
 	on : 1,
 	
-	play(res_name, res_src) {
-		
-		res_src=res_src||assets;
+	play(snd_res,is_loop,volume) {
 		
 		if (!this.on||document.hidden)
 			return;
 		
-		if (!assets[res_name])
+		if (!assets[snd_res])
 			return;
 		
-		assets[res_name].play();	
+		assets[snd_res].play({loop:is_loop||false,volume:volume||1});	
 		
 	},
 	
@@ -1982,6 +1978,7 @@ sound={
 		
 		if (this.on){
 			this.on=0;
+				
 			pref.add_info(['Звуки отключены','Sounds is off'][LANG]);
 			
 		} else{
@@ -2181,8 +2178,6 @@ game={
 		
 		my_data.rating+=amount;
 		if(my_data.rating<0)my_data.rating=0;
-		
-		//fbs.ref('players/' + my_data.uid + '/rating').set(my_data.rating);		
 		fbs.ref('players/' + my_data.uid + '/PUB/rating').set(my_data.rating);	
 			
 	},
@@ -2443,8 +2438,7 @@ game={
 		
 	},
 	
-	sound_switch_down(val){
-		
+	sound_switch_down(val){		
 		
 		if (val!==undefined)
 			sound.on=val
@@ -2453,11 +2447,13 @@ game={
 		
 		sound.play('click')
 		
-		if (sound.on)
-			objects.sound_switch_button.texture=assets.sound_switch_button;
-		else
-			objects.sound_switch_button.texture=assets.no_sound_icon;
-		
+		if (sound.on){			
+			objects.sound_switch_button.texture=assets.sound_switch_button;			
+		}else{
+			PIXI.sound.stopAll();
+			objects.sound_switch_button.texture=assets.no_sound_icon;			
+		}
+
 	},
 			
 	async send_message_down(){		
@@ -4029,15 +4025,11 @@ tables_menu={
 	activate(init){
 				
 			
-		anim2.add(objects.table1_cont,{x:[-50,objects.table1_cont.sx]}, true, 0.25,'linear');
-		anim2.add(objects.table2_cont,{x:[-50,objects.table2_cont.sx]}, true, 0.25,'linear');
-		anim2.add(objects.table3_cont,{x:[-50,objects.table3_cont.sx]}, true, 0.25,'linear');
-		anim2.add(objects.table4_cont,{x:[-50,objects.table4_cont.sx]}, true, 0.25,'linear');
+		anim2.add(objects.table_buttons_cont,{x:[800,0]}, true, 0.5,'linear');
 		
 		
 		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
-		anim2.add(objects.table_buttons_cont,{x:[400,objects.table_buttons_cont.sx]}, true, 0.5,'linear');		
 		objects.bcg.texture = assets.bcg;
 						
 		this.update_my_data();
@@ -4243,6 +4235,13 @@ tables_menu={
 		
 	},
 	
+	slots_btn_down(){
+		
+		this.close();
+		slots.activate();	
+		
+	},
+	
 	rules_button_down(){
 		
 		if (anim2.any_on()) {
@@ -4319,15 +4318,8 @@ tables_menu={
 		fbs.ref('table3/pending').off();	
 		fbs.ref('table4/pending').off();
 		
-		anim2.add(objects.table1_cont,{x:[objects.table1_cont.x,850]}, false, 0.25,'linear');
-		anim2.add(objects.table2_cont,{x:[objects.table2_cont.x,850]}, false, 0.22,'linear');
-		anim2.add(objects.table3_cont,{x:[objects.table3_cont.x,850]}, false, 0.21,'linear');
-		anim2.add(objects.table4_cont,{x:[objects.table4_cont.x,850]}, false, 0.20,'linear');
+		anim2.add(objects.table_buttons_cont,{x:[0,800]}, false, 0.5,'linear');
 		
-		
-		anim2.add(objects.my_data_cont,{alpha:[1,0]}, false, 0.25,'linear');
-		
-		anim2.add(objects.table_buttons_cont,{x:[objects.table_buttons_cont.sx,400]}, false, 0.5,'linear');	
 		
 		some_process.table=function(){};
 		clearInterval(this.timer);
@@ -4622,6 +4614,426 @@ dr={
 		tables_menu.activate();
 		
 	}	
+	
+}
+
+slots={
+		
+	patterns:{
+		
+		cross:{mask:[[1,0,1],[0,1,0],[1,0,1]],bonus:[0.7,0.7,0.7,1,1.3]},
+		romb_filled:{mask:[[0,1,0],[1,1,1],[0,1,0]],bonus:[0.7,0.7,0.7,1,1.3]},
+		romb:{mask:[[0,1,0],[1,0,1],[0,1,0]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+		longV:{mask:[[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0]],bonus:[0.7,0.7,0.7,1,1.3]},
+		longInvV:{mask:[[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],bonus:[0.7,0.7,0.7,1,1.3]},
+		V_filled:{mask:[[1,1,1],[0,1,0]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+		invV_filled:{mask:[[0,1,0],[1,1,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+		V:{mask:[[1,0,1],[0,1,0]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		invV:{mask:[[0,1,0],[1,0,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		leftV_filled:{mask:[[0,1],[1,1],[0,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+		rightV_filled:{mask:[[1,0],[1,1],[1,0]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+		leftV:{mask:[[0,1],[1,0],[0,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		rightV:{mask:[[1,0],[0,1],[1,0]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		row6:{mask:[[1,1,1,1,1,1]],bonus:[1,1,1,1.3,1.6]},
+		row5:{mask:[[1,1,1,1,1]],bonus:[0.7,0.7,0.7,1,1.3]},
+		row4:{mask:[[1,1,1,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+		row3:{mask:[[1,1,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		col3:{mask:[[1],[1],[1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		diag1:{mask:[[1,0,0],[0,1,0],[0,0,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		diag2:{mask:[[0,0,1],[0,1,0],[1,0,0]],bonus:[0.1,0.1,0.1,0.4,0.7]},
+		square:{mask:[[1,1],[1,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+		ends:{mask:[[1,0,0,0,1],[0,0,0,0,0],[1,0,0,0,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
+			
+	},	
+	
+	slot_y:3,
+	slot_x:8,
+	
+	roll_on:0,
+	roll_timer:0,
+	fitted_patterns:[],
+	slot:[],
+	bet_amount:100,
+	check_on:0,
+	info_timer:0,
+	
+	activate(){				
+		
+		this.roll_process();	
+		anim2.add(objects.slots_cont,{x:[-800,0]}, true, 0.5,'linear');	
+		
+		//инициируем мой баланс
+		this.change_my_balance(0);
+		
+		//заполняем значение ставки
+		objects.t_slots_bet.text=this.bet_amount;	
+		
+		//заполняем значение ставки
+		objects.t_slots_payout.text='-';	
+	},
+	
+	send_info(msg,timeout){
+		
+		objects.slots_info.text=msg;
+		anim2.add(objects.slots_info,{alpha:[0, 1]}, true, 0.2,'linear');	
+		
+		clearTimeout(this.info_timer);
+		this.info_timer=setTimeout(function(){
+			anim2.add(objects.slots_info,{alpha:[1, 0]}, false, 0.2,'linear');				
+		},timeout||3000)
+		
+	},
+	
+	bet_change_down(e){
+		
+		const mx=e.data.global.x;		
+		const button_cen_x=objects.t_slots_bet.x;
+		const dir=mx>button_cen_x?1:-1;		
+		
+		const new_bet=this.bet_amount+dir*100;	
+		
+		if (this.check_on||new_bet<=0){
+			sound.play('locked');
+			return;					
+		}
+
+		sound.play('click');
+		this.bet_amount=new_bet;
+		objects.t_slots_bet.text=this.bet_amount;	
+		
+	},
+	
+	add_pattern(py,px,data){
+		
+		const p=[];
+		for (let y=0;y<this.slot_y;y++){
+			p[y]=[];
+			for(let x=0;x<this.slot_x;x++)			
+				p[y][x]=0;
+		}	
+		
+		const data_y=data.mask.length;
+		const data_x=data.mask[0].length;
+		
+		//добавляем по маске и по координате
+		for (let y=0;y<data_y;y++){
+			for(let x=0;x<data_x;x++){
+				mask_flag=data.mask[y][x];
+				if (mask_flag)
+					p[py+y][px+x]=1;
+			}			
+		}	
+		
+		//console.table(p);
+		this.fitted_patterns.push(p);
+			
+	},
+	
+	randomize_slots(){		
+		objects.slots_icons.forEach(s=>{			
+			const id=irnd(1,6);
+			s.texture=assets['slots_icon'+id];			
+		})		
+	},
+	
+	mask_fit(py,px,data,name){
+		
+		const data_y=data.mask.length;
+		const data_x=data.mask[0].length;
+		let symbol=0;
+		
+		//проверяем по маске и координатам
+		let prv_sym=0;
+		for (let y=0;y<data_y;y++){
+			for(let x=0;x<data_x;x++){
+				const mask_flag=data.mask[y][x];
+				if (mask_flag){
+
+					const ty=py+y;
+					const tx=px+x;
+					const tar_sym=this.slot[ty][tx];
+					
+					if (prv_sym&&prv_sym!==tar_sym)
+						return 0;
+					prv_sym=tar_sym;
+					if (!symbol) symbol=tar_sym;
+					
+				} 						
+			}			
+		}	
+
+		//проверяем есть ли это уже в других найденных паттернах
+		for (let pattern of this.fitted_patterns){
+
+			let found=1;
+			for (let y=0;y<data_y;y++){
+				for(let x=0;x<data_x;x++){
+					mask_flag=data.mask[y][x];
+					if (mask_flag){
+		
+						const ty=py+y;
+						const tx=px+x;
+						
+						if (pattern[ty][tx]===0){
+							found=0;
+							x=9999;
+							y=9999;
+						}
+					} 						
+				}			
+			}	
+
+			if (found)
+				return 0;
+		}
+		
+		return symbol;
+		
+	},
+	
+	start_btn_down(){	
+		
+		if (this.roll_on){		
+			sound.play('slot_click');
+			this.roll_on=0;
+			assets.slot_spin.stop();
+			clearInterval(this.roll_timer);	
+			objects.slots_start_btn.texture=assets.slots_start_btn;	
+			setTimeout(function(){slots.check_payout();},1000);			
+		}else{	
+		
+			//если нечем платить
+			if (this.bet_amount>my_data.rating||this.bet_amount<=0){
+				this.send_info(['Недостаточно фишек, измените ставку!','Not enough chips, change you bet!'][LANG],5000);
+				sound.play('locked');
+				return;
+			}
+			
+			if (this.check_on){
+				this.send_info(['Подождите...','Wait...'][LANG],2000);
+				sound.play('locked');
+				return;
+			}
+			
+			
+			
+			this.send_info(['Нажмите стоп!','Press stop!'][LANG],3000);
+			this.check_on=1;
+			this.roll_on=1;			
+			sound.play('slot_click');
+			sound.play('slot_spin',1);
+			this.change_my_balance(-this.bet_amount);
+			
+			//записываем рейтинг в базу
+			game.change_my_balance(0);
+			
+			objects.t_slots_payout.text='';
+			objects.slots_start_btn.texture=assets.slots_stop_btn_img;
+			slots.roll_process();
+			this.roll_timer=setInterval(function(){slots.roll_process()},60);
+		}		
+	
+	},
+	
+	exit_btn_down(){
+		
+		if (this.roll_on) {
+			this.send_info(['Остановите слот перед выходом!','Stop the slot before exit'][LANG]);
+			sound.play('locked');
+			return;
+		}
+		
+		if (this.check_on) {
+			this.send_info(['Подождите...','Wait...'][LANG]);
+			sound.play('locked');
+			return;
+		}
+		
+		this.close();
+		tables_menu.activate();
+		
+		
+	},
+		
+	change_my_balance(amount){
+		
+		my_data.rating+=amount;
+		objects.slots_player_chips.text=my_data.rating;
+	},
+	
+	async check_payout(){
+			
+		await new Promise((resolve, reject) => {setTimeout(resolve, 1250);});	
+			
+		//формируем данные слота в виде 2Д массива
+		let i=0;
+		for (let y=0;y<this.slot_y;y++){
+			this.slot[y]=[];
+			for(let x=0;x<this.slot_x;x++){
+				this.slot[y][x]=objects.slots_icons[i].id;			
+				i++;
+			}
+		}
+				
+		this.fitted_patterns=[];
+		let sum_bonus=0;
+		
+		const bonus_per_symbol={1:0,2:0,3:0,4:0.2,5:0.5};
+		
+		//ищем паттерны в результатах
+		for (const [name, data] of Object.entries(this.patterns)){
+					
+			//но только в пределах зоны маски
+			const mask_h=data.mask.length;
+			const mask_w=data.mask[0].length;
+			let bonus_data=data.bonus;
+			let bonus=0;
+
+			for (let y=0;y<this.slot_y-mask_h+1;y++){
+				for(let x=0;x<this.slot_x-mask_w+1;x++){	
+					const fit_symbol=this.mask_fit(y,x,data,name);
+					if (fit_symbol){
+						
+						bonus+=bonus_data[fit_symbol-1];
+						const win_amount=Math.round(this.bet_amount*bonus);		
+						this.change_my_balance(win_amount);							
+						sum_bonus+=win_amount;
+						this.send_info('+'+win_amount,1000);
+						objects.t_slots_payout.text=sum_bonus;
+						console.log(name,fit_symbol);
+						await this.show_pattern(y,x,data);
+						this.add_pattern(y,x,data);
+						
+					}					
+				}
+			}		
+		}
+		
+		//если нет бонуса
+		if(sum_bonus===0)
+			sound.play('nobonus');		
+		
+		objects.t_slots_payout.text=sum_bonus;
+		
+		this.send_info(['Больше нет выигрышных комбинаций!','No more winning matches!'][LANG]);
+						
+		
+						
+		//записываем рейтинг в базу
+		game.change_my_balance(0);
+						
+		this.check_on=0;
+		
+		fbs.ref('SLOTS_STAT').push({name:my_data.name,sum_bonus,bet:this.bet_amount})
+		
+	},
+	
+	async show_pattern(py,px,data){
+		
+		let hit_icon_id=0;
+		const data_y=data.mask.length;
+		const data_x=data.mask[0].length;
+		
+		
+		//сначала убираем все
+		objects.slots_hits.forEach(s=>s.visible=false);
+				
+		//добавляем по маске и по координате
+		for (let y=0;y<data_y;y++){
+			for(let x=0;x<data_x;x++){
+				mask_flag=data.mask[y][x];
+				if (mask_flag){					
+					
+					const ty=y+py;
+					const tx=x+px;
+					const icon_id=ty*8+tx;
+					const slot_icon=objects.slots_icons[icon_id];
+					const slot_hit_icon=objects.slots_hits[hit_icon_id];	
+
+					const cur_scale_xy=slot_icon.scale_xy;					
+					anim3.add(slot_icon,{scale_xy:[cur_scale_xy,cur_scale_xy*1.25,'ease2back'],angle:[0,10,'ease2back']}, true, 0.75);
+					
+					slot_hit_icon.x=slot_icon.x;
+					slot_hit_icon.y=slot_icon.y;
+					
+					anim2.add(slot_hit_icon,{alpha:[0, 1]}, false, 0.75,'ease2back');	
+					
+					slot_hit_icon.scale_x=Math.abs(slot_hit_icon.scale_x);
+					slot_hit_icon.scale_y=Math.abs(slot_hit_icon.scale_y);
+					hit_icon_id++;
+					
+					switch(icon_id){
+						
+						case 0:
+							slot_hit_icon.texture=assets.slots_hit_corner_icon;
+						break;
+						
+						case 7:
+							slot_hit_icon.texture=assets.slots_hit_corner_icon;
+							slot_hit_icon.scale_x*=-1;
+						break;
+						
+						case 16:
+							slot_hit_icon.texture=assets.slots_hit_corner_icon;
+							slot_hit_icon.scale_y*=-1;
+						break;
+						
+						case 23:
+							slot_hit_icon.texture=assets.slots_hit_corner_icon;
+							slot_hit_icon.scale_xy*=-1;
+						break;
+						
+						default:
+							slot_hit_icon.texture=assets.slots_hit_icon;						
+					}					
+				}					
+			}			
+		};
+		
+		if (hit_icon_id)
+			sound.play('slot_match'+hit_icon_id);
+
+		await new Promise((resolve, reject) => {setTimeout(resolve, 1500);});			
+		
+	},
+	
+	paytable_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return;
+		}
+		
+		anim2.add(objects.paytable,{x:[objects.paytable.sx,-500]}, false, 0.3,'linear');
+		anim2.add(objects.slots_help_info,{alpha:[1,0]}, false, 0.5,'linear');		
+		
+	},
+	
+	show_paytable_btn_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return;
+		}
+		
+		anim2.add(objects.slots_help_info,{alpha:[0,1]}, true, 0.5,'linear');			
+		anim2.add(objects.paytable,{x:[-500,objects.paytable.sx]}, true, 0.3,'linear');	
+		
+	},
+	
+	roll_process(){		
+		
+		objects.slots_icons.forEach(s=>{
+			const id=irnd(1,5);
+			s.texture=assets['slots_icon'+id];	
+			s.id=id;
+		})
+
+	},
+		
+	close(){	
+		anim2.add(objects.slots_cont,{x:[0,-800]}, false, 0.5,'linear');		
+	}
 	
 }
 
@@ -5448,7 +5860,14 @@ main_loader={
 		loader.add('money',git_src+'sounds/money.mp3');
 		loader.add('sticker',git_src+'sounds/sticker.mp3');
 		loader.add('magic',git_src+'sounds/magic.mp3');
-				
+		loader.add('slot_spin',git_src+'sounds/slot_spin.mp3');
+		loader.add('slot_click',git_src+'sounds/slot_click.mp3');
+		loader.add('nobonus',git_src+'sounds/nobonus.mp3');
+		
+		loader.add('slot_match3',git_src+'sounds/slot_match3.mp3');
+		loader.add('slot_match4',git_src+'sounds/slot_match4.mp3');
+		loader.add('slot_match5',git_src+'sounds/slot_match5.mp3');
+		
 		loader.add('egg_snd',git_src+'sounds/egg.mp3');
 		loader.add('brick_snd',git_src+'sounds/brick.mp3');
 		loader.add('tomato_snd',git_src+'sounds/tomato.mp3');
@@ -5571,7 +5990,7 @@ function vis_change() {
 	
 	if (document.hidden === false){
 
-		//sound.on=1;
+		game.sound_switch_down(1);
 		hidden_state_start = Date.now();				
 	}
 	
@@ -5815,6 +6234,7 @@ async function init_game_env(env) {
 	my_data.card_id = other_data?.PUB?.card_id || 1;
 	my_data.show_fold=pref.show_fold = other_data?.PUB?.show_fold ?? 1;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
+
 		
 	//убираем страну из имени
 	if (auth2.get_country_from_name(my_data.name))
