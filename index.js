@@ -4735,8 +4735,7 @@ slots={
 			s.texture=assets['slots_icon'+id];			
 		})		
 	},
-	
-	
+		
 	check_stability2(){
 		
 				
@@ -4980,7 +4979,7 @@ slots={
 						this.change_my_balance(pattern_payout);							
 						sum_pattern_payout+=pattern_payout;
 						this.send_info('+'+pattern_payout,1000);
-						objects.t_slots_payout.text=pattern_payout;
+						objects.t_slots_payout.text=sum_pattern_payout;
 						await this.show_pattern(y,x,data);
 						this.add_pattern(y,x,data);						
 						
