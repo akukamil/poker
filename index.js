@@ -4924,7 +4924,7 @@ slots={
 						
 		this.check_on=0;
 		
-		fbs.ref('SLOTS_STAT').push({name:my_data.name,sum_bonus,bet:this.bet_amount})
+		fbs.ref('SLOTS_STAT').push({name:my_data.name,sum_bonus,bet:this.bet_amount,tm:firebase.database.ServerValue.TIMESTAMP})
 		
 	},
 	
