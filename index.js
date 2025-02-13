@@ -4021,37 +4021,25 @@ tables_menu={
 	free_chips:0,
 	next_admin_info_check_tm:0,
 	my_avatar_clicks:0,
+	table_stat_updater:{1:{players_num:-1,timer:0},2:{players_num:-1,timer:0},3:{players_num:-1,timer:0},4:{players_num:-1,timer:0}},
 		
-	activate(init){
-				
+	activate(init){				
 			
-		anim2.add(objects.table_buttons_cont,{x:[800,0]}, true, 0.5,'linear');
-		
+		anim2.add(objects.table_buttons_cont,{x:[800,0]}, true, 0.5,'linear');		
 		
 		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
 		objects.bcg.texture = assets.bcg;
 						
 		this.update_my_data();
+				
+		this.table_stat_updater[1].timer=setTimeout(()=>this.update_table_stat(1),10);
+		this.table_stat_updater[2].timer=setTimeout(()=>this.update_table_stat(2),1000);
+		this.table_stat_updater[3].timer=setTimeout(()=>this.update_table_stat(3),2000);
+		this.table_stat_updater[4].timer=setTimeout(()=>this.update_table_stat(4),3000);
 		
-		fbs.ref('table1/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.table1_cont,data.val(),1)
-		})
-		
-		fbs.ref('table2/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.table2_cont,data.val())
-		})
-		
-		fbs.ref('table3/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.table3_cont,data.val(),0)
-		})
-		
-		fbs.ref('table4/pending').on('value',function(data){			
-			tables_menu.table_data_updated(objects.table4_cont,data.val(),0)
-		})
-						
 
-		objects.table_menu_info.text=''		
+		objects.table_menu_info.text='';	
 		
 		//проверяем инфор от админа
 		const tm=Date.now();
@@ -4072,11 +4060,47 @@ tables_menu={
 		
 	},
 	
-	process(){
+	async update_table_stat(table_id){		
+			
+		let data=await fbs_once(`table${table_id}/pending`);
 		
+		let cur_players_num=0;
+		if (data) cur_players_num=Object.keys(data).length;	
+		
+		//если это вторая комната то добавляем бота
+		if(table_id===1) cur_players_num=Math.max(cur_players_num,1);
+		
+		const stat_updater=this.table_stat_updater[table_id];
+		const prv_players_stat=stat_updater.players_num;
+		const table_cont=objects[`table${table_id}_cont`];
+		
+		stat_updater.players_num=cur_players_num;
+				
+		if (cur_players_num>0)
+			table_cont.alpha=1;
+		else
+			table_cont.alpha=0.5;
+		
+		table_cont.t_players.text=['Игроков: ','Players: '][LANG]+cur_players_num+'/6';
+		
+		//смотрим как часто надо обновлять столы
+		if (prv_players_stat===cur_players_num){
+			stat_updater.next_update+=1000;
+			if (stat_updater.next_update>10000) stat_updater.next_update=10000;
+			//console.log(`стол ${table_id} не изменился, следующую проверка через ${stat_updater.next_update}`);			
+			
+		}else{
+			//console.log(`стол ${table_id}  изменился, сбрасываем проверку`);
+			stat_updater.next_update=1000;			
+		}
+				
+		stat_updater.timer=setTimeout(()=>{this.update_table_stat(table_id)},stat_updater.next_update);		
+		
+	},
+	
+	process(){		
 		if (dr.have_bonus&&objects.table_dr_button_hl.ready)
 			anim2.add(objects.table_dr_button_hl,{scale_xy:[0.666,1.2],alpha:[0.5,0]}, false, 1,'linear',false);
-
 	},
 	
 	async check_admin_info(){
@@ -4118,24 +4142,6 @@ tables_menu={
 		
 	},
 	
-	table_data_updated(table_cont,data,bot_on){
-
-		let num_of_players=0;
-		if (data) num_of_players=Object.keys(data).length;	
-		
-		//если это вторая комната то добавляем бота
-		if(bot_on) num_of_players=Math.max(num_of_players,1);
-		
-		
-		if (num_of_players>0)
-			table_cont.alpha=1;
-		else
-			table_cont.alpha=0.5;
-		
-		table_cont.t_players.text=['Игроков: ','Players: '][LANG]+num_of_players+'/6';
-		
-	},
-		
 	free_chips_down(){
 		
 		if (anim2.any_on()) {
@@ -4311,18 +4317,17 @@ tables_menu={
 		
 	},
 	
-	close(){
-		
-		fbs.ref('table1/pending').off();
-		fbs.ref('table2/pending').off();	
-		fbs.ref('table3/pending').off();	
-		fbs.ref('table4/pending').off();
+	close(){		
 		
 		anim2.add(objects.table_buttons_cont,{x:[0,800]}, false, 0.5,'linear');
 		
+		clearTimeout(this.table_stat_updater[1].timer);
+		clearTimeout(this.table_stat_updater[2].timer);
+		clearTimeout(this.table_stat_updater[3].timer);
+		clearTimeout(this.table_stat_updater[4].timer);
 		
 		some_process.table=function(){};
-		clearInterval(this.timer);
+
 	}
 	
 }
@@ -4780,7 +4785,7 @@ slots={
 							const symb_perc=bonus_data[fit_symbol-1];
 							const pattern_payout=Math.round(this.bet_amount*symb_perc);		
 							//this.change_my_balance(pattern_payout);							
-							sum_pattern_payout+=pattern_payout;
+							spin_payout+=pattern_payout;
 							//this.send_info('+'+pattern_payout,1000);
 							//objects.t_slots_payout.text=sum_bonus;
 							//await this.show_pattern(y,x,data);
@@ -4788,10 +4793,7 @@ slots={
 							
 						}					
 					}
-				}
-				
-				//всего за спин
-				spin_payout+=sum_pattern_payout;
+				}			
 			}
 			
 			//всего за игру
@@ -4928,16 +4930,17 @@ slots={
 
 		fbs.ref('SLOTS_STAT').orderByChild('tm').limitToLast(num_of_last).once('value',s=>{
 			
-			let sum_bet=0;
-			let sum_win=0;		
+			let sum_rop=0;		
 			
 			const data=s.val();
-			Object.values(data).forEach(d=>{				
-				sum_bet+=d.bet;
-				sum_win+=d.sum_bonus;				
+			Object.values(data).forEach(d=>{	
+				if(d.spin_payout){
+					sum_rop+=(d.spin_payout/d.bet);
+				}			
+				console.log(d);
 			});
 			
-			console.log(sum_win/sum_bet);
+			console.log(sum_rop/num_of_last);
 		});			
 		
 		
