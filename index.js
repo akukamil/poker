@@ -4731,9 +4731,75 @@ slots={
 	
 	randomize_slots(){		
 		objects.slots_icons.forEach(s=>{			
-			const id=irnd(1,6);
+			const id=irnd(1,5);
 			s.texture=assets['slots_icon'+id];			
 		})		
+	},
+	
+	
+	check_stability2(){
+		
+				
+		
+		let total_payout=0;
+		const iters=100000;
+		for (let z=0;z<iters;z++){
+					
+			
+			objects.slots_icons.forEach(s=>{
+				const id=irnd(1,5);
+				s.id=id;
+			})
+			
+			//формируем данные слота в виде 2Д массива
+			let i=0;
+			for (let y=0;y<this.slot_y;y++){
+				this.slot[y]=[];
+				for(let x=0;x<this.slot_x;x++){
+					this.slot[y][x]=objects.slots_icons[i].id;			
+					i++;
+				}
+			}
+			
+			this.fitted_patterns=[];
+			let spin_payout=0;
+			
+			//ищем паттерны в результатах
+			for (const [name, data] of Object.entries(this.patterns)){
+						
+				//но только в пределах зоны маски
+				const mask_h=data.mask.length;
+				const mask_w=data.mask[0].length;
+				let bonus_data=data.bonus;
+				let sum_pattern_payout=0;
+
+				for (let y=0;y<this.slot_y-mask_h+1;y++){
+					for(let x=0;x<this.slot_x-mask_w+1;x++){	
+						const fit_symbol=this.mask_fit(y,x,data,name);
+						if (fit_symbol){
+							
+							const symb_perc=bonus_data[fit_symbol-1];
+							const pattern_payout=Math.round(this.bet_amount*symb_perc);		
+							//this.change_my_balance(pattern_payout);							
+							sum_pattern_payout+=pattern_payout;
+							//this.send_info('+'+pattern_payout,1000);
+							//objects.t_slots_payout.text=sum_bonus;
+							//await this.show_pattern(y,x,data);
+							this.add_pattern(y,x,data);						
+							
+						}					
+					}
+				}
+				
+				//всего за спин
+				spin_payout+=sum_pattern_payout;
+			}
+			
+			//всего за игру
+			total_payout+=spin_payout;
+		}		
+		
+		console.log(100*total_payout/(this.bet_amount*iters))
 	},
 	
 	mask_fit(py,px,data,name){
@@ -4814,9 +4880,7 @@ slots={
 				sound.play('locked');
 				return;
 			}
-			
-			
-			
+								
 			this.send_info(['Нажмите стоп!','Press stop!'][LANG],3000);
 			this.check_on=1;
 			this.roll_on=1;			
@@ -4861,6 +4925,25 @@ slots={
 		objects.slots_player_chips.text=my_data.rating;
 	},
 	
+	check_stability(num_of_last){				
+
+		fbs.ref('SLOTS_STAT').orderByChild('tm').limitToLast(num_of_last).once('value',s=>{
+			
+			let sum_bet=0;
+			let sum_win=0;		
+			
+			const data=s.val();
+			Object.values(data).forEach(d=>{				
+				sum_bet+=d.bet;
+				sum_win+=d.sum_bonus;				
+			});
+			
+			console.log(sum_win/sum_bet);
+		});			
+		
+		
+	},
+	
 	async check_payout(){
 			
 		await new Promise((resolve, reject) => {setTimeout(resolve, 1250);});	
@@ -4876,9 +4959,7 @@ slots={
 		}
 				
 		this.fitted_patterns=[];
-		let sum_bonus=0;
-		
-		const bonus_per_symbol={1:0,2:0,3:0,4:0.2,5:0.5};
+		let spin_payout=0;
 		
 		//ищем паттерны в результатах
 		for (const [name, data] of Object.entries(this.patterns)){
@@ -4887,44 +4968,45 @@ slots={
 			const mask_h=data.mask.length;
 			const mask_w=data.mask[0].length;
 			let bonus_data=data.bonus;
-			let bonus=0;
+			let sum_pattern_payout=0;
 
 			for (let y=0;y<this.slot_y-mask_h+1;y++){
 				for(let x=0;x<this.slot_x-mask_w+1;x++){	
 					const fit_symbol=this.mask_fit(y,x,data,name);
 					if (fit_symbol){
 						
-						bonus+=bonus_data[fit_symbol-1];
-						const win_amount=Math.round(this.bet_amount*bonus);		
-						this.change_my_balance(win_amount);							
-						sum_bonus+=win_amount;
-						this.send_info('+'+win_amount,1000);
-						objects.t_slots_payout.text=sum_bonus;
-						console.log(name,fit_symbol);
+						const symb_perc=bonus_data[fit_symbol-1];
+						const pattern_payout=Math.round(this.bet_amount*symb_perc);		
+						this.change_my_balance(pattern_payout);							
+						sum_pattern_payout+=pattern_payout;
+						this.send_info('+'+pattern_payout,1000);
+						objects.t_slots_payout.text=pattern_payout;
 						await this.show_pattern(y,x,data);
-						this.add_pattern(y,x,data);
+						this.add_pattern(y,x,data);						
 						
 					}					
 				}
-			}		
+			}
+			
+			//всего за спин
+			spin_payout+=sum_pattern_payout;
 		}
 		
 		//если нет бонуса
-		if(sum_bonus===0)
+		if(spin_payout===0)
 			sound.play('nobonus');		
 		
-		objects.t_slots_payout.text=sum_bonus;
+		objects.t_slots_payout.text=spin_payout;
 		
 		this.send_info(['Больше нет выигрышных комбинаций!','No more winning matches!'][LANG]);
 						
-		
 						
 		//записываем рейтинг в базу
 		game.change_my_balance(0);
 						
 		this.check_on=0;
 		
-		fbs.ref('SLOTS_STAT').push({name:my_data.name,sum_bonus,bet:this.bet_amount,tm:firebase.database.ServerValue.TIMESTAMP})
+		fbs.ref('SLOTS_STAT').push({name:my_data.name,spin_payout,bet:this.bet_amount,tm:firebase.database.ServerValue.TIMESTAMP})
 		
 	},
 	
