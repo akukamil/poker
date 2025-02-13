@@ -4967,7 +4967,6 @@ slots={
 			const mask_h=data.mask.length;
 			const mask_w=data.mask[0].length;
 			let bonus_data=data.bonus;
-			let sum_pattern_payout=0;
 
 			for (let y=0;y<this.slot_y-mask_h+1;y++){
 				for(let x=0;x<this.slot_x-mask_w+1;x++){	
@@ -4977,18 +4976,15 @@ slots={
 						const symb_perc=bonus_data[fit_symbol-1];
 						const pattern_payout=Math.round(this.bet_amount*symb_perc);		
 						this.change_my_balance(pattern_payout);							
-						sum_pattern_payout+=pattern_payout;
+						spin_payout+=pattern_payout;
 						this.send_info('+'+pattern_payout,1000);
-						objects.t_slots_payout.text=sum_pattern_payout;
+						objects.t_slots_payout.text=spin_payout;
 						await this.show_pattern(y,x,data);
 						this.add_pattern(y,x,data);						
 						
 					}					
 				}
-			}
-			
-			//всего за спин
-			spin_payout+=sum_pattern_payout;
+			}			
 		}
 		
 		//если нет бонуса
