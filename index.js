@@ -4119,8 +4119,7 @@ tables_menu={
 		}		
 	},
 	
-	tick(){	
-		
+	tick(){			
 		
 		const cur_time=Date.now();
 		const difference = app_start_time+3600000 - cur_time;
@@ -4937,7 +4936,7 @@ slots={
 				if(d.spin_payout){
 					sum_rop+=(d.spin_payout/d.bet);
 				}			
-				console.log(d);
+				console.log(d.name,d.spin_payout-d.bet,new Date(d.tm).toLocaleString());
 			});
 			
 			console.log(sum_rop/num_of_last);
