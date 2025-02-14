@@ -1,7 +1,5 @@
 var M_WIDTH=800, M_HEIGHT=450;
-var app, assets={}, app_start_time=0, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, chat_path='chat', connected = 1, client_id =0, h_state = 0, game_platform = "",
-hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''},
-opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
+var app, assets={}, app_start_time=0, game, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "", game_name='poker', hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''},opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
 
 const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["h",0,8],["h",0,9],["h",0,10],["h",0,11],["h",0,12],["h",0,13],["h",0,14],["d",1,2],["d",1,3],["d",1,4],["d",1,5],["d",1,6],["d",1,7],["d",1,8],["d",1,9],["d",1,10],["d",1,11],["d",1,12],["d",1,13],["d",1,14],["s",2,2],["s",2,3],["s",2,4],["s",2,5],["s",2,6],["s",2,7],["s",2,8],["s",2,9],["s",2,10],["s",2,11],["s",2,12],["s",2,13],["s",2,14],["c",3,2],["c",3,3],["c",3,4],["c",3,5],["c",3,6],["c",3,7],["c",3,8],["c",3,9],["c",3,10],["c",3,11],["c",3,12],["c",3,13],["c",3,14]]
 const suit_num_to_txt = ['h','d','s','c'];
@@ -1116,11 +1114,14 @@ chat={
 	games_to_chat:200,
 	payments:0,
 	processing:0,
-	
+	remote_socket:0,
+	ss:[],
+		
 	activate() {	
 
 		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
-		objects.bcg.texture=assets.bcg;
+		//objects.bcg.texture=assets.lobby_bcg;
+		objects.chat_enter_button.visible=my_data.games>=this.games_to_chat;
 		
 		if(my_data.blocked)		
 			objects.chat_enter_button.texture=assets.chat_blocked_img;
@@ -1129,11 +1130,18 @@ chat={
 
 		objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Отправлять сообщения в чат могут игроки сыгравшие более 200 онлайн партий.\n3. За нарушение правил игрок может попасть в черный список.'
 		if(my_data.blocked) objects.chat_rules.text='Вы не можете писать в чат, так как вы находитесь в черном списке';
-
+		
+		
+	},
+		
+	new_message(data){
+		
+		console.log('new_data',data);
+		
 	},
 	
-	init(){
-		
+	async init(){	
+			
 		this.last_record_end = 0;
 		objects.chat_msg_cont.y = objects.chat_msg_cont.sy;		
 		objects.bcg.interactive=true;
@@ -1141,16 +1149,26 @@ chat={
 		objects.bcg.pointerdown=this.pointer_down.bind(this);
 		objects.bcg.pointerup=this.pointer_up.bind(this);
 		objects.bcg.pointerupoutside=this.pointer_up.bind(this);
+		
 		for(let rec of objects.chat_records) {
 			rec.visible = false;			
 			rec.msg_id = -1;	
 			rec.tm=0;
 		}		
 		
-		//загружаем чат		
-		fbs.ref(chat_path).orderByChild('tm').limitToLast(20).once('value', snapshot => {chat.chat_load(snapshot.val());});		
-		
 		this.init_yandex_payments();
+
+		await my_ws.init();	
+		
+		//загружаем чат		
+		const chat_data=await my_ws.get(`${game_name}/chat`,25);
+		
+		await this.chat_load(chat_data);
+		
+		//подписываемся на новые сообщения
+		my_ws.ss_child_added(`${game_name}/chat`,chat.chat_updated.bind(chat))
+		
+		console.log('Чат загружен!')
 	},		
 
 	init_yandex_payments(){
@@ -1164,13 +1182,6 @@ chat={
 		}).catch(err => {})			
 		
 	},	
-
-	fix_name(uid){
-		
-		fbs.ref('players/'+uid+'/name').set(auth1.get_random_name(uid));
-		fbs.ref('players/'+uid+'/nick_tm').set(2728556930444);
-		
-	},
 
 	get_oldest_index () {
 		
@@ -1210,7 +1221,7 @@ chat={
 		
 	async chat_load(data) {
 		
-		if (data === null) return;
+		if (!data) return;
 		
 		//превращаем в массив
 		data = Object.keys(data).map((key) => data[key]);
@@ -1221,15 +1232,12 @@ chat={
 		//покаываем несколько последних сообщений
 		for (let c of data)
 			await this.chat_updated(c,true);	
-		
-		//подписываемся на новые сообщения
-		fbs.ref(chat_path).on('child_changed', snapshot => {chat.chat_updated(snapshot.val());});
 	},	
 				
 	async chat_updated(data, first_load) {		
 	
-		//console.log('receive message',data)
-		if(data===undefined) return;
+		//console.log('chat_updated:',JSON.stringify(data).length);
+		if(data===undefined||!data.msg||!data.name||!data.uid) return;
 				
 		//ждем пока процессинг пройдет
 		for (let i=0;i<10;i++){			
@@ -1239,13 +1247,7 @@ chat={
 				break;				
 		}
 		if (this.processing) return;
-				
-		//если это дубликат моего сообщения из-за таймстемпа
-		if (data.uid===my_data.uid)
-			if (objects.chat_records.find(obj => {return obj.msg.text===data.msg&&obj.index===data.index}))
-				return;			
-		
-		
+							
 		this.processing=1;
 		
 		//выбираем номер сообщения
@@ -1254,9 +1256,6 @@ chat={
 		new_rec.y=this.last_record_end;
 		
 		this.last_record_end += y_shift;		
-
-		//if (!first_load)
-		//	lobby.inst_message(data);
 		
 		//смещаем на одно сообщение (если чат не видим то без твина)
 		if (objects.chat_cont.visible)
@@ -1288,17 +1287,14 @@ chat={
 			console.log('Игрок убит: ',player_data.uid);
 			this.kill_next_click=0;
 		}
-		
-		if(this.delete_message_mode){			
-			fbs.ref(`${chat_path}/${player_data.index}`).remove();
-			console.log(`сообщение ${player_data.index} удалено`)
-		}
-		
+			
 		
 		if(this.moderation_mode||this.block_next_click||this.kill_next_click||this.delete_message_mode) return;
 		
 		if (objects.chat_keyboard_cont.visible)		
 			keyboard.response_message(player_data.uid,player_data.name.text);
+		else
+			lobby.show_invite_dialog_from_chat(player_data.uid,player_data.name.text);
 		
 		
 	},
@@ -1413,8 +1409,7 @@ chat={
 			sound.play('locked');
 			return
 		};
-		
-		
+				
 		//оплата разблокировки чата
 		if (my_data.blocked){	
 		
@@ -1443,8 +1438,7 @@ chat={
 				
 			return;
 		}
-		
-		
+				
 		sound.play('click');
 		
 		//убираем метки старых сообщений
@@ -1463,7 +1457,8 @@ chat={
 		const msg = await keyboard.read(70);		
 		if (msg) {			
 			const index=irnd(1,999);
-			fbs.ref(chat_path+'/'+index).set({uid:my_data.uid,name:my_data.name,msg,tm:firebase.database.ServerValue.TIMESTAMP,index});
+			my_ws.socket.send(JSON.stringify({cmd:'push',path:`${game_name}/chat`,val:{uid:my_data.uid,name:my_data.name,msg,tm:'TMS'}}))	
+			//fbs.ref(chat_path+'/'+index).set({uid:my_data.uid,name:my_data.name,msg, tm:firebase.database.ServerValue.TIMESTAMP,index});
 		}	
 		
 	},
@@ -4661,7 +4656,7 @@ slots={
 	check_on:0,
 	info_timer:0,
 	
-	activate(){				
+	activate(){	
 		
 		this.roll_process();	
 		anim2.add(objects.slots_cont,{x:[-800,0]}, true, 0.5,'linear');	
@@ -4859,13 +4854,13 @@ slots={
 	
 	start_btn_down(){	
 		
-		if (this.roll_on){		
-			sound.play('slot_click');
+		if (this.roll_on){
 			this.roll_on=0;
-			assets.slot_spin.stop();
 			clearInterval(this.roll_timer);	
 			objects.slots_start_btn.texture=assets.slots_start_btn;	
-			setTimeout(function(){slots.check_payout();},1000);			
+			setTimeout(function(){slots.check_payout();},1000);
+			assets.slot_spin.stop();
+			sound.play('slot_click');
 		}else{	
 		
 			//если нечем платить
@@ -6348,6 +6343,15 @@ async function init_game_env(env) {
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
 	
+	
+	//загрузка библиотеки сокета
+	await auth2.load_script('https://akukamil.github.io/common/my_ws.js');	
+	
+	//ждем загрузки чата
+	await Promise.race([
+		chat.init(),
+		new Promise(resolve=> setTimeout(() => {console.log('chat is not loaded!');resolve()}, 5000))
+	]);
 	
 	//сообщение для дубликатов
 	client_id = irnd(10,999999);
