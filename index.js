@@ -4925,16 +4925,18 @@ slots={
 		fbs.ref('SLOTS_STAT').orderByChild('tm').limitToLast(num_of_last).once('value',s=>{
 			
 			let sum_rop=0;		
+			let sum_win=0;
 			
 			const data=s.val();
 			Object.values(data).forEach(d=>{	
 				if(d.spin_payout){
 					sum_rop+=(d.spin_payout/d.bet);
+					sum_win+=(d.spin_payout-d.bet);
 				}			
 				console.log(d.name,d.spin_payout-d.bet,new Date(d.tm).toLocaleString());
 			});
 			
-			console.log(sum_rop/num_of_last);
+			console.log(sum_rop/num_of_last,sum_win);
 		});			
 		
 		
@@ -5000,6 +5002,7 @@ slots={
 		
 		fbs.ref('SLOTS_STAT').push({name:my_data.name,spin_payout,bet:this.bet_amount,tm:firebase.database.ServerValue.TIMESTAMP})
 		
+		ad.show();
 	},
 	
 	async show_pattern(py,px,data){
