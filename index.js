@@ -4740,7 +4740,7 @@ slots={
 				
 		
 		let total_payout=0;
-		const iters=100000;
+		const iters=10000;
 		for (let z=0;z<iters;z++){
 					
 			
@@ -4858,6 +4858,7 @@ slots={
 			this.roll_on=0;
 			clearInterval(this.roll_timer);	
 			objects.slots_start_btn.texture=assets.slots_start_btn;	
+			slots.roll_process();
 			setTimeout(function(){slots.check_payout();},1000);
 			assets.slot_spin.stop();
 			sound.play('slot_click');
