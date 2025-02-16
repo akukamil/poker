@@ -5001,7 +5001,10 @@ slots={
 						
 		this.check_on=0;
 		
-		fbs.ref('SLOTS_STAT').push({name:my_data.name,spin_payout,bet:this.bet_amount,tm:firebase.database.ServerValue.TIMESTAMP})
+		
+		my_ws.socket.send(JSON.stringify({cmd:'log',logger:'slots',data:{uid:my_data.uid,name:my_data.name,spin_payout,bet:this.bet_amount,tm:'TMS'}}));
+		
+		//fbs.ref('SLOTS_STAT').push({name:my_data.name,spin_payout,bet:this.bet_amount,tm:firebase.database.ServerValue.TIMESTAMP})
 		
 		ad.show();
 	},
