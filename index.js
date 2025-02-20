@@ -4049,7 +4049,9 @@ tables_menu={
 				this.timer=setInterval(function(){tables_menu.tick()},1000);			
 		}
 		
-		//objects.shop_button.visible=false;
+		
+		const dow=new Date(Date.now()).getDay();		
+		objects.slots_btn.visible=dow===5?true:false;
 			
 		some_process.table=function(){tables_menu.process()};
 		
