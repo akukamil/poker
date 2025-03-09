@@ -11,7 +11,7 @@ let cards_suit_texture=''
 const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
 const enter_data={'table1':25000,'table2':50000,'table3':10000,'table4':20000};
 fbs_once=async function(path){
-	const info=await fbs.ref(path).once('value');
+	const info=await fbs.ref(path).get();
 	return info.val();	
 }
 
@@ -6307,8 +6307,7 @@ async function init_game_env(env) {
 	document.addEventListener("visibilitychange", vis_change);
 		
 	//загружаем остальные данные из файербейса
-	let _other_data = await fbs.ref("players/" + my_data.uid).once('value');
-	let other_data = _other_data.val();
+	const other_data = await fbs_once("players/" + my_data.uid);
 		
 	//определяем базовые параметры
 	my_data.rating = other_data?.PUB?.rating || 100;
