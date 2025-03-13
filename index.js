@@ -4690,8 +4690,15 @@ slots={
 		const mx=e.data.global.x/app.stage.scale.x;;		
 		const button_cen_x=objects.t_slots_bet.x;
 		const dir=mx>button_cen_x?1:-1;		
+			
 		
 		const new_bet=this.bet_amount+dir*100;	
+		
+		if (new_bet>25000){
+			sound.play('locked');
+			this.send_info(['Это максимальная ставка!','Maximum bet!'][LANG],5000);
+			return;		
+		}
 		
 		if (this.check_on||new_bet<=0){
 			sound.play('locked');
