@@ -4017,6 +4017,8 @@ tables_menu={
 	next_admin_info_check_tm:0,
 	my_avatar_clicks:0,
 	table_stat_updater:{1:{players_num:-1,timer:0},2:{players_num:-1,timer:0},3:{players_num:-1,timer:0},4:{players_num:-1,timer:0}},
+	moscow_dow:0,
+	srv_timer:0,
 		
 	activate(init){				
 			
@@ -4025,7 +4027,11 @@ tables_menu={
 		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
 		objects.bcg.texture = assets.bcg;
-						
+		
+		//обновляем серверное время
+		this.update_moscow_dow();
+		this.srv_timer=setInterval(()=>{this.update_moscow_dow()},40000)
+				
 		this.update_my_data();
 				
 		this.table_stat_updater[1].timer=setTimeout(()=>this.update_table_stat(1),10);
@@ -4048,12 +4054,25 @@ tables_menu={
 			if (!this.free_chips);
 				this.timer=setInterval(function(){tables_menu.tick()},1000);			
 		}
-		
-		
-		const dow=new Date(Date.now()).getDay();		
-		objects.slots_btn.visible=dow===5?true:false;
-			
+					
 		some_process.table=function(){tables_menu.process()};
+		
+	},
+	
+	async update_moscow_dow(){
+		
+		const server_time=await my_ws.get_tms();	
+		if (server_time){
+			const moscow_time=new Date(Date.now()).toLocaleString("en-US", {timeZone: "Europe/Moscow"});
+			this.moscow_dow =  new Date(moscow_time).getDay();
+		}else{
+			this.moscow_dow=0;
+		}		
+		
+		if (this.moscow_dow===5)
+			objects.slots_btn.alpha=1;
+		else
+			objects.slots_btn.alpha=0.25;
 		
 	},
 	
@@ -4239,6 +4258,16 @@ tables_menu={
 	
 	slots_btn_down(){
 		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
+		if (this.moscow_dow!==5){
+			objects.table_menu_info.text=['Слоты работают только по пятницам (МСК)','Only on Firdays'][LANG];
+			return;
+		}
+		
 		this.close();
 		slots.activate();	
 		
@@ -4316,6 +4345,8 @@ tables_menu={
 	close(){		
 		
 		anim2.add(objects.table_buttons_cont,{x:[0,800]}, false, 0.5,'linear');
+		
+		clearInterval(this.srv_timer);
 		
 		clearTimeout(this.table_stat_updater[1].timer);
 		clearTimeout(this.table_stat_updater[2].timer);
@@ -4749,9 +4780,12 @@ slots={
 				
 		
 		let total_payout=0;
-		const iters=10000;
+		let total_bet=0;
+		const iters=3386;
+		
 		for (let z=0;z<iters;z++){
 					
+			
 			
 			objects.slots_icons.forEach(s=>{
 				const id=irnd(1,5);
@@ -4770,6 +4804,8 @@ slots={
 			
 			this.fitted_patterns=[];
 			let spin_payout=0;
+			const cur_bet=100+z*15;
+			total_bet+=cur_bet;
 			
 			//ищем паттерны в результатах
 			for (const [name, data] of Object.entries(this.patterns)){
@@ -4786,7 +4822,7 @@ slots={
 						if (fit_symbol){
 							
 							const symb_perc=bonus_data[fit_symbol-1];
-							const pattern_payout=Math.round(this.bet_amount*symb_perc);		
+							const pattern_payout=Math.round(cur_bet*symb_perc);		
 							//this.change_my_balance(pattern_payout);							
 							spin_payout+=pattern_payout;
 							//this.send_info('+'+pattern_payout,1000);
@@ -4803,7 +4839,7 @@ slots={
 			total_payout+=spin_payout;
 		}		
 		
-		console.log(100*total_payout/(this.bet_amount*iters))
+		console.log(100*total_payout/total_bet,total_payout-total_bet)
 	},
 	
 	mask_fit(py,px,data,name){
