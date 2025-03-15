@@ -4989,8 +4989,9 @@ slots={
 	},
 	
 	async check_payout(){
-			
-		await new Promise((resolve, reject) => {setTimeout(resolve, 1250);});	
+		
+		tables_menu.update_moscow_dow();
+		await new Promise((resolve, reject) => {setTimeout(resolve, 1250)});	
 			
 		//формируем данные слота в виде 2Д массива
 		let i=0;
@@ -5046,8 +5047,11 @@ slots={
 						
 		this.check_on=0;
 		
-		
+		if (tables_menu.moscow_dow!==5){
+			this.exit_btn_down();
+		}
 		my_ws.socket.send(JSON.stringify({cmd:'log',logger:'slots',data:{uid:my_data.uid,name:my_data.name,spin_payout,bet:this.bet_amount,tm:'TMS'}}));
+		
 		
 		//fbs.ref('SLOTS_STAT').push({name:my_data.name,spin_payout,bet:this.bet_amount,tm:firebase.database.ServerValue.TIMESTAMP})
 		
