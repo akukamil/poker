@@ -5619,12 +5619,12 @@ auth2 = {
 		
 	load_script(src) {
 	  return new Promise((resolve, reject) => {
-		const script = document.createElement('script')
-		script.type = 'text/javascript'
-		script.onload = resolve
-		script.onerror = reject
-		script.src = src
-		document.head.appendChild(script)
+        const script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.onload = () => resolve(1)
+        script.onerror = () => resolve(0)
+        script.src = src
+        document.head.appendChild(script)
 	  })
 	},
 			
