@@ -6262,15 +6262,23 @@ async function init_game_env(env) {
 	const opts={width:800, height:450,antialias:true,resolution,autoDensity:true};
 	app = new PIXI.Application(opts);
 	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #999999";					
-
 				
 	//событие по изменению размера окна
 	resize();
 	window.addEventListener("resize", resize);
-
 				
 	await main_loader.load1();	
 	await main_loader.load2();
+	
+	//запускаем главный цикл
+	main_loop.run();
+
+	//анимация лупы
+	//anim2.add(objects.id_cont,{y:[-200,objects.id_cont.sy]}, true, 0.5,'easeOutBack');
+	some_process.loup_anim=function() {
+		objects.id_loup.x=20*Math.sin(game_tick*8)+90;
+		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
+	}	
 	
 	await auth2.init();	
 	
@@ -6326,15 +6334,6 @@ async function init_game_env(env) {
 	}
 		
 
-	//запускаем главный цикл
-	main_loop.run();
-
-	//анимация лупы
-	anim2.add(objects.id_cont,{y:[-200,objects.id_cont.sy]}, true, 0.5,'easeOutBack');
-	some_process.loup_anim=function() {
-		objects.id_loup.x=20*Math.sin(game_tick*8)+90;
-		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
-	}
 		
 	//также сразу включаем его в кэш
 	if(!players_cache.players.BOT){
@@ -6364,7 +6363,6 @@ async function init_game_env(env) {
 	my_data.card_id = other_data?.PUB?.card_id || 1;
 	my_data.show_fold=pref.show_fold = other_data?.PUB?.show_fold ?? 1;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
-
 		
 	//убираем страну из имени
 	if (auth2.get_country_from_name(my_data.name))
@@ -6420,10 +6418,8 @@ async function init_game_env(env) {
 			kill_game();	
 		if(data.message==='RELOAD')
 			window.location.reload();	
-		if (data.message==='EVAL_CODE'){
-			eval(data.code)		
-	}
-		
+		if (data.message==='EVAL_CODE')
+			eval(data.code);
 	});
 				
 	//устанавливаем рейтинг в попап
