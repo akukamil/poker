@@ -5415,11 +5415,9 @@ pref={
 		objects.pref_conf_photo_btn.visible=false;
 		
 		//сколько осталось до изменения
-		this.hours_to_nick_change=Math.max(0,Math.floor(720-(serv_tm-my_data.nick_tm)*0.001/3600));
 		this.hours_to_photo_change=Math.max(0,Math.floor(720-(serv_tm-my_data.avatar_tm)*0.001/3600));
 		
 		//определяем какие кнопки доступны
-		objects.pref_change_name_btn.alpha=(this.hours_to_nick_change>0||!serv_tm)?0.5:1;
 		objects.pref_prv_avatar_btn.alpha=(this.hours_to_photo_change>0||!serv_tm)?0.5:1;
 		objects.pref_next_avatar_btn.alpha=(this.hours_to_photo_change>0||!serv_tm)?0.5:1;	
 		objects.pref_reset_avatar_btn.alpha=(this.hours_to_photo_change>0||!serv_tm)?0.5:1;	
@@ -5633,7 +5631,7 @@ pref={
 		players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
 		fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.cur_pic_url);
 		
-		my_data.avatar_tm=Date.now();
+		my_data.avatar_tm=serv_tm;
 		fbs.ref(`players/${my_data.uid}/PRV/avatar_tm`).set(my_data.avatar_tm);
 		
 		//обновляем аватар в кэше
@@ -5641,6 +5639,7 @@ pref={
 			tables_menu.update_my_data();			
 		})	
 		
+		this.update_buttons();
 		objects.pref_conf_photo_btn.visible=false;	
 		this.send_info(['Вы изменили фото)))','You have changed your photo)))'][LANG]);
 		sound.play('confirm_dialog');
