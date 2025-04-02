@@ -5522,7 +5522,7 @@ pref={
 		if (game_platform==='VK'){
 			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item:'change_card'}).then(data =>{
 				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_card'}});
-				this.change_card(name);				
+				this.conf_change_card();				
 			}).catch((err) => {
 				this.send_info(['Ошибка при покупке!','Error!'][LANG]);
 			});	
