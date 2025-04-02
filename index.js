@@ -5552,7 +5552,7 @@ pref={
 		this.cur_card_id+=dir;
 		
 		if (this.cur_card_id<1) this.cur_card_id=1;
-		if (this.cur_card_id>10) this.cur_card_id=10;
+		if (this.cur_card_id>15) this.cur_card_id=15;
 		objects.card_pic.bcg.texture=assets['card'+this.cur_card_id];		
 		objects.pref_conf_card_btn.visible=this.cur_card_id!==my_data.card_id;
 		objects.pref_change_card_icon.visible=objects.pref_conf_card_btn.visible;
@@ -6111,6 +6111,12 @@ main_loader={
 		loader.add('egg_snd',git_src+'sounds/egg.mp3');
 		loader.add('brick_snd',git_src+'sounds/brick.mp3');
 		loader.add('tomato_snd',git_src+'sounds/tomato.mp3');
+		
+		
+		//добавляем карточки
+		for (let c=1;c<16;c++)
+			loader.add('card'+c,git_src+`res/common/card${c}.png`);
+		
 		
 		//добавляем из листа загрузки
 		//const load_list=eval(assets.main_load_list);
