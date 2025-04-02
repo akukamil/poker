@@ -5451,7 +5451,11 @@ pref={
 		
 		//получаем новое имя
 		const name=await keyboard.read(15);
-		if ((name&&name.replace(/\s/g, '').length<3)||!name){			
+		
+		if (!name)		
+			return;		
+		
+		if (name&&name.replace(/\s/g, '').length<3){			
 			this.send_info(['Неправильное имя(((','Invalid name'][LANG]);	
 			sound.play('locked');
 			return;
@@ -5615,8 +5619,8 @@ pref={
 		if (this.cur_card_id<1) this.cur_card_id=1;
 		if (this.cur_card_id>10) this.cur_card_id=10;
 		objects.card_pic.bcg.texture=assets['card'+this.cur_card_id];		
-		objects.pref_conf_card_btn.visible=this.cur_card_id!==my_data.card_id;		
-		
+		objects.pref_conf_card_btn.visible=this.cur_card_id!==my_data.card_id;
+		objects.pref_change_card_icon.texture=game_platform==='YANDEX'?assets.yan_icon:assets.vk_icon;
 		//objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
 		
 	},
