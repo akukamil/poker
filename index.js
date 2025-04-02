@@ -1975,11 +1975,11 @@ sound={
 		if (this.on){
 			this.on=0;
 				
-			pref.add_info(['Звуки отключены','Sounds is off'][LANG]);
+			pref.send_info(['Звуки отключены','Sounds is off'][LANG]);
 			
 		} else{
 			this.on=1;
-			pref.add_info(['Звуки включены','Sounds is on'][LANG]);
+			pref.send_info(['Звуки включены','Sounds is on'][LANG]);
 		}
 	
 	}
