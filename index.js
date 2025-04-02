@@ -5627,7 +5627,22 @@ pref={
 		this.tex_loading=0;	
 		
 	},
-					
+				
+	conf_photo_down(){
+		
+		players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
+		fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.cur_pic_url);
+		
+		my_data.avatar_tm=Date.now();
+		fbs.ref(`players/${my_data.uid}/PRV/avatar_tm`).set(my_data.avatar_tm);
+		
+		//обновляем аватар в кэше
+		players_cache.update_avatar_forced(my_data.uid,this.cur_pic_url).then(()=>{
+			tables_menu.update_my_data();			
+		})	
+		
+	},
+				
 	send_info(msg,timeout){
 		
 		objects.pref_info.text=msg;
@@ -5697,19 +5712,7 @@ pref={
 		anim2.add(objects.pref_cont,{alpha:[1,0]}, false, 0.2,'linear');	
 		
 	},
-	
-	async close_btn_down(){
-		
-		if(anim2.any_on()){
-			sound.play('locked');
-			return;			
-		}
-		
-		sound.play('click');
-		this.close();
-		tables_menu.activate();
-		
-	}
+
 
 }
 
