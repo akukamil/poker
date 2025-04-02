@@ -4057,7 +4057,7 @@ tables_menu={
 				this.restart_free_chips_count();			
 		}
 					
-		objects.pref_button.visible=false;
+		//objects.pref_button.visible=false;
 					
 		some_process.table=function(){tables_menu.process()};
 		
