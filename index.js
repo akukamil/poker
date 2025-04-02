@@ -5367,6 +5367,7 @@ pref={
 		//кнопки сохранения пока не видно
 		objects.pref_conf_card_btn.visible=false;
 		objects.pref_conf_photo_btn.visible=false;
+		objects.pref_change_card_icon.visible=false;
 		
 		this.update_available_actions();
 		
@@ -5535,12 +5536,32 @@ pref={
 		my_data.card_id = this.cur_card_id;
 		fbs.ref('players/'+my_data.uid+'/PUB/card_id').set(my_data.card_id);
 		players_cache.players[my_data.uid].card_id=my_data.card_id;		
-		objects.pref_conf_card_btn.visible=false;			
+		objects.pref_conf_card_btn.visible=false;		
+		objects.pref_change_card_icon.visible=false;
 		this.send_info(['Вы изменили дизайн карточки)))','You have changed card design!'][LANG]);
-		sound.play('confirm_dialog');	
+		sound.play('confirm_dialog');
 		
 	},
 			
+	change_card(dir){
+				
+		if (game_platform!=='YANDEX'&&game_platform!=='VK'){
+			this.send_info(['Только для Яндекса и Вконтакте(((','Only for Yandex and VK((('][LANG]);
+			sound.play('locked');
+			return;
+		}
+				
+		this.cur_card_id+=dir;
+		
+		if (this.cur_card_id<1) this.cur_card_id=1;
+		if (this.cur_card_id>10) this.cur_card_id=10;
+		objects.card_pic.bcg.texture=assets['card'+this.cur_card_id];		
+		objects.pref_conf_card_btn.visible=this.cur_card_id!==my_data.card_id;
+		objects.pref_change_card_icon.texture=game_platform==='YANDEX'?assets.yan_icon:assets.vk_icon;
+		//objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
+		
+	},
+				
 	async reset_avatar(){
 		
 		if (!serv_tm){
@@ -5606,25 +5627,7 @@ pref={
 		
 	},
 		
-	change_card(dir){
-				
-		if (game_platform!=='YANDEX'&&game_platform!=='VK'){
-			this.send_info(['Только для Яндекса и Вконтакте(((','Only for Yandex and VK((('][LANG]);
-			sound.play('locked');
-			return;
-		}
-				
-		this.cur_card_id+=dir;
-		
-		if (this.cur_card_id<1) this.cur_card_id=1;
-		if (this.cur_card_id>10) this.cur_card_id=10;
-		objects.card_pic.bcg.texture=assets['card'+this.cur_card_id];		
-		objects.pref_conf_card_btn.visible=this.cur_card_id!==my_data.card_id;
-		objects.pref_change_card_icon.texture=game_platform==='YANDEX'?assets.yan_icon:assets.vk_icon;
-		//objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
-		
-	},
-				
+			
 	send_info(msg,timeout){
 		
 		objects.pref_info.text=msg;
