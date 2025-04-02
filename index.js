@@ -5492,13 +5492,13 @@ pref={
 	
 	
 		//проверяем покупку
-		
+		my_data.name=name;				
 	
 		//обновляем данные о времени
 		fbs.ref(`players/${my_data.uid}/PRV/nick_tm`).set(my_data.nick_tm);
 		fbs.ref(`players/${my_data.uid}/PUB/name`).set(my_data.name);	
 		
-		my_data.name=name;					
+			
 		
 		tables_menu.update_my_data();
 		
