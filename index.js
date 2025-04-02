@@ -5504,7 +5504,7 @@ pref={
 		
 		if (game_platform==='YANDEX'){
 			yndx_payments.purchase({id:'change_card'}).then(purchase => {
-				this.change_card();
+				this.conf_change_card();
 				yndx_payments.consumePurchase(purchase.purchaseToken);			
 				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_card'}});		
 			}).catch(err => {
@@ -5523,7 +5523,7 @@ pref={
 
 	},
 	
-	change_card(){
+	conf_change_card(){
 		
 		//меняем карту после покупки
 		my_data.card_id = this.cur_card_id;
@@ -5612,10 +5612,8 @@ pref={
 		
 		if (this.cur_card_id<1) this.cur_card_id=1;
 		if (this.cur_card_id>10) this.cur_card_id=10;
-		objects.card_pic.bcg.texture=assets['card'+this.cur_card_id];
-		
-		objects.pref_conf_card_btn.visible=this.cur_card_id!==my_data.card_id;	
-		
+		objects.card_pic.bcg.texture=assets['card'+this.cur_card_id];		
+		objects.pref_conf_card_btn.visible=this.cur_card_id!==my_data.card_id;		
 		
 		//objects.pref_card_button_info.text=''+this.cards_prices[this.cur_card];
 		
