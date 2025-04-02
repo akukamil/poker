@@ -5641,6 +5641,10 @@ pref={
 			tables_menu.update_my_data();			
 		})	
 		
+		objects.pref_conf_photo_btn.visible=false;	
+		this.send_info(['Вы изменили фото)))','You have changed your photo)))'][LANG]);
+		sound.play('confirm_dialog');
+		
 	},
 				
 	send_info(msg,timeout){
