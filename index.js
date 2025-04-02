@@ -5449,7 +5449,7 @@ pref={
 		
 		//получаем новое имя
 		const name=await keyboard.read(15);
-		if (name&&name.replace(/\s/g, '').length<3){			
+		if ((name&&name.replace(/\s/g, '').length<3)||!name){			
 			this.send_info(['Неправильное имя(((','Invalid name'][LANG]);	
 			sound.play('locked');
 			return;
