@@ -115,6 +115,8 @@ return;}
 objects.chat_msg_cont.y+=dy;},wheel_event(delta){this.shift(-delta*30)},make_hash(){let hash='';const characters='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';for(let i=0;i<6;i++){hash+=characters.charAt(Math.floor(Math.random()*characters.length));}
 return hash;},async write_button_down(){if(anim2.any_on()===true){sound.play('locked');return};if(my_data.blocked){let block_num=await fbs_once('players/'+my_data.uid+'/block_num');block_num=block_num||1;block_num=Math.min(6,block_num);if(game_platform==='YANDEX'){this.payments.purchase({id:'unblock'+block_num}).then(purchase=>{this.unblock_chat();}).catch(err=>{message.add('Ошибка при покупке!');})}
 if(game_platform==='VK'){vkBridge.send('VKWebAppShowOrderBox',{type:'item',item:'unblock'+block_num}).then(data=>{this.unblock_chat();}).catch((err)=>{message.add('Ошибка при покупке!');});};return;}
+if(my_data.days_in_game<30){message.add('Чат доступен только для игроков более 1 месяца в игре')
+return;}
 sound.play('click');const cur_dt=Date.now();this.recent_msg=this.recent_msg.filter(d=>cur_dt-d<60000);if(this.recent_msg.length>3){message.add('Подождите 1 минуту')
 return;}
 this.recent_msg.push(Date.now());const msg=await keyboard.read(70);if(msg){const index=irnd(1,999);my_ws.socket.send(JSON.stringify({cmd:'push',path:'chat',val:{uid:my_data.uid,name:my_data.name,msg,tm:'TMS'}}))}},unblock_chat(){objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Отправлять сообщения в чат могут игроки сыгравшие более 200 онлайн партий.\n3. За нарушение правил игрок может попасть в черный список.'
