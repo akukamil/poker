@@ -2171,16 +2171,16 @@ game={
 	},
 		
 	change_my_balance(amount,s){
-		
-		if (my_data.uid==='lCxFS2PgNIMmIYQ1n1LzDOWB1HhoqRyxBA1lrfTUU'||my_data.uid==='c1LWSmC1TRzt7rGkKnOOKMl7OKQgcbiKUtXTKZAqDfg'){
-			fbs.ref('CONTROL_CASE').push({amount,uid:my_data.uid,reason:s||'UNKNOWN'})
-		}
-		
-		
+				
 		my_data.rating+=amount;
 		if(my_data.rating<0)my_data.rating=0;
 		fbs.ref('players/' + my_data.uid + '/PUB/rating').set(my_data.rating);	
 			
+			
+		if (my_data.uid==='lCxFS2PgNIMmIYQ1n1LzDOWB1HhoqRyxBA1lrfTUU'||my_data.uid==='c1LWSmC1TRzt7rGkKnOOKMl7OKQgcbiKUtXTKZAqDfg'){
+			fbs.ref('CONTROL_CASE').push({amount,uid:my_data.uid,reason:s||'UNKNOWN'})
+		}
+					
 	},
 	
 	update_pending(){
