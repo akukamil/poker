@@ -4584,12 +4584,14 @@ dr={
 		
 		if (my_data.uid==='ZhDDS7ajzhB9OUrY2XTnuK3wLgnUwCCxSGjYoNNK7Y'){
 			try{
-				fbs.ref('AIDAR_CASE').push({tms,cur_tm,prv_auth_tm});
+				fbs.ref('AIDAR_CASE').push({tms,cur_tm,prv_auth_tm,socket_state:my_ws.socket.readyState});
 			}catch(e){
 				
 			}
 			
 		}
+		
+		if (!tms) return
 				
 		if (cur_tm-prv_auth_tm===86400000)
 			this.day_reached++;
