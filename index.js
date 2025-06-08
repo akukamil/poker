@@ -2170,7 +2170,12 @@ game={
 				
 	},
 		
-	change_my_balance(amount){
+	change_my_balance(amount,s){
+		
+		if (my_data.uid==='lCxFS2PgNIMmIYQ1n1LzDOWB1HhoqRyxBA1lrfTUU'||my_data.uid==='c1LWSmC1TRzt7rGkKnOOKMl7OKQgcbiKUtXTKZAqDfg'){
+			fbs.ref('CONTROL_CASE').push({amount,uid:my_data.uid,reason:s||'UNKNOWN'})
+		}
+		
 		
 		my_data.rating+=amount;
 		if(my_data.rating<0)my_data.rating=0;
@@ -4208,7 +4213,7 @@ tables_menu={
 			sound.play('locked');return
 		};			
 		
-		game.change_my_balance(1000)
+		game.change_my_balance(1000,'free_chips')
 		sound.play('confirm_dialog');		
 		
 		this.update_my_data();
@@ -4652,7 +4657,7 @@ dr={
 		card.update();
 		
 		fbs.ref('players/'+my_data.uid+'/PRV/DR/claimed').set(this.claimed).then(()=>{	
-			game.change_my_balance(card.reward);
+			game.change_my_balance(card.reward,'dr');
 			stickers.change_stickers_num(10);
 			tables_menu.update_my_data();
 		})			
@@ -4985,10 +4990,10 @@ slots={
 			this.roll_on=1;			
 			sound.play('slot_click');
 			sound.play('slot_spin',1);
-			this.change_my_balance(-this.bet_amount);
+			this.change_my_balance(-this.bet_amount,'slots');
 			
 			//записываем рейтинг в базу
-			game.change_my_balance(0);
+			game.change_my_balance(0,'slots');
 			
 			objects.t_slots_payout.text='';
 			objects.slots_start_btn.texture=assets.slots_stop_btn_img;
@@ -5288,7 +5293,7 @@ shop={
 				//если купили фишки
 				if (item.name==='chips'){
 					objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
-					game.change_my_balance(item.amount);	
+					game.change_my_balance(item.amount,'purchase');	
 					tables_menu.update_my_data();
 					
 					//дополнительный бонус за покупку множества фишек
@@ -5322,7 +5327,7 @@ shop={
 				if (item.name==='chips'){
 					
 					objects.shop_info.text=[`Вы купили ${item.amount} фишек!`,`you bought ${item.amount} chips!`][LANG];
-					game.change_my_balance(item.amount);	
+					game.change_my_balance(item.amount,'purchase');	
 					tables_menu.update_my_data();
 					
 					//дополнительный бонус за покупку множества фишек
@@ -6604,15 +6609,7 @@ async function init_game_env(env) {
 	});
 				
 
-	
-	//обновляем базовые данные в файербейс так могло что-то поменяться
-	/*fbs.ref('players/'+my_data.uid+'/name').set(my_data.name);
-	fbs.ref('players/'+my_data.uid+'/country').set(my_data.country);
-	fbs.ref('players/'+my_data.uid+'/pic_url').set(my_data.pic_url);				
-	fbs.ref('players/'+my_data.uid+'/rating').set(my_data.rating);
-	fbs.ref('players/'+my_data.uid+'/card_id').set(my_data.card_id);	
-	fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);*/
-	
+		
 	//новая версия
 	fbs.ref('players/'+my_data.uid+'/PUB/name').set(my_data.name);
 	fbs.ref('players/'+my_data.uid+'/PUB/country').set(my_data.country);
