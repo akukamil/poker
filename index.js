@@ -721,7 +721,7 @@ class player_card_class extends PIXI.Container {
 		this.chip_icon.x=this.t_rating.x-this.t_rating.width-10;
 	}
 	
-	change_balance(amount){
+	change_balance(amount,reason){
 				
 		if(!amount) return;
 		
@@ -730,7 +730,7 @@ class player_card_class extends PIXI.Container {
 		if(this.uid===my_data.uid){		
 		
 			game.update_my_balance_info(amount);			
-			game.change_my_balance(amount);		
+			game.change_my_balance(amount,reason);		
 			game.update_pending();
 
 		}		
@@ -2631,7 +2631,7 @@ game={
 			in_money=event.chips;		
 
 		this.update_bank(in_money);					
-		this.uid_to_pcards[event.uid].change_balance(-in_money);
+		this.uid_to_pcards[event.uid].change_balance(-in_money,'bet');
 		this.uid_to_pcards[event.uid].added_chips+=in_money;
 			
 		//определяем размер банка который я могу взять
