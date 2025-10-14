@@ -6367,7 +6367,7 @@ async function check_admin_info(){
 async function init_game_env(env) {			
 
 	git_src="https://akukamil.github.io/poker/"
-	git_src=""
+	//git_src=""
 
 	//document.body.style.backgroundColor = "black";
 	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
