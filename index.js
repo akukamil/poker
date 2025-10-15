@@ -232,7 +232,13 @@ class chat_record_class extends PIXI.Container {
 		//получаем pic_url из фб
 		this.avatar.set_texture(PIXI.Texture.WHITE);
 				
-		await this.update_avatar(msg_data.uid, this.avatar);
+		if (msg_data.uid==='admin'){
+			this.msg_bcg.tint=0x55ff55;
+			this.avatar.set_texture(assets.pc_icon);
+		}else{
+			this.msg_bcg.tint=0xffffff;
+			await this.update_avatar(msg_data.uid, this.avatar);
+		}		
 
 		this.uid=msg_data.uid;
 		this.tm = msg_data.tm;			
@@ -1211,13 +1217,16 @@ chat={
 		
 	},
 		
-	block_player(uid){
+	async block_player(uid){
 		
 		fbs.ref('blocked/'+uid).set(Date.now());
 		fbs.ref('inbox/'+uid).set({message:'CHAT_BLOCK',tm:Date.now()});
-		
+		const name=await fbs_once(`players/${uid}/PUB/name`);
+		const msg=`Игрок ${name} занесен в черный список.`;
+		my_ws.socket.send(JSON.stringify({cmd:'push',path:'chat',val:{uid:'admin',name:'Админ',msg,tm:'TMS'}}));
+
 		//увеличиваем количество блокировок
-		fbs.ref('players/'+uid+'/block_num').transaction(val=> {return (val || 0) + 1});
+		fbs.ref('players/'+uid+'/PRV/block_num').transaction(val=> {return (val || 0) + 1});
 		
 	},
 		
@@ -6490,6 +6499,7 @@ async function init_game_env(env) {
 	my_data.country = other_data?.PUB?.country || await auth2.get_country_code() || await auth2.get_country_code2() 
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
+	my_data.block_num = other_data?.PRV?.block_num || 0;
 	my_data.card_id = other_data?.PUB?.card_id || 1;
 	my_data.show_fold=pref.show_fold = other_data?.PUB?.show_fold ?? 1;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
