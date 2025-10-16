@@ -234,7 +234,7 @@ class chat_record_class extends PIXI.Container {
 				
 		if (msg_data.uid==='admin'){
 			this.msg_bcg.tint=0x55ff55;
-			this.avatar.set_texture(assets.pc_icon);
+			await this.update_avatar('BOT', this.avatar);
 		}else{
 			this.msg_bcg.tint=0xffffff;
 			await this.update_avatar(msg_data.uid, this.avatar);
