@@ -1304,9 +1304,6 @@ chat={
 		
 		if (objects.chat_keyboard_cont.visible)		
 			keyboard.response_message(player_data.uid,player_data.name.text);
-		else
-			lobby.show_invite_dialog_from_chat(player_data.uid,player_data.name.text);
-		
 		
 	},
 			
