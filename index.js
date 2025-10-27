@@ -1126,7 +1126,7 @@ chat={
 		
 	activate() {	
 
-		anim2.add(objects.chat_cont,{alpha:[0, 1]}, true, 0.1,'linear');
+		anim2.add(objects.chat_cont,{x:[-800, 0]}, true, 0.5,'linear');
 		//objects.bcg.texture=assets.lobby_bcg;
 		objects.chat_enter_button.visible=true;
 			
@@ -1481,7 +1481,7 @@ chat={
 		
 	close() {
 		
-		anim2.add(objects.chat_cont,{alpha:[1, 0]}, false, 0.1,'linear');
+		anim2.add(objects.chat_cont,{x:[0, -800]}, false, 0.5,'linear');
 		if (objects.chat_keyboard_cont.visible)
 			keyboard.close();
 	}
@@ -4029,30 +4029,30 @@ tables_menu={
 		
 	activate(init){				
 			
-		anim2.add(objects.table_buttons_cont,{x:[800,0]}, true, 0.5,'linear');		
+		anim2.add(objects.table_buttons_cont,{x:[800,0]}, true, 0.5,'linear')
 		
-		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
-		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear');
+		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear')
+		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear')
 		objects.bcg.texture = assets.bcg;
 		
 		//обновляем серверное время
-		this.update_moscow_dow();
+		this.update_moscow_dow()
 		if (!this.srv_timer)
 			this.srv_timer=setInterval(()=>{this.update_moscow_dow()},40000)
 				
-		this.update_my_data();
+		this.update_my_data()
 				
-		this.table_stat_updater[1].timer=setTimeout(()=>this.update_table_stat(1),10);
-		this.table_stat_updater[2].timer=setTimeout(()=>this.update_table_stat(2),1000);
-		this.table_stat_updater[3].timer=setTimeout(()=>this.update_table_stat(3),2000);
-		this.table_stat_updater[4].timer=setTimeout(()=>this.update_table_stat(4),3000);
+		this.table_stat_updater[1].timer=setTimeout(()=>this.update_table_stat(1),10)
+		this.table_stat_updater[2].timer=setTimeout(()=>this.update_table_stat(2),1000)
+		this.table_stat_updater[3].timer=setTimeout(()=>this.update_table_stat(3),2000)
+		this.table_stat_updater[4].timer=setTimeout(()=>this.update_table_stat(4),3000)
 		
 
-		objects.table_menu_info.text='';	
+		objects.table_menu_info.text=''
 		
 		//перепроверяем инфор от админа
-		const tm=Date.now();
-		if (init||(tm>this.next_admin_info_check)) this.check_admin_info();
+		const tm=Date.now()
+		if (init||(tm>this.next_admin_info_check)) this.check_admin_info()
 		
 		if (my_data.days_in_game>30){
 			objects.free_chips_button.visible=false;
@@ -4065,7 +4065,7 @@ tables_menu={
 					
 		objects.days_in_game.text=['День: ','Day: '][LANG]+my_data.days_in_game
 					
-		some_process.table=function(){tables_menu.process()};
+		some_process.table=function(){tables_menu.process()}
 		
 	},
 	
@@ -5204,7 +5204,7 @@ shop={
 	payments:0,
 	
 	activate(){
-		anim2.add(objects.shop_cont,{y:[-450,objects.shop_cont.sy]}, true, 0.25,'linear');	
+		anim2.add(objects.shop_cont,{x:[-800,0]}, true, 0.5,'linear');	
 		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
 	},
 		
@@ -5220,7 +5220,7 @@ shop={
 	
 	close(){
 		
-		anim2.add(objects.shop_cont,{y:[objects.shop_cont.sy, -450]}, false, 0.25,'linear');	
+		anim2.add(objects.shop_cont,{x:[0, -800]}, false, 0.5,'linear');	
 		
 	},
 	
@@ -5372,7 +5372,7 @@ pref={
 	activate(){
 		
 		
-		anim2.add(objects.pref_cont,{alpha:[0,1]}, true, 0.2,'linear');
+		anim2.add(objects.pref_cont,{x:[-800,0]}, true, 0.5,'linear');
 		
 
 		//заполняем имя и аватар
@@ -5729,7 +5729,7 @@ pref={
 	
 	close(){
 		
-		anim2.add(objects.pref_cont,{alpha:[1,0]}, false, 0.2,'linear');	
+		anim2.add(objects.pref_cont,{x:[0,-800]}, false, 0.5,'linear');	
 		
 	},
 
@@ -6217,9 +6217,7 @@ main_loader={
 		}
 
 		
-		anim2.add(objects.loader_cont,{alpha:[1,0],y:[0,450]}, false, 1,'easeInCubic');	
-		objects.loader_bcg.visible=false;
-		objects.loader_front.visible=false;
+		anim2.add(objects.loader_cont,{x:[0,-800]}, false, 0.5,'linear');	
 
 	}
 	
@@ -6410,7 +6408,7 @@ async function init_game_env(env) {
 	main_loop.run();
 
 	//анимация лупы
-	anim2.add(objects.id_cont,{x:[800,objects.id_cont.sx]}, true, 0.5,'easeOutBack');
+	anim2.add(objects.id_cont,{x:[1200,objects.id_cont.sx]}, true, 0.5,'linear');
 	some_process.loup_anim=function() {
 		objects.id_loup.x=20*Math.sin(game_tick*8)+90;
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
@@ -6604,7 +6602,7 @@ async function init_game_env(env) {
 	some_process.loup_anim = function(){};
 
 	//убираем контейнер
-	anim2.add(objects.id_cont,{x:[objects.id_cont.x, -200]}, false, 0.5,'easeInBack');
+	anim2.add(objects.id_cont,{x:[objects.id_cont.x, -400]}, false, 0.5,'linear');
 	
 	//контроль за присутсвием
 	var connected_control = fbs.ref('.info/connected');
