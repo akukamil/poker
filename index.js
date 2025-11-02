@@ -5600,7 +5600,7 @@ pref={
 		
 		this.cur_pic_url=my_data.orig_pic_url;		
 		
-		objects.pref_conf_cards_btn.visible=true;
+		objects.pref_conf_photo_btn.visible=true;
 		this.tex_loading=1;
 		const t=await players_cache.my_texture_from(my_data.orig_pic_url);
 		objects.card_pic.avatar.set_texture(t);	
