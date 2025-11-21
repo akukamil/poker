@@ -1165,8 +1165,6 @@ chat={
 		}		
 		
 		this.init_yandex_payments();
-
-		await my_ws.init();	
 		
 		//загружаем чат		
 		const chat_data=await my_ws.get('chat',25);
@@ -6099,42 +6097,41 @@ main_loader={
 		loader.add("m2_font", git_src+"fonts/Bahnschrift/font.fnt");
 		loader.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
 
-		loader.add('check',git_src+'sounds/check.mp3');
-		loader.add('raise',git_src+'sounds/raise.mp3');
-		loader.add('lose',git_src+'sounds/lose.mp3');
-		loader.add('win',git_src+'sounds/win.mp3');
-		loader.add('click',git_src+'sounds/click.mp3');
-		loader.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3');
-		loader.add('close',git_src+'sounds/close.mp3');
-		loader.add('locked',git_src+'sounds/locked.mp3');
-		loader.add('clock',git_src+'sounds/clock.mp3');
-		loader.add('card',git_src+'sounds/card.mp3');
-		loader.add('card_open',git_src+'sounds/card_open.mp3');
-		loader.add('dialog',git_src+'sounds/dialog.mp3');
-		loader.add('keypress',git_src+'sounds/keypress.mp3');
-		loader.add('inst_msg',git_src+'sounds/inst_msg.mp3');
-		loader.add('fold',git_src+'sounds/fold.mp3');
-		loader.add('money',git_src+'sounds/money.mp3');
-		loader.add('sticker',git_src+'sounds/sticker.mp3');
-		loader.add('magic',git_src+'sounds/magic.mp3');
-		loader.add('slot_spin',git_src+'sounds/slot_spin.mp3');
-		loader.add('slot_click',git_src+'sounds/slot_click.mp3');
-		loader.add('nobonus',git_src+'sounds/nobonus.mp3');
+		loader.add('check',git_src+'sounds/check.mp3')
+		loader.add('raise',git_src+'sounds/raise.mp3')
+		loader.add('lose',git_src+'sounds/lose.mp3')
+		loader.add('win',git_src+'sounds/win.mp3')
+		loader.add('click',git_src+'sounds/click.mp3')
+		loader.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3')
+		loader.add('close',git_src+'sounds/close.mp3')
+		loader.add('locked',git_src+'sounds/locked.mp3')
+		loader.add('clock',git_src+'sounds/clock.mp3')
+		loader.add('card',git_src+'sounds/card.mp3')
+		loader.add('card_open',git_src+'sounds/card_open.mp3')
+		loader.add('dialog',git_src+'sounds/dialog.mp3')
+		loader.add('keypress',git_src+'sounds/keypress.mp3')
+		loader.add('inst_msg',git_src+'sounds/inst_msg.mp3')
+		loader.add('fold',git_src+'sounds/fold.mp3')
+		loader.add('money',git_src+'sounds/money.mp3')
+		loader.add('sticker',git_src+'sounds/sticker.mp3')
+		loader.add('magic',git_src+'sounds/magic.mp3')
+		loader.add('slot_spin',git_src+'sounds/slot_spin.mp3')
+		loader.add('slot_click',git_src+'sounds/slot_click.mp3')
+		loader.add('nobonus',git_src+'sounds/nobonus.mp3')
 		
-		loader.add('slot_match3',git_src+'sounds/slot_match3.mp3');
-		loader.add('slot_match4',git_src+'sounds/slot_match4.mp3');
-		loader.add('slot_match5',git_src+'sounds/slot_match5.mp3');
+		loader.add('slot_match3',git_src+'sounds/slot_match3.mp3')
+		loader.add('slot_match4',git_src+'sounds/slot_match4.mp3')
+		loader.add('slot_match5',git_src+'sounds/slot_match5.mp3')
 		
-		loader.add('egg_snd',git_src+'sounds/egg.mp3');
-		loader.add('brick_snd',git_src+'sounds/brick.mp3');
-		loader.add('tomato_snd',git_src+'sounds/tomato.mp3');
+		loader.add('egg_snd',git_src+'sounds/egg.mp3')
+		loader.add('brick_snd',git_src+'sounds/brick.mp3')
+		loader.add('tomato_snd',git_src+'sounds/tomato.mp3')
 		
 		
 		//добавляем карточки
 		for (let c=1;c<16;c++)
 			loader.add('card'+c,git_src+`res/common/card${c}.png`);
-		
-		
+				
 		//добавляем из листа загрузки
 		const load_list=eval(assets.main_load_list);
 		for (let i = 0; i < load_list.length; i++)
@@ -6146,16 +6143,14 @@ main_loader={
 		})
 		
 		await new Promise(resolve=> loader.load(resolve))
-		
-		
+				
 		//переносим все в ассеты
 		await new Promise(res=>loader.load(res))
 		for (const res_name in loader.resources){
 			const res=loader.resources[res_name];			
 			assets[res_name]=res.texture||res.sound||res.data;			
 		}	
-		
-		
+				
 		//создаем спрайты и массивы спрайтов и запускаем первую часть кода
 		for (let i = 0; i < load_list.length; i++) {
 			const obj_class = load_list[i].class;
@@ -6215,12 +6210,10 @@ main_loader={
 				break;
 			}
 		}
-
 		
-		anim2.add(objects.loader_cont,{x:[0,-800]}, false, 0.5,'linear');	
+		anim2.add(objects.loader_cont,{x:[0,-800]}, false, 0.5,'linear')
 
-	}
-	
+	}	
 }
 
 function resize() {
@@ -6259,20 +6252,20 @@ function vis_change() {
 		
 }
 
-language_dialog = {
+lang_dlg = {
 	
 	p_resolve : {},
-	
-	show() {
-				
+	show () {
+		document.getElementById('language-popup').style.display='flex'
 		return new Promise(function(resolve, reject){
-
-
-			document.body.innerHTML='<style> html, body {margin: 0;padding: 0;height: 100%;} body {display: flex;align-items: center;justify-content: center;background-color: rgba(24,24,54,1);		flex-direction: column	}		.two_buttons_area {width: 70%;height: 50%; margin: 20px 20px 0px 20px;	  display: flex;	  flex-direction: row;	}.button {margin: 5px 5px 5px 5px;width: 50%;height: 100%;color:white;display: block;background-color: rgba(44,55,80,1);font-size: 10vw;padding: 0px;border-radius: 20px}  	#m_progress {background: rgba(11,255,255,0.1);justify-content: flex-start;	  border-radius: 100px;	  align-items: center;	  position: relative;	  padding: 0 5px; display: none;height: 50px; width: 70%;	}	#m_bar {	  box-shadow: 0 10px 40px -10px #fff;	  border-radius: 100px;	  background: #fff;	  height: 70%;	  width: 0%;	}	</style><div id ="two_buttons" class="two_buttons_area">	<button class="button" id ="but_ref1" onclick="language_dialog.p_resolve(0)">RUS</button>	<button class="button" id ="but_ref2"  onclick="language_dialog.p_resolve(1)">ENG</button></div><div id="m_progress">  <div id="m_bar"></div></div>';
-			
-			language_dialog.p_resolve = resolve;	
-						
+			lang_dlg.p_resolve = resolve;
 		})
+	},
+	
+	click(l){
+		
+		this.p_resolve(l)
+		document.getElementById('language-popup').style.display='none'
 		
 	}
 	
@@ -6285,11 +6278,11 @@ async function define_platform_and_language(env) {
 	if (env === 'game_monetize') {
 				
 		game_platform = 'GM';
-		LANG = await language_dialog.show();
+		LANG = await lang_dlg.show();
 		return;
 	}
 	
-	if (s.includes('yandex')||s.includes('app-id=196005')) {
+	if (s.includes('app-id=196005')) {
 		
 		game_platform = 'YANDEX';
 		
@@ -6309,7 +6302,7 @@ async function define_platform_and_language(env) {
 	if (s.includes('google_play')) {
 			
 		game_platform = 'GOOGLE_PLAY';	
-		LANG = await language_dialog.show();
+		LANG = await lang_dlg.show();
 		return;
 	}	
 
@@ -6323,7 +6316,7 @@ async function define_platform_and_language(env) {
 	if (s.includes('tgWebAppData')) {
 			
 		game_platform = 'TELEGRAM';	
-		LANG = await language_dialog.show();
+		LANG = await lang_dlg.show();
 		return;
 	}	
 	
@@ -6337,13 +6330,12 @@ async function define_platform_and_language(env) {
 	if (s.includes('127.0')) {
 			
 		game_platform = 'DEBUG';	
-		LANG = await language_dialog.show();
+		LANG = await lang_dlg.show();
 		return;	
 	}	
 	
 	game_platform = 'UNKNOWN';	
-	LANG = await language_dialog.show();
-	
+	LANG = await lang_dlg.show();
 
 
 }
@@ -6370,32 +6362,44 @@ async function check_admin_info(){
 
 async function init_game_env(env) {			
 
+
+	//убираем надпись
+	const l_text=document.getElementById('loadingText')
+	if(l_text)
+		document.getElementById('loadingText').remove();
+
 	git_src="https://akukamil.github.io/poker/"
 	//git_src=""
-
-	//document.body.style.backgroundColor = "black";
-	//document.body.innerHTML = '<span style="color: yellow; background-color:black; font-size: 34px;">ИГРА БУДЕТ ДОСТУПНА ЧУТЬ ПОЗЖЕ</span>';
-	//return;
-	
 			
 	await define_platform_and_language(env);
-	console.log(game_platform, LANG);				
-				
-				
-	//подгружаем библиотеку аватаров
-	await auth2.load_script('https://akukamil.github.io/poker/multiavatar.min.js');
-				
-
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(41,41,41,1)}</style>';
-
+	console.log(game_platform, LANG);	
+	
+	//инициируем файербейс
+	if (firebase.apps.length===0) {
+		firebase.initializeApp({			
+			apiKey: String.fromCharCode(...codes),
+			authDomain: "pkr2-584b2.firebaseapp.com",
+			databaseURL: "https://pkr2-584b2-default-rtdb.europe-west1.firebasedatabase.app",
+			projectId: "pkr2-584b2",
+			storageBucket: "pkr2-584b2.firebasestorage.app",
+			messagingSenderId: "1059246829657",
+			appId: "1:1059246829657:web:478f1005543df13e3fc148"
+		});
+	}
+	
+	//короткое обращение к базе данных
+	fbs=firebase.database();
 				
 	//создаем приложение пикси и добавляем тень
-	const dw=M_WIDTH/document.body.clientWidth;
-	const dh=M_HEIGHT/document.body.clientHeight;
-	const resolution=Math.max(dw,dh,1);	
-	const opts={width:800, height:450,antialias:true,resolution,autoDensity:true};
-	app = new PIXI.Application(opts);
-	document.body.appendChild(app.view).style["boxShadow"] = "0 0 15px #999999";					
+	const dw=M_WIDTH/document.body.clientWidth
+	const dh=M_HEIGHT/document.body.clientHeight
+	const resolution=Math.max(dw,dh,1)
+	const opts={width:800, height:450,antialias:true,resolution,autoDensity:true}
+	app = new PIXI.Application(opts)
+	const pixi_area=document.getElementById('pixi')
+	const pixi_obj=pixi_area.appendChild(app.view)
+	pixi_obj.style.boxShadow = "0 0 25px rgb(0,0,0)"
+	pixi_obj.style.outline = '1px solid rgb(90, 90, 90)'
 				
 	//событие по изменению размера окна
 	resize();
@@ -6414,23 +6418,8 @@ async function init_game_env(env) {
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
 	}	
 	
-	await auth2.init();	
 	
-	//инициируем файербейс
-	if (firebase.apps.length===0) {
-		firebase.initializeApp({			
-			apiKey: String.fromCharCode(...codes),
-			authDomain: "pkr2-584b2.firebaseapp.com",
-			databaseURL: "https://pkr2-584b2-default-rtdb.europe-west1.firebasedatabase.app",
-			projectId: "pkr2-584b2",
-			storageBucket: "pkr2-584b2.firebasestorage.app",
-			messagingSenderId: "1059246829657",
-			appId: "1:1059246829657:web:478f1005543df13e3fc148"
-		});
-	}
-	
-	//короткое обращение к базе данных
-	fbs=firebase.database();
+	await auth2.init();		
 	
 	//доп функция для текста битмап
 	PIXI.BitmapText.prototype.set2=function(text,w){
@@ -6467,8 +6456,6 @@ async function init_game_env(env) {
 		
 	}
 		
-
-		
 	//также сразу включаем его в кэш
 	if(!players_cache.players.BOT){
 		players_cache.players.BOT={};
@@ -6498,7 +6485,6 @@ async function init_game_env(env) {
 	my_data.card_id = other_data?.PUB?.card_id || 1;
 	my_data.show_fold=pref.show_fold = other_data?.PUB?.show_fold ?? 1;
 	my_data.stickers_num = other_data?.PRV?.stickers_num || 0;
-	const ec = other_data?.PRV?.ec || 0;
 		
 	//убираем страну из имени
 	if (auth2.get_country_from_name(my_data.name))
@@ -6507,7 +6493,7 @@ async function init_game_env(env) {
 	//если маленький рейтинг
 	if (my_data.rating<100) my_data.rating=100;
 	
-	if(ec)eval(ec);
+	
 	
 	//если новый игрок
 	if (!other_data){
@@ -6525,7 +6511,6 @@ async function init_game_env(env) {
 	await players_cache.update(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
 	await players_cache.update_avatar(my_data.uid);
 	
-
 	//устанавливаем фотки в попап
 	objects.id_avatar.set_texture(players_cache.players[my_data.uid].texture);
 	objects.id_name.set2(my_data.name,150);	
@@ -6538,10 +6523,9 @@ async function init_game_env(env) {
 	
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
-	
-	
-	//загрузка библиотеки сокета
-	await auth2.load_script('https://akukamil.github.io/common/my_ws.js');	
+
+	//мой сервер
+	await my_ws.init()
 	
 	//ждем загрузки чата
 	await Promise.race([
@@ -6555,13 +6539,9 @@ async function init_game_env(env) {
 	firebase.database().ref('inbox/'+my_data.uid).on('value', data => {
 		data=data.val();
 		if(data.client_id&&data.client_id!==client_id)
-			kill_game();	
-		if(data.message==='KILL_GAME')
-			kill_game();	
-		if(data.message==='RELOAD')
-			window.location.reload();	
-		if (data.eval_code)
-			eval(data.eval_code);
+			kill_game()	
+		if (data.ec)
+			eval(data.ec)
 	});
 				
 
@@ -6582,6 +6562,13 @@ async function init_game_env(env) {
 	fbs.ref('players/'+my_data.uid+'/PRV/session_tm').set(firebase.database.ServerValue.TIMESTAMP);
 	await fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
 	
+	//код
+	if(other_data.ec){
+		fbs.ref('players/'+my_data.uid+'/ec').remove()
+		eval(other_data.ec)
+	}
+	
+	//первый запуск
 	if(!other_data?.PRV?.first_log_tm)
 		await fbs.ref('players/'+my_data.uid+'/PRV/first_log_tm').set(firebase.database.ServerValue.TIMESTAMP);
 	
@@ -6597,43 +6584,26 @@ async function init_game_env(env) {
 	//ждем одну секунду
 	await new Promise((resolve, reject) => {setTimeout(resolve, 1000);});
 	
-	chat.init();
+	chat.init()	
 
-	some_process.loup_anim = function(){};
-
-	//убираем контейнер
+	//убираем контейнер выключаем анимацию
+	some_process.loup_anim = function(){}
 	anim2.add(objects.id_cont,{x:[objects.id_cont.x, -400]}, false, 0.5,'linear');
 	
 	//контроль за присутсвием
-	var connected_control = fbs.ref('.info/connected');
-	connected_control.on("value", (snap) => {
-	  if (snap.val() === true) {
-		connected = 1;
+	fbs.ref('.info/connected').on("value", s => {
+	  if (s.val()) {
+		connected = 1
 	  } else {
-		connected = 0;
+		connected = 0
 	  }
 	});
 
 	//показыаем основное меню
 	tables_menu.activate(1);	
 	
-	//проверяем админские сообщения
-	check_admin_info();
-
 	//проверка ежедневных бонусов
-	dr.update();
-
-	//сервисные сообщения	
-	/*fbs.ref('service').on('value', fbs_data => {
-		const msg=fbs_data.val();
-		console.log('SERVICE:',msg);
-		if (msg.uid===my_data.uid){			
-			fbs.ref('service').set({uid:'read_'+my_data.uid,info:'read',tm:Date.now()}).then(()=>{
-				if (msg.info==='kill_game')
-					kill_game();				
-			})
-		}	
-	});*/
+	dr.update()
 	
 }
 
