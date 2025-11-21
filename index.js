@@ -5873,6 +5873,15 @@ auth2 = {
 			my_data.orig_pic_url = 'mavatar'+my_data.uid;			
 			
 		}
+		
+		if (game_platform === 'GJ') {			
+						
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('GJ_');
+			my_data.name = this.get_random_name(my_data.uid);
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;			
+			
+		}
+				
 				
 		if (game_platform === 'YANDEX') {			
 		
@@ -6278,6 +6287,13 @@ async function define_platform_and_language(env) {
 	if (s.includes('game_monetize')) {
 				
 		game_platform = 'GM';
+		LANG = await lang_dlg.show();
+		return;
+	}
+	
+	if (s.includes('game_jolt')) {
+				
+		game_platform = 'GJ';
 		LANG = await lang_dlg.show();
 		return;
 	}
