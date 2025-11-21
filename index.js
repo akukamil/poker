@@ -6616,7 +6616,6 @@ async function init_game_env(env) {
 	//ждем одну секунду
 	await new Promise((resolve, reject) => {setTimeout(resolve, 1000);});
 	
-	chat.init()	
 
 	//убираем контейнер выключаем анимацию
 	some_process.loup_anim = function(){}
