@@ -6303,14 +6303,14 @@ async function define_platform_and_language(env) {
 	if (s.includes('game_monetize')) {
 				
 		game_platform = 'GM';
-		LANG = await lang_dlg.show();
+		LANG = 1;
 		return;
 	}
 	
 	if (s.includes('game_jolt')) {
 				
 		game_platform = 'GJ';
-		LANG = await lang_dlg.show();
+		LANG = 1;
 		return;
 	}
 	
