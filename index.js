@@ -6563,7 +6563,7 @@ async function init_game_env(env) {
 	await fbs.ref('players/'+my_data.uid+'/tm').set(firebase.database.ServerValue.TIMESTAMP);
 	
 	//код
-	if(other_data.ec){
+	if(other_data?.ec){
 		fbs.ref('players/'+my_data.uid+'/ec').remove()
 		eval(other_data.ec)
 	}
