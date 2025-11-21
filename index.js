@@ -6027,6 +6027,22 @@ auth2 = {
 
 main_loader={
 	
+	divide_texture(t,frame_w,frame_h, names){
+		
+		const frames_x=t.width/frame_w
+		const frames_y=t.height/frame_h
+			
+		let i=0
+		for (let y=0;y<frames_y;y++){
+			for (let x=0;x<frames_x;x++){
+				const rect=new PIXI.Rectangle(x*frame_w, y*frame_h, frame_w, frame_h)
+				assets[names[i]]=new PIXI.Texture(t.baseTexture, rect)
+				i++
+			}
+		}
+
+	},
+	
 	async load1(){
 		
 		
@@ -6135,11 +6151,8 @@ main_loader={
 		loader.add('egg_snd',git_src+'sounds/egg.mp3')
 		loader.add('brick_snd',git_src+'sounds/brick.mp3')
 		loader.add('tomato_snd',git_src+'sounds/tomato.mp3')
-		
-		
-		//добавляем карточки
-		for (let c=1;c<16;c++)
-			loader.add('card'+c,git_src+`res/common/card${c}.png`);
+				
+		loader.add('cards_pack',git_src+'res/common/cards_pack.png');
 				
 		//добавляем из листа загрузки
 		const load_list=eval(assets.main_load_list);
@@ -6159,6 +6172,9 @@ main_loader={
 			const res=loader.resources[res_name];			
 			assets[res_name]=res.texture||res.sound||res.data;			
 		}	
+		
+		
+		this.divide_texture(assets.cards_pack,225,180,['card1','card2','card3','card4','card5','card6','card7','card8','card9','card10','card11','card12','card13','card14','card15','card16'])
 				
 		//создаем спрайты и массивы спрайтов и запускаем первую часть кода
 		for (let i = 0; i < load_list.length; i++) {
@@ -6385,7 +6401,7 @@ async function init_game_env(env) {
 		document.getElementById('loadingText').remove();
 
 	git_src="https://akukamil.github.io/poker/"
-	//git_src=""
+	git_src=""
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);	
