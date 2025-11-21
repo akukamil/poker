@@ -6300,7 +6300,7 @@ async function define_platform_and_language(env) {
 	
 	let s = window.location.href;
 	
-	if (s.includes('game_monetize')) {
+	if (env==='game_monetize') {
 				
 		game_platform = 'GM';
 		LANG = 1;
