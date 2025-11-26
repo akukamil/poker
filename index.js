@@ -1,5 +1,5 @@
 var M_WIDTH=800, M_HEIGHT=450;
-var app, assets={},yndx_payments=0, app_start_time=0, game,serv_tm, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "", game_name='poker', hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''},opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
+var app, assets={},yndx_payments=0, app_start_time=0, game,SERVER_TM, objects={}, LANG = 0, state="", game_tick = 0, game_id = 0, connected = 1, client_id =0, h_state = 0, game_platform = "", game_name='poker', hidden_state_start=0,fbs=null, pending_player='', opponent={}, my_data={opp_id : ''},opp_data={}, some_process={},git_src='', ME=0,OPP=1,WIN=1,DRAW=0,LOSE=-1,NOSYNC=2,turn=0,BET=0,BIG_BLIND=2;
 const codes = [65,73,122,97,83,121,67,104,71,73,82,53,87,110,119,51,87,77,97,116,55,77,113,79,68,95,101,72,81,75,107,84,51,65,65,98,85,69];
 const cards_data=[["h",0,2],["h",0,3],["h",0,4],["h",0,5],["h",0,6],["h",0,7],["h",0,8],["h",0,9],["h",0,10],["h",0,11],["h",0,12],["h",0,13],["h",0,14],["d",1,2],["d",1,3],["d",1,4],["d",1,5],["d",1,6],["d",1,7],["d",1,8],["d",1,9],["d",1,10],["d",1,11],["d",1,12],["d",1,13],["d",1,14],["s",2,2],["s",2,3],["s",2,4],["s",2,5],["s",2,6],["s",2,7],["s",2,8],["s",2,9],["s",2,10],["s",2,11],["s",2,12],["s",2,13],["s",2,14],["c",3,2],["c",3,3],["c",3,4],["c",3,5],["c",3,6],["c",3,7],["c",3,8],["c",3,9],["c",3,10],["c",3,11],["c",3,12],["c",3,13],["c",3,14]]
 const suit_num_to_txt = ['h','d','s','c'];
@@ -375,10 +375,10 @@ class playing_cards_class extends PIXI.Container {
 		
 		this.t_value.text = this.value_txt;	
 				
-		await anim2.add(this,{scale_x:[1, 0]}, false, 0.2,'linear');		
+		await anim3.add(this,{scale_x:[1,0,'linear']}, false, 0.2);		
 		this.t_value.visible = true;
 		this.suit_img.texture = assets[this.suit_txt + '_bcg'];
-		await anim2.add(this,{scale_x:[0, 1]}, true, 0.2,'linear');	
+		await anim3.add(this,{scale_x:[0, 1,'linear']}, true, 0.2);	
 		
 	}	
 		
@@ -522,14 +522,14 @@ class player_card_class extends PIXI.Container {
 	
 	add_info(info){		
 		this.t_comb.text=info;
-		anim2.add(this.t_comb,{alpha:[1,0]}, true, 3,'linear');				
+		anim3.add(this.t_comb,{alpha:[1,0,'linear']}, true, 3);				
 	}
 	
 	async show_income(income){	
 		this.t_won.text='+'+income;
-		anim2.add(this.t_won,{y:[this.t_won.sy-50,this.t_won.sy],alpha:[0,1]}, true, 0.25,'linear',false);
+		anim3.add(this.t_won,{y:[this.t_won.sy-50,this.t_won.sy,'linear'],alpha:[0,1,'linear']}, true, 0.25,false);
 		await new Promise((resolve, reject) => {setTimeout(resolve, 8000);});
-		anim2.add(this.t_won,{y:[this.t_won.y,this.t_won.sy-50],alpha:[1,0]}, false, 0.25,'linear',false);
+		anim3.add(this.t_won,{y:[this.t_won.y,this.t_won.sy-50,'linear'],alpha:[1,0,'linear']}, false, 0.25,false);
 	}
 	
 	show_sticker(sticker){
@@ -594,7 +594,7 @@ class player_card_class extends PIXI.Container {
 			free_anim_spr.x=75+irnd(-20,20);
 			free_anim_spr.y=60+irnd(-20,20);
 			free_anim_spr.tint=Math.floor((Math.random()*0.5+0.5) * 0xFFFFFF);
-			anim2.add(free_anim_spr,{alpha:[1, 0.5],scale_xy:[0.2,0.9],angle:[0,irnd(-20,20)]}, false, 4,'linear',false);
+			anim3.add(free_anim_spr,{alpha:[1, 0.5,'linear'],scale_xy:[0.2,0.9,'linear'],angle:[0,irnd(-20,20),'linear']}, false, 4,false);
 		}		
 	}	
 	
@@ -616,7 +616,7 @@ class player_card_class extends PIXI.Container {
 		egg_with_shell.visible=true;
 		egg_with_shell.tint=0xffffff;
 		
-		anim2.add(splash,{alpha:[0,1],scale_xy:[0,0.666]}, true, 0.1,'linear');	
+		anim3.add(splash,{alpha:[0,1,'linear'],scale_xy:[0,0.666,'linear']}, true, 0.1);	
 		
 	}
 	
@@ -638,7 +638,7 @@ class player_card_class extends PIXI.Container {
 		tomato.visible=true;
 		tomato.tint=0xffffff;
 		
-		anim2.add(splash,{alpha:[0,1],scale_xy:[0,0.666]}, true, 0.1,'linear');			
+		anim3.add(splash,{alpha:[0,1,'linear'],scale_xy:[0,0.666,'linear']}, true, 0.1);			
 		
 	}
 	
@@ -651,7 +651,7 @@ class player_card_class extends PIXI.Container {
 		pic.height=120;
 		pic.tint=0xffffff;
 		pic.texture=assets.brick_smash;
-		anim2.add(pic,{alpha:[0,1]}, true, 0.1,'linear');
+		anim3.add(pic,{alpha:[0,1,'linear']}, true, 0.1);
 		
 	}
 		
@@ -675,7 +675,7 @@ class player_card_class extends PIXI.Container {
 		if(action==='FOLD') in_money=0;
 		
 		if (in_money) objects.action_info.t_info.text+=' '+in_money;			
-		anim2.add(objects.action_info,{alpha:[0,1]}, false, 3,'easeBridge',false);		
+		anim3.add(objects.action_info,{alpha:[0,1,'easeBridge']}, false, 3,false);		
 	
 		if (this.uid!==my_data.uid){
 			if(action==='CHECK'||action==='CALL')
@@ -748,7 +748,7 @@ class player_card_class extends PIXI.Container {
 		this.sticker_on=0;
 		this.anims.forEach(a=>{
 			if (a.visible)
-				anim2.add(a,{alpha:[a.alpha, 0]}, false, 0.2,'linear');	
+				anim3.add(a,{alpha:[a.alpha, 0,'linear']}, false, 0.2);	
 		});		
 	}
 	
@@ -830,7 +830,7 @@ class player_card_class extends PIXI.Container {
 	
 	open_cards(fin){
 		
-		anim2.kill_anim(this.t_comb)	
+		anim3.kill_anim(this.t_comb)	
 		
 		//если это фолд и не показываем карты
 		if (!fin&&!this.show_fold){
@@ -1078,7 +1078,7 @@ table_chat={
 		const message_height=oldest.text.textHeight-6;
 		this.bottom+=message_height;
 		this.cont_total_shift-=message_height;
-		anim2.add(objects.table_chat_cont,{y:[objects.table_chat_cont.y, objects.table_chat_cont.sy+this.cont_total_shift]}, true, 0.15,'linear');
+		anim3.add(objects.table_chat_cont,{y:[objects.table_chat_cont.y, objects.table_chat_cont.sy+this.cont_total_shift,'linear']}, true, 0.15);
 		
 		
 	},
@@ -1126,7 +1126,7 @@ chat={
 		
 	activate() {	
 
-		anim2.add(objects.chat_cont,{x:[-800, 0]}, true, 0.5,'linear');
+		anim3.add(objects.chat_cont,{x:[-800, 0,'linear']}, true, 0.5);
 		//objects.bcg.texture=assets.lobby_bcg;
 		objects.chat_enter_button.visible=true;
 			
@@ -1268,7 +1268,7 @@ chat={
 		
 		//смещаем на одно сообщение (если чат не видим то без твина)
 		if (objects.chat_cont.visible)
-			await anim2.add(objects.chat_msg_cont,{y:[objects.chat_msg_cont.y,objects.chat_msg_cont.y-y_shift]},true, 0.05,'linear');		
+			await anim3.add(objects.chat_msg_cont,{y:[objects.chat_msg_cont.y,objects.chat_msg_cont.y-y_shift,'linear']},true, 0.05);		
 		else
 			objects.chat_msg_cont.y-=y_shift
 		
@@ -1324,7 +1324,7 @@ chat={
 	
 	back_button_down(){
 		
-		if (anim2.any_on()===true) {
+		if (anim3.any_on()===true) {
 			sound.play('locked');
 			return
 		};
@@ -1403,7 +1403,7 @@ chat={
 		
 	async write_button_down(){
 		
-		if (anim2.any_on()===true) {
+		if (anim3.any_on()===true) {
 			sound.play('locked');
 			return
 		};
@@ -1479,7 +1479,7 @@ chat={
 		
 	close() {
 		
-		anim2.add(objects.chat_cont,{x:[0, -800]}, false, 0.5,'linear');
+		anim3.add(objects.chat_cont,{x:[0, -800,'linear']}, false, 0.5);
 		if (objects.chat_keyboard_cont.visible)
 			keyboard.close();
 	}
@@ -1501,14 +1501,14 @@ confirm_dialog = {
 				
 		objects.confirm_msg.text=msg;
 		
-		anim2.add(objects.confirm_cont,{y:[450,objects.confirm_cont.sy]}, true, 0.6,'easeOutBack');		
+		anim3.add(objects.confirm_cont,{y:[450,objects.confirm_cont.sy,'easeOutBack']}, true, 0.6);		
 				
 		return new Promise(function(resolve, reject){					
 			confirm_dialog.p_resolve = resolve;	  		  
 		});
 	},
 	
-	button_down : function(res) {
+	button_down(res) {
 		
 		if (objects.confirm_cont.ready===false)
 			return;
@@ -1520,269 +1520,65 @@ confirm_dialog = {
 		
 	},
 	
-	close : function() {
+	close() {
 		
-		anim2.add(objects.confirm_cont,{y:[objects.confirm_cont.sy,450]}, false, 0.4,'easeInBack');		
-		
-	}
-
-}
-
-anim2={
-		
-	c1: 1.70158,
-	c2: 1.70158 * 1.525,
-	c3: 1.70158 + 1,
-	c4: (2 * Math.PI) / 3,
-	c5: (2 * Math.PI) / 4.5,
-	empty_spr : {x:0,visible:false,ready:true, alpha:0},
-		
-	slot: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-	
-	any_on() {
-		
-		for (let s of this.slot)
-			if (s !== null&&s.block)
-				return true
-		return false;		
-	},
-	
-	wait(seconds){		
-		return this.add(this.empty_spr,{x:[0,1]}, false, seconds,'linear');		
-	},
-	
-	linear(x) {
-		return x
-	},
-	
-	kill_anim(obj) {
-		
-		for (var i=0;i<this.slot.length;i++)
-			if (this.slot[i]!==null)
-				if (this.slot[i].obj===obj)
-					this.slot[i]=null;		
-	},
-	
-	easeOutBack(x) {
-		return 1 + this.c3 * Math.pow(x - 1, 3) + this.c1 * Math.pow(x - 1, 2);
-	},
-	
-	easeOutElastic(x) {
-		return x === 0
-			? 0
-			: x === 1
-			? 1
-			: Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * this.c4) + 1;
-	},
-	
-	easeOutSine(x) {
-		return Math.sin( x * Math.PI * 0.5);
-	},
-	
-	easeOutCubic(x) {
-		return 1 - Math.pow(1 - x, 3);
-	},
-	
-	easeInBack(x) {
-		return this.c3 * x * x * x - this.c1 * x * x;
-	},
-	
-	easeInQuad(x) {
-		return x * x;
-	},
-	
-	easeBridge(x){
-		
-		if(x<0.1)
-			return x*10;
-		if(x>0.9)
-			return (1-x)*10;
-		return 1		
-	},
-		
-	easeOutBounce(x) {
-		const n1 = 7.5625;
-		const d1 = 2.75;
-
-		if (x < 1 / d1) {
-			return n1 * x * x;
-		} else if (x < 2 / d1) {
-			return n1 * (x -= 1.5 / d1) * x + 0.75;
-		} else if (x < 2.5 / d1) {
-			return n1 * (x -= 2.25 / d1) * x + 0.9375;
-		} else {
-			return n1 * (x -= 2.625 / d1) * x + 0.984375;
-		}
-	},
-	
-	easeInCubic(x) {
-		return x * x * x;
-	},
-	
-	ease2back(x) {
-		return Math.sin(x*Math.PI);
-	},
-	
-	easeInOutCubic(x) {
-		
-		return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-	},
-	
-	easeInOutBack(x) {
-
-		return x < 0.5
-		  ? (Math.pow(2 * x, 2) * ((this.c2 + 1) * 2 * x - this.c2)) / 2
-		  : (Math.pow(2 * x - 2, 2) * ((this.c2 + 1) * (x * 2 - 2) + this.c2) + 2) / 2;
-	},
-	
-	shake(x) {
-		
-		return Math.sin(x*2 * Math.PI);	
-		
-		
-	},	
-	
-	add (obj,params,vis_on_end,time,func,block) {
-				
-		//если уже идет анимация данного спрайта то отменяем ее
-		anim2.kill_anim(obj);
-		/*if (anim3_origin === undefined)
-			anim3.kill_anim(obj);*/
-
-		let f=0;
-		//ищем свободный слот для анимации
-		for (var i = 0; i < this.slot.length; i++) {
-
-			if (this.slot[i] === null) {
-
-				obj.visible = true;
-				obj.ready = false;
-				
-				//добавляем дельту к параметрам и устанавливаем начальное положение
-				for (let key in params) {
-					params[key][2]=params[key][1]-params[key][0];					
-					obj[key]=params[key][0];
-				}
-				
-				//для возвратных функцие конечное значение равно начальному
-				if (func === 'ease2back'||func==='shake')
-					for (let key in params)
-						params[key][1]=params[key][0];					
-					
-				this.slot[i] = {
-					obj: obj,
-					block:block===undefined,
-					params: params,
-					vis_on_end: vis_on_end,
-					func: this[func].bind(anim2),
-					speed: 0.01818 / time,
-					progress: 0
-				};
-				f = 1;
-				break;
-			}
-		}
-		
-		if (f===0) {
-			console.log("Кончились слоты анимации");	
-			
-			
-			//сразу записываем конечные параметры анимации
-			for (let key in params)				
-				obj[key]=params[key][1];			
-			obj.visible=vis_on_end;
-			obj.alpha = 1;
-			obj.ready=true;
-			
-			
-			return new Promise(function(resolve, reject){					
-			  resolve();	  		  
-			});	
-		}
-		else {
-			return new Promise(function(resolve, reject){					
-			  anim2.slot[i].p_resolve = resolve;	  		  
-			});			
-			
-		}
-
-	},	
-	
-	process () {
-		
-		for (var i = 0; i < this.slot.length; i++)
-		{
-			if (this.slot[i] !== null) {
-				
-				let s=this.slot[i];
-				
-				s.progress+=s.speed;		
-				
-				for (let key in s.params)				
-					s.obj[key]=s.params[key][0]+s.params[key][2]*s.func(s.progress);		
-				
-				//если анимация завершилась то удаляем слот
-				if (s.progress>=0.999) {
-					for (let key in s.params)				
-						s.obj[key]=s.params[key][1];
-					
-					s.obj.visible=s.vis_on_end;
-					if (s.vis_on_end === false)
-						s.obj.alpha = 1;
-					
-					s.obj.ready=true;					
-					s.p_resolve('finished');
-					this.slot[i] = null;
-				}
-			}			
-		}
+		anim3.add(objects.confirm_cont,{y:[objects.confirm_cont.sy,450,'easeInBack']}, false, 0.4);		
 		
 	}
-	
+
 }
 
 anim3={
-		
+
 	c1: 1.70158,
 	c2: 1.70158 * 1.525,
 	c3: 1.70158 + 1,
 	c4: (2 * Math.PI) / 3,
 	c5: (2 * Math.PI) / 4.5,
 	empty_spr : {x:0,visible:false,ready:true, alpha:0},
-			
-	slots: new Array(20).fill().map(u => ({obj:{},on:0,params_num:0,p_resolve:0,progress:0,vis_on_end:false,blocking:false,tm:0,params:new Array(10).fill().map(u => ({param:'x',s:0,f:0,d:0,func:this.linear}))})),
-	
+
+	slots: new Array(20).fill().map(u => ({obj:{},on:0,block:true,params_num:0,p_resolve:0,progress:0,vis_on_end:false,tm:0,params:new Array(10).fill().map(u => ({param:'x',s:0,f:0,d:0,func:this.linear}))})),
+
 	any_on() {
-		
+
 		for (let s of this.slots)
-			if (s !== null&&s.block)
+			if (s.on&&s.block)
 				return true
-		return false;		
+		return false;
 	},
-	
-	wait(seconds){		
-		return this.add(this.empty_spr,{x:[0,1]}, false, seconds,'linear');		
+
+	wait(seconds){
+		return this.add(this.empty_spr,{x:[0,1,'linear']}, false, seconds);
 	},
-	
+
 	linear(x) {
 		return x
 	},
-	
+
 	kill_anim(obj) {
-		
+
 		for (var i=0;i<this.slots.length;i++){
 			const slot=this.slots[i];
 			if (slot.on&&slot.obj===obj){
 				slot.p_resolve(2);
-				slot.on=0;				
+				slot.on=0;
 			}
-		}	
+		}
 	},
-	
+
+	easeBridge(x){
+
+		if(x<0.1)
+			return x*10;
+		if(x>0.9)
+			return (1-x)*10;
+		return 1
+	},
+
 	easeOutBack(x) {
 		return 1 + this.c3 * Math.pow(x - 1, 3) + this.c1 * Math.pow(x - 1, 2);
 	},
-	
+
 	easeOutElastic(x) {
 		return x === 0
 			? 0
@@ -1790,23 +1586,33 @@ anim3={
 			? 1
 			: Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * this.c4) + 1;
 	},
-	
+
 	easeOutSine(x) {
 		return Math.sin( x * Math.PI * 0.5);
 	},
-	
+
+	easeOutQuart(x){
+		return 1 - Math.pow(1 - x, 4);
+	},
+
 	easeOutCubic(x) {
 		return 1 - Math.pow(1 - x, 3);
 	},
-	
+
+	flick(x){
+
+		return Math.abs(Math.sin(x*6.5*3.141593));
+
+	},
+
 	easeInBack(x) {
 		return this.c3 * x * x * x - this.c1 * x * x;
 	},
-	
+
 	easeInQuad(x) {
 		return x * x;
 	},
-	
+
 	easeOutBounce(x) {
 		const n1 = 7.5625;
 		const d1 = 2.75;
@@ -1821,36 +1627,53 @@ anim3={
 			return n1 * (x -= 2.625 / d1) * x + 0.984375;
 		}
 	},
-	
+
 	easeInCubic(x) {
 		return x * x * x;
 	},
-	
+
+	ease3peaks(x){
+
+		if (x < 0.16666) {
+			return x / 0.16666;
+		} else if (x < 0.33326) {
+			return 1-(x - 0.16666) / 0.16666;
+		} else if (x < 0.49986) {
+			return (x - 0.3326) / 0.16666;
+		} else if (x < 0.66646) {
+			return 1-(x - 0.49986) / 0.16666;
+		} else if (x < 0.83306) {
+			return (x - 0.6649) / 0.16666;
+		} else if (x >= 0.83306) {
+			return 1-(x - 0.83306) / 0.16666;
+		}
+	},
+
 	ease2back(x) {
 		return Math.sin(x*Math.PI);
 	},
-	
+
 	easeInOutCubic(x) {
-		
+
 		return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 	},
-	
+
 	easeInOutBack(x) {
 
 		return x < 0.5
 		  ? (Math.pow(2 * x, 2) * ((this.c2 + 1) * 2 * x - this.c2)) / 2
 		  : (Math.pow(2 * x - 2, 2) * ((this.c2 + 1) * (x * 2 - 2) + this.c2) + 2) / 2;
 	},
-	
+
 	shake(x) {
-		
-		return Math.sin(x*2 * Math.PI);	
-		
-		
-	},	
-	
-	add (obj, inp_params, vis_on_end, time, blocking) {
-				
+
+		return Math.sin(x*2 * Math.PI);
+
+
+	},
+
+	add (obj, inp_params, vis_on_end, time, block) {
+
 		//если уже идет анимация данного спрайта то отменяем ее
 		anim3.kill_anim(obj);
 
@@ -1861,34 +1684,35 @@ anim3={
 
 			const slot=this.slots[i];
 			if (slot.on) continue;
-			
+
 			found=true;
-			
-			obj.visible = true;
-			obj.ready = false;
-					
+
+			obj.visible = true
+			obj.ready = false
+
 			//заносим базовые параметры слота
 			slot.on=1;
-			slot.params_num=Object.keys(inp_params).length;			
+			slot.params_num=Object.keys(inp_params).length;
 			slot.obj=obj;
 			slot.vis_on_end=vis_on_end;
-			slot.blocking=blocking||false;
+			slot.block=block===undefined;
 			slot.speed=0.01818 / time;
-			slot.progress=0;			
-			
+			slot.progress=0;
+
 			//добавляем дельту к параметрам и устанавливаем начальное положение
 			let ind=0;
 			for (const param in inp_params) {
-				
+
 				const s=inp_params[param][0];
 				let f=inp_params[param][1];
-				const d=f-s;					
+				const d=f-s;
 
-								
+
 				//для возвратных функцие конечное значение равно начальному что в конце правильные значения присвоить
-				const func=anim3[inp_params[param][2]];	
-				if (func === anim3.ease2back||func===anim3.shake) f=s;				
-				
+				const func_name=inp_params[param][2];
+				const func=anim3[func_name].bind(anim3);
+				if (func_name === 'ease2back'||func_name==='shake') f=s;
+
 				slot.params[ind].param=param;
 				slot.params[ind].s=s;
 				slot.params[ind].f=f;
@@ -1899,63 +1723,64 @@ anim3={
 				//фиксируем начальное значение параметра
 				obj[param]=s;
 			}
-			
+
 			return new Promise(resolve=>{
-				slot.p_resolve = resolve;	  		  
-			});		
+				slot.p_resolve = resolve;
+			});
 		}
 
-		console.log("Кончились слоты анимации");	
-		
+		console.log("Кончились слоты анимации")
+
 		//сразу записываем конечные параметры анимации
-		for (let param in params)
-			obj[param]=params[param][1];
-		obj.visible=vis_on_end;
-		obj.alpha = 1;
-		obj.ready=true;
-
-
-	},	
-	
-	process () {
+		for (let param in inp_params)
+			obj[param]=inp_params[param][1]
+		obj.visible=vis_on_end
+		obj.alpha = 1
+		obj.ready=true
 		
+		Promise.resolve(1)
+
+	},
+
+	process () {
+
 		for (var i = 0; i < this.slots.length; i++) {
 			const slot=this.slots[i];
 			const obj=slot.obj;
 			if (slot.on) {
-				
-				slot.progress+=slot.speed;		
-				
+
+				slot.progress+=slot.speed;
+
 				for (let i=0;i<slot.params_num;i++){
-					
+
 					const param_data=slot.params[i];
 					const param=param_data.param;
 					const s=param_data.s;
 					const d=param_data.d;
 					const func=param_data.func;
-					slot.obj[param]=s+d*func(slot.progress);					
+					slot.obj[param]=s+d*func(slot.progress);
 				}
-				
+
 				//если анимация завершилась то удаляем слот
 				if (slot.progress>=0.999) {
-					
+
 					//заносим конечные параметры
 					for (let i=0;i<slot.params_num;i++){
 						const param=slot.params[i].param;
 						const f=slot.params[i].f;
 						slot.obj[param]=f;
 					}
-					
+
 					slot.obj.visible=slot.vis_on_end;
-					slot.obj.alpha = 1*slot.vis_on_end;
-					
-					slot.obj.ready=true;
-					slot.p_resolve(1);
-					slot.on = 0;
+					if(!slot.vis_on_end) slot.obj.alpha=1;
+
+					slot.obj.ready=true
+					slot.p_resolve(1)
+					slot.on = 0
 				}
-			}			
-		}		
-	}	
+			}
+		}
+	}
 }
 
 sound={	
@@ -2201,7 +2026,7 @@ game={
 		}
 		
 		//показываем окошко статуса
-		anim2.add(objects.table_status_cont,{y:[450,objects.table_status_cont.sy]}, true, 0.2,'linear');	
+		anim3.add(objects.table_status_cont,{y:[450,objects.table_status_cont.sy,'linear']}, true, 0.2);	
 	},
 		
 	close_status_window(){
@@ -2210,7 +2035,7 @@ game={
 		fbs.ref(table_id+'/pending').off();
 		
 		//показываем окошко статуса
-		anim2.add(objects.table_status_cont,{y:[objects.table_status_cont.y,450]}, false, 0.2,'linear');		
+		anim3.add(objects.table_status_cont,{y:[objects.table_status_cont.y,450,'linear']}, false, 0.2);		
 	},
 		
 	show_pending_players(players){
@@ -2269,7 +2094,7 @@ game={
 		i=0;
 		for (let player of players){
 			const pcard=objects.pcards[i];
-			anim2.add(pcard,{y:[-100,pcard.sy]}, true, 0.1,'linear');
+			anim3.add(pcard,{y:[-100,pcard.sy,'linear']}, true, 0.1);
 			await new Promise(resolve=> {setTimeout(resolve, 50);});
 			i++;
 		}
@@ -2341,7 +2166,7 @@ game={
 		if (init_card.visible){
 			sound.play('card');
 			for (const card of objects.cen_cards)
-				anim2.add(card,{x:[card.x, 850]}, false, 0.25,'linear');		
+				anim3.add(card,{x:[card.x, 850,'linear']}, false, 0.25);		
 			await new Promise((resolve, reject) => {setTimeout(resolve, 250);});			
 		}
 
@@ -2350,16 +2175,16 @@ game={
 		for (const card of objects.cen_cards) card.set_shirt();		
 				
 		sound.play('card');
-		await anim2.add(init_card,{angle:[-90,0],x:[-200, init_card.sx],y:[450, init_card.sy]}, true, 0.5,'linear');	
+		await anim3.add(init_card,{angle:[-90,0,'linear'],x:[-200, init_card.sx,'linear'],y:[450, init_card.sy,'linear']}, true, 0.5);	
 		await new Promise((resolve, reject) => {setTimeout(resolve, 200);});
 		sound.play('card');
 		for (let i=1;i<5;i++){
 			const card=objects.cen_cards[i];
-			anim2.add(card,{x:[init_card.sx, card.sx],y:[init_card.sy, card.sy]}, true, 0.35,'linear');	
+			anim3.add(card,{x:[init_card.sx, card.sx,'linear'],y:[init_card.sy, card.sy,'linear']}, true, 0.35);	
 		}
 		
 
-		anim2.add(objects.control_buttons_cont,{x:[-150,0]}, true, 0.2,'linear');	
+		anim3.add(objects.control_buttons_cont,{x:[-150,0,'linear']}, true, 0.2);	
 		
 		//определяем меня
 		this.my_card=this.uid_to_pcards[my_data.uid];
@@ -2430,7 +2255,7 @@ game={
 	
 	status_exit_down(){
 		
-		if(anim2.any_on())return;
+		if(anim3.any_on())return;
 		
 		this.close();
 		tables_menu.activate();
@@ -2457,21 +2282,21 @@ game={
 			
 	async send_message_down(){		
 		
-		if(anim2.any_on()||!this.iam_in_game){
+		if(anim3.any_on()||!this.iam_in_game){
 			sound.play('locked')
 			return;			
 		}
 		
 		if(my_data.blocked){
 			objects.game_info.text=['ЗАКРЫТО!','CLOSED!'][LANG];
-			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
+			anim3.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5,'shake']}, true, 0.25);	
 			sound.play('locked')
 			return;			
 		}		
 		
 		if(my_data.rating<5000){
 			objects.game_info.text=['Нужно иметь более 5000 фишек чтобы писать в чат!','You need more that 5000 chips to chat!'][LANG];
-			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
+			anim3.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5,'shake']}, true, 0.25);	
 			sound.play('locked')
 			return;			
 		}
@@ -2481,7 +2306,7 @@ game={
 		this.recent_msg = this.recent_msg.filter(d =>cur_dt-d<60000);
 				
 		if (this.recent_msg.length>2){
-			anim2.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5]}, true, 0.25,'shake');	
+			anim3.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+5,'shake']}, true, 0.25);	
 			objects.game_info.text=['Подождите 1 минуту','Wait 1 minute'][LANG];
 			return;
 		}		
@@ -2513,7 +2338,7 @@ game={
 	
 	exit_button_down(){
 		
-		if(anim2.any_on())return;		
+		if(anim3.any_on())return;		
 				
 		this.close();
 		tables_menu.activate();
@@ -2865,7 +2690,7 @@ stickers={
 		if (!game.iam_in_game) return
 		
 		
-		if (anim2.any_on()||anim3.any_on()||objects.stickers_cont.visible) {
+		if (anim3.any_on()||anim3.any_on()||objects.stickers_cont.visible) {
 			sound.play('locked');
 			return;			
 		}
@@ -2873,7 +2698,7 @@ stickers={
 		sound.play('click');
 		
 		
-		anim2.add(objects.stickers_cont,{y:[-450, objects.stickers_cont.sy]}, true, 0.25,'linear');	
+		anim3.add(objects.stickers_cont,{y:[-450, objects.stickers_cont.sy,'linear']}, true, 0.25);	
 		
 		this.cur_card=card;
 		const p_data=players_cache.players[card.uid];
@@ -2897,7 +2722,7 @@ stickers={
 	
 	close_btn_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return;			
 		}
@@ -2909,18 +2734,18 @@ stickers={
 		
 		if (!my_data.stickers_num) {
 			sound.play('locked');
-			anim2.add(objects.t_stickers_left,{x:[objects.t_stickers_left.x, objects.t_stickers_left.x+10]}, true, 0.15,'shake');	
+			anim3.add(objects.t_stickers_left,{x:[objects.t_stickers_left.x, objects.t_stickers_left.x+10,'shake']}, true, 0.15);	
 			return;
 		}
 		
-		if (anim2.any_on()||anim3.any_on()) {
+		if (anim3.any_on()||anim3.any_on()) {
 			sound.play('locked');
 			return;
 		}
 		
 		if (this.cur_card.uid===my_data.uid){
 			objects.t_stickers_left.text=['Нельзя отправить самому себе','Can not send to yourself'][LANG];
-			anim2.add(objects.t_stickers_left,{x:[objects.t_stickers_left.x, objects.t_stickers_left.x+10]}, true, 0.15,'shake');	
+			anim3.add(objects.t_stickers_left,{x:[objects.t_stickers_left.x, objects.t_stickers_left.x+10,'shake']}, true, 0.15);	
 			return;
 		}
 		
@@ -2957,7 +2782,7 @@ stickers={
 	close(){
 		
 		sound.play('close');
-		anim2.add(objects.stickers_cont,{y:[objects.stickers_cont.y, 450]}, false, 0.25,'linear');	
+		anim3.add(objects.stickers_cont,{y:[objects.stickers_cont.y, 450,'linear']}, false, 0.25);	
 		
 	}	
 	
@@ -3304,13 +3129,13 @@ timer = {
 		else
 			objects.timer_cont.y = 145;
 		
-		anim2.add(objects.timer_cont,{scale_x:[0, 1]}, true, 0.2,'linear');	
+		anim3.add(objects.timer_cont,{scale_x:[0, 1,'linear']}, true, 0.2);	
 				
 	},
 	
 	stop() {
 			
-		anim2.add(objects.timer_cont,{scale_x:[1, 0]}, false, 0.2,'linear');	
+		anim3.add(objects.timer_cont,{scale_x:[1,0,'linear']}, false, 0.2);	
 		this.clear();
 		
 	},
@@ -3441,7 +3266,7 @@ bet_dialog = {
 		//устанаваем слайдер на минимальное значение
 		objects.slider_button.x = this.slider_min_max_x[0];		
 		
-		anim2.add(objects.bet_dialog_cont,{alpha:[0,1]}, true, 0.25,'linear');	
+		anim3.add(objects.bet_dialog_cont,{alpha:[0,1,'linear']}, true, 0.25);	
 	
 		return new Promise(function(resolve, reject){
 			bet_dialog.p_resolve = resolve;			
@@ -3478,7 +3303,7 @@ bet_dialog = {
 	close(){
 		
 		objects.game_info.text='';
-		anim2.add(objects.bet_dialog_cont,{alpha:[1, 0]}, false, 0.25,'linear');	
+		anim3.add(objects.bet_dialog_cont,{alpha:[1, 0,'linear']}, false, 0.25);	
 		
 	},
 
@@ -3819,7 +3644,7 @@ confirm_dialog = {
 				
 		objects.confirm_msg.text=msg;
 		
-		anim2.add(objects.confirm_cont,{y:[450,objects.confirm_cont.sy]}, true, 0.6,'easeOutBack');		
+		anim3.add(objects.confirm_cont,{y:[450,objects.confirm_cont.sy,'easeOutBack']}, true, 0.6);		
 				
 		return new Promise(function(resolve, reject){					
 			confirm_dialog.p_resolve = resolve;	  		  
@@ -3840,7 +3665,7 @@ confirm_dialog = {
 	
 	close : function() {
 		
-		anim2.add(objects.confirm_cont,{y:[objects.confirm_cont.sy,450]}, false, 0.4,'easeInBack');		
+		anim3.add(objects.confirm_cont,{y:[objects.confirm_cont.sy,450,'easeInBack']}, false, 0.4);		
 		
 	}
 
@@ -3874,7 +3699,7 @@ keyboard={
 		objects.chat_keyboard_text.text ='';
 		objects.chat_keyboard_control.text = this.MAX_SYMBOLS;
 				
-		anim2.add(objects.chat_keyboard_cont,{y:[450, objects.chat_keyboard_cont.sy],alpha:[0,1]}, true, 0.2,'linear');	
+		anim3.add(objects.chat_keyboard_cont,{y:[450, objects.chat_keyboard_cont.sy,'linear'],alpha:[0,1,'linear']}, true, 0.2);	
 
 
 		return new Promise(resolve=>{			
@@ -3925,7 +3750,7 @@ keyboard={
 		objects.chat_keyboard_hl.x = x+objects.chat_keyboard.x-10;
 		objects.chat_keyboard_hl.y = y+objects.chat_keyboard.y-11;	
 		
-		anim2.add(objects.chat_keyboard_hl,{alpha:[1, 0]}, false, 0.5,'linear');
+		anim3.add(objects.chat_keyboard_hl,{alpha:[1,0,'linear']}, false, 0.5);
 		
 	},	
 	
@@ -4007,7 +3832,7 @@ keyboard={
 		
 		//на всякий случай уничтожаем резолвер
 		if (this.resolver) this.resolver(0);
-		anim2.add(objects.chat_keyboard_cont,{y:[objects.chat_keyboard_cont.y,450],alpha:[1,0]}, false, 0.2,'linear');		
+		anim3.add(objects.chat_keyboard_cont,{y:[objects.chat_keyboard_cont.y,450,'linear'],alpha:[1,0,'linear']}, false, 0.2);		
 		
 	},
 	
@@ -4022,21 +3847,20 @@ tables_menu={
 	my_avatar_clicks:0,
 	sec_to_free_chips:3600,
 	table_stat_updater:{1:{players_num:-1,timer:0},2:{players_num:-1,timer:0},3:{players_num:-1,timer:0},4:{players_num:-1,timer:0}},
-	moscow_dow:0,
 	srv_timer:0,
 		
 	activate(init){				
 			
-		anim2.add(objects.table_buttons_cont,{x:[800,0]}, true, 0.5,'linear')
+		anim3.add(objects.table_buttons_cont,{x:[800,0,'linear']}, true, 0.5)
 		
-		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear')
-		anim2.add(objects.bcg,{alpha:[0, 1]}, true, 0.5,'linear')
+		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25)
+		anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5)
 		objects.bcg.texture = assets.bcg;
 		
-		//обновляем серверное время
-		this.update_moscow_dow()
+		//обновляем серверное время		
+		this.update_server_tm()
 		if (!this.srv_timer)
-			this.srv_timer=setInterval(()=>{this.update_moscow_dow()},40000)
+			this.srv_timer=setInterval(()=>{this.update_server_tm()},40000)
 				
 		this.update_my_data()
 				
@@ -4067,20 +3891,22 @@ tables_menu={
 		
 	},
 	
-	async update_moscow_dow(){
+	async update_server_tm(){
 		
-		const server_time=await my_ws.get_tms();	
-		if (server_time){
-			const moscow_time=new Date(server_time).toLocaleString("en-US", {timeZone: "Europe/Moscow"});
-			this.moscow_dow =  new Date(moscow_time).getDay();
-		}else{
-			this.moscow_dow=0;
-		}		
+		SERVER_TM=await my_ws.get_tms()	
 		
-		if (this.moscow_dow===5)
-			objects.slots_btn.alpha=1;
+		if (!SERVER_TM) {
+			objects.slots_btn.alpha=0.25
+			return
+		}
+		
+		const cur_data=new Date(SERVER_TM)
+		const msk_hour=+cur_data.toLocaleString('en-US', {timeZone: 'Europe/Moscow',hour:'numeric',hourCycle:'h23'})
+		
+		if (msk_hour>1&&msk_hour<6)
+			objects.slots_btn.alpha=1
 		else
-			objects.slots_btn.alpha=0.25;
+			objects.slots_btn.alpha=0.25
 		
 	},
 	
@@ -4124,7 +3950,7 @@ tables_menu={
 	
 	process(){		
 		if (dr.have_bonus&&objects.table_dr_button_hl.ready)
-			anim2.add(objects.table_dr_button_hl,{scale_xy:[0.666,1.2],alpha:[0.5,0]}, false, 1,'linear',false);
+			anim3.add(objects.table_dr_button_hl,{scale_xy:[0.666,1.2,'linear'],alpha:[0.5,0,'linear']}, false, 1,false);
 	},
 	
 	async check_admin_info(){
@@ -4169,7 +3995,7 @@ tables_menu={
 	
 	free_chips_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');return};				
 
 		if (this.sec_to_free_chips!==0) {
@@ -4189,7 +4015,7 @@ tables_menu={
 	
 	table_down(table){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -4227,7 +4053,7 @@ tables_menu={
 	
 	chat_button_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');return};
 		
 		sound.play('click');
@@ -4238,7 +4064,7 @@ tables_menu={
 		
 	dr_button_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -4250,7 +4076,7 @@ tables_menu={
 	
 	lb_button_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -4263,16 +4089,17 @@ tables_menu={
 	
 	slots_btn_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
 		};
 		
-		if (this.moscow_dow!==5){
-			objects.table_menu_info.text=['Слоты работают только по пятницам (МСК)','Only on Firdays'][LANG];
+		if (objects.slots_btn.alpha<0.9){
+			objects.table_menu_info.text=['Слоты работают только с 01:00 до 06:00 (МСК)',' Only open from 01:00 to 06:00 (MSK)'][LANG];
 			return;
 		}
 		
+		sound.play('click')
 		this.close();
 		slots.activate();	
 		
@@ -4280,7 +4107,7 @@ tables_menu={
 	
 	rules_button_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -4293,7 +4120,7 @@ tables_menu={
 	
 	pref_btn_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -4306,7 +4133,7 @@ tables_menu={
 	
 	shop_button_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
 		};
@@ -4350,7 +4177,7 @@ tables_menu={
 	
 	close(){		
 		
-		anim2.add(objects.table_buttons_cont,{x:[0,800]}, false, 0.5,'linear');
+		anim3.add(objects.table_buttons_cont,{x:[0,800,'linear']}, false, 0.5);
 		
 		clearInterval(this.srv_timer);
 		
@@ -4373,12 +4200,12 @@ lb={
 	activate() {
 
 		objects.bcg.texture=assets.lb_bcg;
-		anim2.add(objects.bcg,{alpha:[0,1]}, true, 0.5,'linear');
+		anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5);
 		
-		anim2.add(objects.lb_1_cont,{x:[-150, objects.lb_1_cont.sx]}, true, 0.5,'easeOutBack');
-		anim2.add(objects.lb_2_cont,{x:[-150, objects.lb_2_cont.sx]}, true, 0.5,'easeOutBack');
-		anim2.add(objects.lb_3_cont,{x:[-150, objects.lb_3_cont.sx]}, true, 0.5,'easeOutBack');
-		anim2.add(objects.lb_cards_cont,{x:[450, 0]}, true, 0.5,'easeOutCubic');
+		anim3.add(objects.lb_1_cont,{x:[-150, objects.lb_1_cont.sx,'easeOutBack']}, true, 0.5);
+		anim3.add(objects.lb_2_cont,{x:[-150, objects.lb_2_cont.sx,'easeOutBack']}, true, 0.5);
+		anim3.add(objects.lb_3_cont,{x:[-150, objects.lb_3_cont.sx,'easeOutBack']}, true, 0.5);
+		anim3.add(objects.lb_cards_cont,{x:[450, 0,'easeOutCubic']}, true, 0.5);
 				
 		objects.lb_cards_cont.visible=true;
 		objects.lb_back_button.visible=true;
@@ -4411,7 +4238,7 @@ lb={
 
 	back_button_down() {
 
-		if (anim2.any_on()===true) {
+		if (anim3.any_on()===true) {
 			sound.play('locked');
 			return
 		};
@@ -4515,8 +4342,8 @@ dr={
 			card.t_reward.text=reward_data.reward;
 		}	
 		
-		anim2.add(objects.dr_cont,{y:[-450,objects.dr_cont.sy]}, true, 0.25,'linear');	
-		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
+		anim3.add(objects.dr_cont,{y:[-450,objects.dr_cont.sy,'linear']}, true, 0.25);	
+		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25);
 	},
 		
 	round_tm_to_day(d){
@@ -4623,7 +4450,7 @@ dr={
 	
 	card_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');return};
 		
 		if (this.claimed) {
@@ -4645,13 +4472,13 @@ dr={
 	
 	close(){
 		
-		anim2.add(objects.dr_cont,{y:[objects.dr_cont.sy, -450]}, false, 0.25,'linear');	
+		anim3.add(objects.dr_cont,{y:[objects.dr_cont.sy, -450,'linear']}, false, 0.25);	
 		
 	},
 	
 	close_button_down(){		
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');return};
 		
 		sound.play('click')
@@ -4663,49 +4490,27 @@ dr={
 }
 
 slots={
-		
-	patterns:{
-		
-		cross:{mask:[[1,0,1],[0,1,0],[1,0,1]],bonus:[0.7,0.7,0.7,1,1.3]},
-		romb_filled:{mask:[[0,1,0],[1,1,1],[0,1,0]],bonus:[0.7,0.7,0.7,1,1.3]},
-		romb:{mask:[[0,1,0],[1,0,1],[0,1,0]],bonus:[0.5,0.5,0.5,0.8,1.1]},
-		longV:{mask:[[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0]],bonus:[0.7,0.7,0.7,1,1.3]},
-		longInvV:{mask:[[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],bonus:[0.7,0.7,0.7,1,1.3]},
-		V_filled:{mask:[[1,1,1],[0,1,0]],bonus:[0.5,0.5,0.5,0.8,1.1]},
-		invV_filled:{mask:[[0,1,0],[1,1,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
-		V:{mask:[[1,0,1],[0,1,0]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		invV:{mask:[[0,1,0],[1,0,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		leftV_filled:{mask:[[0,1],[1,1],[0,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
-		rightV_filled:{mask:[[1,0],[1,1],[1,0]],bonus:[0.5,0.5,0.5,0.8,1.1]},
-		leftV:{mask:[[0,1],[1,0],[0,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		rightV:{mask:[[1,0],[0,1],[1,0]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		row6:{mask:[[1,1,1,1,1,1]],bonus:[1,1,1,1.3,1.6]},
-		row5:{mask:[[1,1,1,1,1]],bonus:[0.7,0.7,0.7,1,1.3]},
-		row4:{mask:[[1,1,1,1]],bonus:[0.7,0.7,0.7,1.2,1.5]},
-		row3:{mask:[[1,1,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		col3:{mask:[[1],[1],[1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		diag1:{mask:[[1,0,0],[0,1,0],[0,0,1]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		diag2:{mask:[[0,0,1],[0,1,0],[1,0,0]],bonus:[0.1,0.1,0.1,0.4,0.7]},
-		square:{mask:[[1,1],[1,1]],bonus:[0.5,0.5,0.5,0.8,1.1]},
-		ends:{mask:[[1,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,1]],bonus:[0.5,0.5,0.5,1.5,2]}
 			
-	},	
-	
 	slot_y:3,
-	slot_x:8,
-	
+	slot_x:8,	
 	roll_on:0,
 	roll_timer:0,
-	fitted_patterns:[],
 	slot:[],
 	bet_amount:100,
 	check_on:0,
 	info_timer:0,
+	cur_payout:0,
+	tar_payout:0,
+	combo:0,
+	bonus2x:1,
+	payout_data:[-999,2,3,5,10,15,1,1],
+	bet_win:[0,0,0],
+	slots_progress_postfix:['_0','_0','_0','_1','_0','_0','_0','_2'],
 	
 	activate(){	
 		
 		this.roll_process();	
-		anim2.add(objects.slots_cont,{x:[-800,0]}, true, 0.5,'linear');	
+		anim3.add(objects.slots_cont,{x:[-800,0,'linear']}, true, 0.5);	
 		
 		//инициируем мой баланс
 		this.change_my_balance(0);
@@ -4713,18 +4518,36 @@ slots={
 		//заполняем значение ставки
 		objects.t_slots_bet.text=this.bet_amount;	
 		
+		//начальные значения
+		this.combo=1
+		this.bonus2x=1
+		
+		//обновляем значения около иконок для инфы
+		this.update_payout_table()
+		
 		//заполняем значение ставки
 		objects.t_slots_payout.text='-';	
+		
+		for (let i=0;i<8;i++)
+			objects.slots_progress[i].texture=assets['slots_progress'+this.slots_progress_postfix[i]]
+		
+	},
+	
+	update_payout_table(){				
+		
+		for (let i=0;i<5;i++)
+			objects.slots_payouts[i].text='+'+Math.round(this.payout_data[i+1]*0.01*this.bet_amount)
+		
 	},
 	
 	send_info(msg,timeout){
 		
 		objects.slots_info.text=msg;
-		anim2.add(objects.slots_info,{alpha:[0, 1]}, true, 0.2,'linear');	
+		anim3.add(objects.slots_info,{scale_xy:[1,1.2,'ease2back'],alpha:[0, 1,'linear']}, true, 0.2);	
 		
 		clearTimeout(this.info_timer);
 		this.info_timer=setTimeout(function(){
-			anim2.add(objects.slots_info,{alpha:[1, 0]}, false, 0.2,'linear');				
+			anim3.add(objects.slots_info,{alpha:[1, 0,'linear']}, false, 0.2);				
 		},timeout||3000)
 		
 	},
@@ -4733,8 +4556,7 @@ slots={
 		
 		const mx=e.data.global.x/app.stage.scale.x;;		
 		const button_cen_x=objects.t_slots_bet.x;
-		const dir=mx>button_cen_x?1:-1;		
-			
+		const dir=mx>button_cen_x?1:-1;				
 		
 		const new_bet=this.bet_amount+dir*100;	
 		
@@ -4751,165 +4573,19 @@ slots={
 
 		sound.play('click');
 		this.bet_amount=new_bet;
-		objects.t_slots_bet.text=this.bet_amount;	
+		objects.t_slots_bet.text=this.bet_amount
+		
+		this.update_payout_table()
 		
 	},
-	
-	add_pattern(py,px,data){
 		
-		const p=[];
-		for (let y=0;y<this.slot_y;y++){
-			p[y]=[];
-			for(let x=0;x<this.slot_x;x++)			
-				p[y][x]=0;
-		}	
-		
-		const data_y=data.mask.length;
-		const data_x=data.mask[0].length;
-		
-		//добавляем по маске и по координате
-		for (let y=0;y<data_y;y++){
-			for(let x=0;x<data_x;x++){
-				mask_flag=data.mask[y][x];
-				if (mask_flag)
-					p[py+y][px+x]=1;
-			}			
-		}	
-		
-		//console.table(p);
-		this.fitted_patterns.push(p);
-			
-	},
-	
 	randomize_slots(){		
 		objects.slots_icons.forEach(s=>{			
 			const id=irnd(1,5);
 			s.texture=assets['slots_icon'+id];			
 		})		
 	},
-		
-	check_stability2(){
-		
-				
-		
-		let total_payout=0;
-		let total_bet=0;
-		const iters=3386;
-		
-		for (let z=0;z<iters;z++){
-					
 			
-			
-			objects.slots_icons.forEach(s=>{
-				const id=irnd(1,5);
-				s.id=id;
-			})
-			
-			//формируем данные слота в виде 2Д массива
-			let i=0;
-			for (let y=0;y<this.slot_y;y++){
-				this.slot[y]=[];
-				for(let x=0;x<this.slot_x;x++){
-					this.slot[y][x]=objects.slots_icons[i].id;			
-					i++;
-				}
-			}
-			
-			this.fitted_patterns=[];
-			let spin_payout=0;
-			const cur_bet=100+z*15;
-			total_bet+=cur_bet;
-			
-			//ищем паттерны в результатах
-			for (const [name, data] of Object.entries(this.patterns)){
-						
-				//но только в пределах зоны маски
-				const mask_h=data.mask.length;
-				const mask_w=data.mask[0].length;
-				let bonus_data=data.bonus;
-				let sum_pattern_payout=0;
-
-				for (let y=0;y<this.slot_y-mask_h+1;y++){
-					for(let x=0;x<this.slot_x-mask_w+1;x++){	
-						const fit_symbol=this.mask_fit(y,x,data,name);
-						if (fit_symbol){
-							
-							const symb_perc=bonus_data[fit_symbol-1];
-							const pattern_payout=Math.round(cur_bet*symb_perc);		
-							//this.change_my_balance(pattern_payout);							
-							spin_payout+=pattern_payout;
-							//this.send_info('+'+pattern_payout,1000);
-							//objects.t_slots_payout.text=sum_bonus;
-							//await this.show_pattern(y,x,data);
-							this.add_pattern(y,x,data);						
-							
-						}					
-					}
-				}			
-			}
-			
-			//всего за игру
-			total_payout+=spin_payout;
-		}		
-		
-		console.log(100*total_payout/total_bet,total_payout-total_bet)
-	},
-	
-	mask_fit(py,px,data,name){
-		
-		const data_y=data.mask.length;
-		const data_x=data.mask[0].length;
-		let symbol=0;
-		
-		//проверяем по маске и координатам
-		let prv_sym=0;
-		for (let y=0;y<data_y;y++){
-			for(let x=0;x<data_x;x++){
-				const mask_flag=data.mask[y][x];
-				if (mask_flag){
-
-					const ty=py+y;
-					const tx=px+x;
-					const tar_sym=this.slot[ty][tx];
-					
-					if (prv_sym&&prv_sym!==tar_sym)
-						return 0;
-					prv_sym=tar_sym;
-					if (!symbol) symbol=tar_sym;
-					
-				} 						
-			}			
-		}	
-
-		//проверяем есть ли это уже в других найденных паттернах
-		for (let pattern of this.fitted_patterns){
-
-			let found=1;
-			for (let y=0;y<data_y;y++){
-				for(let x=0;x<data_x;x++){
-					mask_flag=data.mask[y][x];
-					if (mask_flag){
-		
-						const ty=py+y;
-						const tx=px+x;
-						
-						if (pattern[ty][tx]===0){
-							found=0;
-							x=9999;
-							y=9999;
-						}
-					} 						
-				}			
-			}	
-
-			if (found)
-				return 0;
-		}
-		
-		return symbol;
-		
-	},
-	
 	start_btn_down(){	
 	
 		if(!connected){
@@ -4920,7 +4596,8 @@ slots={
 		if (this.roll_on){
 			this.roll_on=0;
 			clearInterval(this.roll_timer);	
-			objects.slots_start_btn.texture=assets.slots_start_btn;	
+			objects.slots_start_btn.texture=assets.slots_start_btn
+			objects.slots_start_btn.alpha=0.25
 			slots.roll_process();
 			setTimeout(function(){slots.check_payout();},1000);
 			assets.slot_spin.stop();
@@ -4929,7 +4606,7 @@ slots={
 		
 			//если нечем платить
 			if (this.bet_amount>my_data.rating||this.bet_amount<=0){
-				this.send_info(['Недостаточно фишек, измените ставку!','Not enough chips, change you bet!'][LANG],5000);
+				this.send_info(['Мало фишек, измените ставку!','No chips, change you bet!'][LANG],5000);
 				sound.play('locked');
 				return;
 			}
@@ -4947,13 +4624,20 @@ slots={
 			sound.play('slot_spin',1);
 			this.change_my_balance(-this.bet_amount,'slots');
 			
+			this.bonus2x=1
+			this.update_payout_table()
+			
+			//возвращаем иконки
+			for (let i=0;i<8;i++)
+				objects.slots_progress[i].texture=assets['slots_progress'+this.slots_progress_postfix[i]]
+				
 			//записываем рейтинг в базу
 			game.change_my_balance(0,'slots');
 			
-			objects.t_slots_payout.text='';
-			objects.slots_start_btn.texture=assets.slots_stop_btn_img;
-			slots.roll_process();
-			this.roll_timer=setInterval(function(){slots.roll_process()},60);
+			objects.t_slots_payout.text=0
+			objects.slots_start_btn.texture=assets.slots_stop_btn_img			
+			slots.roll_process()
+			this.roll_timer=setInterval(function(){slots.roll_process()},60)
 		}		
 	
 	},
@@ -4972,6 +4656,7 @@ slots={
 			return;
 		}
 		
+		sound.play('close')
 		this.close();
 		tables_menu.activate();
 		
@@ -4984,193 +4669,253 @@ slots={
 		objects.slots_player_chips.text=my_data.rating;
 	},
 	
-	check_stability(num_of_last){				
-
-		fbs.ref('SLOTS_STAT').orderByChild('tm').limitToLast(num_of_last).once('value',s=>{
-			
-			let sum_rop=0;		
-			let sum_win=0;
-			
-			const data=s.val();
-			Object.values(data).forEach(d=>{	
-				if(d.spin_payout){
-					sum_rop+=(d.spin_payout/d.bet);
-					sum_win+=(d.spin_payout-d.bet);
-				}			
-				console.log(d.name,d.spin_payout-d.bet,new Date(d.tm).toLocaleString());
-			});
-			
-			console.log(sum_rop/num_of_last,sum_win);
-		});			
+	get_matched_area(y,x,matched_area){
+	
+		//выходим если эту ячейку не нужно проверять
+		if (x<0||x>this.slot_x-1) return
+		if (y<0||y>this.slot_y-1) return		
 		
+		const cur_slot=objects.slots_icons[y*this.slot_x+x]
+		const cur_id=cur_slot.id
+		
+		if (cur_slot.checked) return
+		if (cur_slot.picked) return
+		
+		if (matched_area.length===0||matched_area[0].id===cur_id){		
+			cur_slot.checked=1
+			matched_area.push(cur_slot)			
+		}
+		else
+			return
+		
+		this.get_matched_area(y,x-1,matched_area)
+		this.get_matched_area(y,x+1,matched_area)
+		this.get_matched_area(y+1,x,matched_area)
+		this.get_matched_area(y-1,x,matched_area)	
+		
+	},
+	
+	update_text_payout(){		
+		
+		const dif=this.tar_payout-this.cur_payout
+		if (dif>0){	
+
+			if (dif>100)
+				this.cur_payout+=20
+			else
+				this.cur_payout++
+			
+			for (let i=0;i<3;i++){
+				
+				if (!this.bet_win[i]){
+					if (this.cur_payout>=this.bet_amount*(i+1)){
+						this.bet_win[i]=1	
+						sound.play('bet_win')
+						
+						
+						if (i===0) this.send_info(['Есть выигрыш!','WIN!'][LANG])
+						if (i===1) this.send_info(['Двойной выигрыш!!','Double Win!!'][LANG])
+						if (i===2) this.send_info(['Тройной выигрыш!!!','Triple Win!!!'][LANG])
+							
+						anim3.add(objects.t_slots_payout,{scale_xy:[1,1.3,'ease2back']}, true, 0.5);
+					}
+				}				
+			}
+
+			
+		
+			
+			objects.t_slots_payout.text=this.cur_payout			
+		}	
 		
 	},
 	
 	async check_payout(){
 		
-		await new Promise((resolve, reject) => {setTimeout(resolve, 1250)});	
+		await new Promise(r => setTimeout(r, 500))	
+		this.combo=0
+		this.bet_win=[0,0,0]
 		
 		if(!connected){
 			this.send_info(['Нет связи!','No connection!'][LANG]);
 			return;
-		}
-			
-		//формируем данные слота в виде 2Д массива
-		let i=0;
-		for (let y=0;y<this.slot_y;y++){
-			this.slot[y]=[];
-			for(let x=0;x<this.slot_x;x++){
-				this.slot[y][x]=objects.slots_icons[i].id;			
-				i++;
-			}
-		}
+		}				
+		
+		const update_text_timer=setInterval(()=>{this.update_text_payout()},10)
 				
-		this.fitted_patterns=[];
-		let spin_payout=0;
-		
-		//ищем паттерны в результатах
-		for (const [name, data] of Object.entries(this.patterns)){
+		//текущий выигрыш
+		this.tar_payout=0
+		this.cur_payout=0
+		objects.t_slots_payout.text=this.cur_payout				
+				
+		for (let z=0;z<100;z++){			
+			
+			objects.slots_icons.forEach(s=>s.picked=0)
+			
+			//ищем паттерны
+			let match_found=0
+			for (let y=0;y<this.slot_y;y++){
+				for (let x=0;x<this.slot_x;x++){
 					
-			//но только в пределах зоны маски
-			const mask_h=data.mask.length;
-			const mask_w=data.mask[0].length;
-			let bonus_data=data.bonus;
+					objects.slots_icons.forEach(s=>s.checked=0)
+					const matched_area=[]
+					this.get_matched_area(y,x,matched_area)			
+					if (matched_area.length>=3){
+						match_found=1
+						await this.show_and_reg_pattern(matched_area)					
+					}				
+				}			
+			}					
+			
+			if (match_found)
+				this.refill_slot()				
+			else
+				break
 
-			for (let y=0;y<this.slot_y-mask_h+1;y++){
-				for(let x=0;x<this.slot_x-mask_w+1;x++){	
-					const fit_symbol=this.mask_fit(y,x,data,name);
-					if (fit_symbol){
-						
-						const symb_perc=bonus_data[fit_symbol-1];
-						const pattern_payout=Math.round(this.bet_amount*symb_perc);		
-						this.change_my_balance(pattern_payout);							
-						spin_payout+=pattern_payout;
-						this.send_info('+'+pattern_payout,1000);
-						objects.t_slots_payout.text=spin_payout;
-						await this.show_pattern(y,x,data);
-						this.add_pattern(y,x,data);						
-						
-					}					
-				}
-			}			
-		}
-		
-		//если нет бонуса
-		if(spin_payout===0)
-			sound.play('nobonus');		
-		
-		objects.t_slots_payout.text=spin_payout;
-		
-		this.send_info(['Больше нет выигрышных комбинаций!','No more winning matches!'][LANG]);
-						
-						
-		//записываем рейтинг в базу
-		game.change_my_balance(0);
-						
+			await new Promise(r => setTimeout(r, 400))	
+			
+			if (this.combo===8){
+				await this.collect_all()				
+				break
+			}	
+		}					
+				
+		anim3.add(objects.slots_start_btn,{scale_xy:[0.666,0.8,'ease2back'],angle:[0,5,'ease2back'],alpha:[0.25,1,'linear']}, true, 0.2);		
+		sound.play('nobonus')
+		this.change_my_balance(this.cur_payout)
+		clearInterval(update_text_timer)
 		this.check_on=0;
-		
-		if (tables_menu.moscow_dow!==5)
-			this.exit_btn_down();
-		
-		my_ws.safe_send({cmd:'log',logger:'slots',data:{uid:my_data.uid,name:my_data.name,spin_payout,bet:this.bet_amount,tm:'TMS'}});
-		
-		
 		ad.show();
 	},
 	
-	async show_pattern(py,px,data){
+	async collect_all(){
 		
-		let hit_icon_id=0;
-		const data_y=data.mask.length;
-		const data_x=data.mask[0].length;
+		const matched_area=[]
+		objects.slots_icons.forEach(s=>{s.checked=0;matched_area.push(s)})		
+		await this.show_and_reg_pattern(matched_area)					
 		
+		sound.play('total_win')
+		objects.big_win.angle=0
+		await anim3.add(objects.big_win,{scale_xy:[0.666,1,'ease2back'],alpha:[0,0.8,'linear']}, true, 2.5);
+		await anim3.add(objects.big_win,{angle:[0,10,'linear']}, true, 2.5);
+		await anim3.add(objects.big_win,{scale_xy:[0.666,0.1,'easeInBack'],alpha:[0.8,0,'linear']}, false, 1);		
 		
-		//сначала убираем все
-		objects.slots_hits.forEach(s=>s.visible=false);
-				
-		//добавляем по маске и по координате
-		for (let y=0;y<data_y;y++){
-			for(let x=0;x<data_x;x++){
-				mask_flag=data.mask[y][x];
-				if (mask_flag){					
-					
-					const ty=y+py;
-					const tx=x+px;
-					const icon_id=ty*8+tx;
-					const slot_icon=objects.slots_icons[icon_id];
-					const slot_hit_icon=objects.slots_hits[hit_icon_id];	
-
-					const cur_scale_xy=slot_icon.scale_xy;					
-					anim3.add(slot_icon,{scale_xy:[cur_scale_xy,cur_scale_xy*1.25,'ease2back'],angle:[0,10,'ease2back']}, true, 0.75);
-					
-					slot_hit_icon.x=slot_icon.x;
-					slot_hit_icon.y=slot_icon.y;
-					
-					anim2.add(slot_hit_icon,{alpha:[0, 1]}, false, 0.75,'ease2back');	
-					
-					slot_hit_icon.scale_x=Math.abs(slot_hit_icon.scale_x);
-					slot_hit_icon.scale_y=Math.abs(slot_hit_icon.scale_y);
-					hit_icon_id++;
-					
-					switch(icon_id){
-						
-						case 0:
-							slot_hit_icon.texture=assets.slots_hit_corner_icon;
-						break;
-						
-						case 7:
-							slot_hit_icon.texture=assets.slots_hit_corner_icon;
-							slot_hit_icon.scale_x*=-1;
-						break;
-						
-						case 16:
-							slot_hit_icon.texture=assets.slots_hit_corner_icon;
-							slot_hit_icon.scale_y*=-1;
-						break;
-						
-						case 23:
-							slot_hit_icon.texture=assets.slots_hit_corner_icon;
-							slot_hit_icon.scale_xy*=-1;
-						break;
-						
-						default:
-							slot_hit_icon.texture=assets.slots_hit_icon;						
-					}					
-				}					
+		//возвращаем на место
+		for (let y=0;y<this.slot_y;y++){
+			for (let x=0;x<this.slot_x;x++){				
+				const cur_slot=objects.slots_icons[y*this.slot_x+x]
+				const id=irnd(1,5)
+				cur_slot.texture=null
+				cur_slot.id=id
+				cur_slot.x=cur_slot.sx
+				cur_slot.y=cur_slot.sy
+				cur_slot.angle=0	
+				cur_slot.visible=true
+				cur_slot.scale_xy=0.51851
 			}			
-		};
-		
-		if (hit_icon_id)
-			sound.play('slot_match'+hit_icon_id);
-
-		await new Promise((resolve, reject) => {setTimeout(resolve, 1500);});			
-		
-	},
-	
-	paytable_down(){
-		
-		if (anim2.any_on()) {
-			sound.play('locked');
-			return;
 		}
 		
-		anim2.add(objects.paytable,{x:[objects.paytable.sx,-500]}, false, 0.3,'linear');
-		anim2.add(objects.slots_help_info,{alpha:[1,0]}, false, 0.5,'linear');		
-		
 	},
 	
-	show_paytable_btn_down(){
+	refill_slot(){
 		
-		if (anim2.any_on()) {
-			sound.play('locked');
-			return;
+		//комбо
+		if (this.combo===3) this.bonus2x=2		
+		objects.slots_progress[this.combo].texture=assets['slots_progress'+this.slots_progress_postfix[this.combo]+'a']
+		this.combo++	
+		
+		sound.play('refill')
+		for (let y=0;y<this.slot_y;y++){
+			for (let x=0;x<this.slot_x;x++){
+				
+				const cur_slot=objects.slots_icons[y*this.slot_x+x]
+				if (cur_slot.picked){
+					const id=irnd(1,5)
+					cur_slot.texture=assets['slots_icon'+id]
+					cur_slot.id=id
+					cur_slot.x=cur_slot.sx
+					cur_slot.y=cur_slot.sy
+					cur_slot.angle=0
+					anim3.add(cur_slot,{scale_xy:[0.1,0.51851,'easeOutBack'],alpha:[0,1,'linear']}, true, 0.25);
+				}				
+			}			
 		}
 		
-		anim2.add(objects.slots_help_info,{alpha:[0,1]}, true, 0.5,'linear');			
-		anim2.add(objects.paytable,{x:[-500,objects.paytable.sx]}, true, 0.3,'linear');	
+	},
+	
+	hl_cell(icon){
+		
+		const index=icon.index
+		const hl=objects.slots_hits.find(h=>h.visible===false)
+		if(!hl) return
+		hl.x=icon.sx
+		hl.y=icon.sy		
+		
+		hl.texture=assets.slots_hit_icon	
+		hl.scale_x=Math.abs(hl.scale_x)
+		hl.scale_y=Math.abs(hl.scale_y)
+			
+		if (icon.index===0){
+			hl.scale_x=Math.abs(hl.scale_x)
+			hl.scale_y=Math.abs(hl.scale_y)
+			hl.texture=assets.slots_hit_corner_icon			
+		}
+		
+		if (icon.index===7){
+			hl.scale_x=-Math.abs(hl.scale_x)
+			hl.scale_y=Math.abs(hl.scale_y)
+			hl.texture=assets.slots_hit_corner_icon			
+		}
+		
+		if (icon.index===16){
+			hl.scale_x=Math.abs(hl.scale_x)
+			hl.scale_y=-Math.abs(hl.scale_y)
+			hl.texture=assets.slots_hit_corner_icon			
+		}
+		
+		if (icon.index===23){
+			hl.scale_x=-Math.abs(hl.scale_x)
+			hl.scale_y=-Math.abs(hl.scale_y)
+			hl.texture=assets.slots_hit_corner_icon			
+		}		
+		
+		anim3.add(hl,{alpha:[1,0,'linear']}, false, 1)		
 		
 	},
 	
+	async show_and_reg_pattern(matched_area){		
+		
+		//сортируем по дальности
+		const tar_x=170
+		const tar_y=385
+		for (const icon of matched_area){
+			
+			const dx=icon.x-tar_x
+			const dy=icon.y-tar_y
+			icon.dist=dx*dx+dy*dy
+		}		
+		matched_area.sort((a, b) => b.dist - a.dist);
+		
+		
+		//Сколько получим с каждого символа
+		const payout=Math.round(this.bonus2x*this.payout_data[matched_area[0].id]*0.01*this.bet_amount)
+		
+		for (const icon of matched_area){
+			icon.picked=1
+			this.hl_cell(icon)
+			const tar_ang=irnd(0,360)
+			 
+			this.bonus2x===1?sound.play('slot_match'):sound.play('slot_match_x2')
+			anim3.add(icon,{scale_xy:[0.51851,0.3,'easeInBack'],angle:[0,tar_ang,'linear'],alpha:[1,0.5,'linear'],x:[icon.x,tar_x,'linear'],y:[icon.y,tar_y,'easeInCubic']}, false, 0.45).then(()=>{
+				this.tar_payout+=payout
+			})
+			await new Promise(r => setTimeout(r, 100))	
+		}
+		
+		await new Promise(r => setTimeout(r, 500))				
+		
+	},
+		
 	roll_process(){		
 		
 		objects.slots_icons.forEach(s=>{
@@ -5182,7 +4927,7 @@ slots={
 	},
 		
 	close(){	
-		anim2.add(objects.slots_cont,{x:[0,-800]}, false, 0.5,'linear');		
+		anim3.add(objects.slots_cont,{x:[0,-800,'linear']}, false, 0.5);		
 	}
 	
 }
@@ -5202,13 +4947,13 @@ shop={
 	payments:0,
 	
 	activate(){
-		anim2.add(objects.shop_cont,{x:[-800,0]}, true, 0.5,'linear');	
-		anim2.add(objects.my_data_cont,{alpha:[0,1]}, true, 0.25,'linear');
+		anim3.add(objects.shop_cont,{x:[-800,0,'linear']}, true, 0.5);	
+		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25);
 	},
 		
 	close_button_down(){
 		
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');return};
 		
 		sound.play('click')
@@ -5218,13 +4963,13 @@ shop={
 	
 	close(){
 		
-		anim2.add(objects.shop_cont,{x:[0, -800]}, false, 0.5,'linear');	
+		anim3.add(objects.shop_cont,{x:[0, -800,'linear']}, false, 0.5);	
 		
 	},
 	
 	button_down(e){		
 	
-		if (anim2.any_on()) {
+		if (anim3.any_on()) {
 			sound.play('locked');return};
 		
 		sound.play('click')
@@ -5239,7 +4984,7 @@ shop={
 		
 		objects.shop_sel_hl.x=item.x-30;
 		objects.shop_sel_hl.y=item.y-30;
-		anim2.add(objects.shop_sel_hl,{alpha:[1, 0]}, true, 0.5,'linear');	
+		anim3.add(objects.shop_sel_hl,{alpha:[1, 05,'linear']}, true, 0.);	
 			
 		if (game_platform==='YANDEX') {
 			
@@ -5319,16 +5064,16 @@ rules = {
 	activate() {
 		
 		this.active = 1;
-		anim2.add(objects.bcg,{alpha:[0,0.5]}, true, 0.6,'linear');	
-		anim2.add(objects.rules_back_button,{x:[800, objects.rules_back_button.sx]}, true, 0.5,'easeOutCubic');
-		anim2.add(objects.rules_text,{alpha:[0, 1]}, true, 1,'linear');
+		anim3.add(objects.bcg,{alpha:[0,0.5,'linear']}, true, 0.6);	
+		anim3.add(objects.rules_back_button,{x:[800, objects.rules_back_button.sx,'easeOutCubic']}, true, 0.5);
+		anim3.add(objects.rules_text,{alpha:[0, 1,'linear']}, true, 1);
 				
 		objects.rules_text.text = ['Добро пожаловать в карточную игру Джет Покер Онлайн!\n\nВ игре участвуют до 6 игроков. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк. Также можно выиграть банк, если соперники откажутся продолжать партию (скинут карты). Выиграть можно также вводя соперников в заблуждение величиной ставок (блеф) и тем самым заставляя их скидывать карты.\n\nУдачной игры!','Welcome to the Jet Poker Online game!\n\n The game involves up to 6 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\nHave a good game!'][LANG];
 	},
 	
 	async back_button_down() {
 		
-		if (anim2.any_on()===true) {
+		if (anim3.any_on()===true) {
 			sound.play('locked');
 			return
 		};
@@ -5343,9 +5088,9 @@ rules = {
 	async close() {
 		
 		this.active = 0;
-		anim2.add(objects.rules_text,{alpha:[1, 0]}, false, 0.5,'linear');
-		anim2.add(objects.bcg,{alpha:[1, 0]}, true, 0.5,'linear');
-		await anim2.add(objects.rules_back_button,{x:[objects.rules_back_button.x, 800]}, false, 0.5,'easeInCubic');
+		anim3.add(objects.rules_text,{alpha:[1, 0,'linear']}, false, 0.5);
+		anim3.add(objects.bcg,{alpha:[1,0,'linear']}, true, 0.5);
+		await anim3.add(objects.rules_back_button,{x:[objects.rules_back_button.x, 800,'easeInCubic']}, false, 0.5);
 		
 	}	
 	
@@ -5370,7 +5115,7 @@ pref={
 	activate(){
 		
 		
-		anim2.add(objects.pref_cont,{x:[-800,0]}, true, 0.5,'linear');
+		anim3.add(objects.pref_cont,{x:[-800,0,'linear']}, true, 0.5);
 		
 
 		//заполняем имя и аватар
@@ -5413,9 +5158,9 @@ pref={
 		const tm=Date.now();
 		if (tm-this.last_serv_tm_check<30000) return;
 		this.last_serv_tm_check=tm;		
-		serv_tm=await my_ws.get_tms()||serv_tm;
+		SERVER_TM=await my_ws.get_tms()||SERVER_TM;
 		
-		if (!serv_tm){
+		if (!SERVER_TM){
 			this.send_info('Ошибка получения серверного времени(((');
 			this.update_buttons();
 			return;
@@ -5430,12 +5175,12 @@ pref={
 		objects.pref_conf_photo_btn.visible=false;
 		
 		//сколько осталось до изменения
-		this.hours_to_photo_change=Math.max(0,Math.floor(720-(serv_tm-my_data.avatar_tm)*0.001/3600));
+		this.hours_to_photo_change=Math.max(0,Math.floor(720-(SERVER_TM-my_data.avatar_tm)*0.001/3600));
 		
 		//определяем какие кнопки доступны
-		objects.pref_prv_avatar_btn.alpha=(this.hours_to_photo_change>0||!serv_tm)?0.5:1;
-		objects.pref_next_avatar_btn.alpha=(this.hours_to_photo_change>0||!serv_tm)?0.5:1;	
-		objects.pref_reset_avatar_btn.alpha=(this.hours_to_photo_change>0||!serv_tm)?0.5:1;	
+		objects.pref_prv_avatar_btn.alpha=(this.hours_to_photo_change>0||!SERVER_TM)?0.5:1;
+		objects.pref_next_avatar_btn.alpha=(this.hours_to_photo_change>0||!SERVER_TM)?0.5:1;	
+		objects.pref_reset_avatar_btn.alpha=(this.hours_to_photo_change>0||!SERVER_TM)?0.5:1;	
 		
 	},
 	
@@ -5578,13 +5323,13 @@ pref={
 				
 	async reset_avatar(){
 		
-		if (!serv_tm){
+		if (!SERVER_TM){
 			this.send_info('Ошибка получения серверного времени(((');
 			sound.play('locked');
 			return;
 		}
 								
-		if (anim2.any_on()||this.tex_loading) {
+		if (anim3.any_on()||this.tex_loading) {
 			sound.play('blocked');
 			return;
 		}
@@ -5607,13 +5352,13 @@ pref={
 	
 	async change_avatar(dir){
 		
-		if (!serv_tm){
+		if (!SERVER_TM){
 			this.send_info('Ошибка получения серверного времени(((');
 			sound.play('locked');
 			return;
 		}
 		
-		if (anim2.any_on()||this.tex_loading) {
+		if (anim3.any_on()||this.tex_loading) {
 			sound.play('blocked');
 			return;
 		}				
@@ -5646,7 +5391,7 @@ pref={
 		players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
 		fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.cur_pic_url);
 		
-		my_data.avatar_tm=serv_tm;
+		my_data.avatar_tm=SERVER_TM;
 		fbs.ref(`players/${my_data.uid}/PRV/avatar_tm`).set(my_data.avatar_tm);
 		
 		//обновляем аватар в кэше
@@ -5664,29 +5409,29 @@ pref={
 	send_info(msg,timeout){
 		
 		objects.pref_info.text=msg;
-		anim2.add(objects.pref_info,{alpha:[0,1]}, true, 0.25,'linear',false);
+		anim3.add(objects.pref_info,{alpha:[0,1,'linear']}, true, 0.25,false);
 		clearTimeout(this.info_timer);
 		this.info_timer=setTimeout(()=>{
-			anim2.add(objects.pref_info,{alpha:[1,0]}, false, 0.25,'linear',false);	
+			anim3.add(objects.pref_info,{alpha:[1,0,'linear']}, false, 0.25,false);	
 		},timeout||3000);	
 	},
 	
 	sound_switch(){
 		
-		if(anim2.any_on()){
+		if(anim3.any_on()){
 			sound.play('locked');
 			return;			
 		}
 		sound.switch();
 		sound.play('click');
 		const tar_x=sound.on?538:514; //-24
-		anim2.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x]}, true, 0.1,'linear');	
+		anim3.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x,'linear']}, true, 0.1);	
 		
 	},
 	
 	show_fold_switch(){
 		
-		if(anim2.any_on()){
+		if(anim3.any_on()){
 			sound.play('locked');
 			return;			
 		}
@@ -5700,13 +5445,13 @@ pref={
 		
 		const tar_x=this.show_fold?215 :184; //-31
 		sound.play('click');
-		anim2.add(objects.pref_show_fold_slider,{x:[objects.pref_show_fold_slider.x,tar_x]}, true, 0.1,'linear');	
+		anim3.add(objects.pref_show_fold_slider,{x:[objects.pref_show_fold_slider.x,tar_x,'linear']}, true, 0.1);	
 		
 	},
 	
 	async ok_button_down(){
 		
-		if(anim2.any_on()){
+		if(anim3.any_on()){
 			sound.play('locked');
 			return;			
 		}
@@ -5727,7 +5472,7 @@ pref={
 	
 	close(){
 		
-		anim2.add(objects.pref_cont,{x:[0,-800]}, false, 0.5,'linear');	
+		anim3.add(objects.pref_cont,{x:[0,-800,'linear']}, false, 0.5);	
 		
 	},
 
@@ -6125,7 +5870,6 @@ main_loader={
 		loader.add('check',git_src+'sounds/check.mp3')
 		loader.add('raise',git_src+'sounds/raise.mp3')
 		loader.add('lose',git_src+'sounds/lose.mp3')
-		loader.add('win',git_src+'sounds/win.mp3')
 		loader.add('click',git_src+'sounds/click.mp3')
 		loader.add('confirm_dialog',git_src+'sounds/confirm_dialog.mp3')
 		loader.add('close',git_src+'sounds/close.mp3')
@@ -6143,10 +5887,13 @@ main_loader={
 		loader.add('slot_spin',git_src+'sounds/slot_spin.mp3')
 		loader.add('slot_click',git_src+'sounds/slot_click.mp3')
 		loader.add('nobonus',git_src+'sounds/nobonus.mp3')
+		loader.add('refill',git_src+'sounds/refill.mp3')
+		loader.add('bet_win',git_src+'sounds/bet_win.mp3')
+		loader.add('total_win',git_src+'sounds/total_win.mp3')
 		
-		loader.add('slot_match3',git_src+'sounds/slot_match3.mp3')
-		loader.add('slot_match4',git_src+'sounds/slot_match4.mp3')
-		loader.add('slot_match5',git_src+'sounds/slot_match5.mp3')
+		loader.add('slot_match',git_src+'sounds/slot_match.mp3')
+		loader.add('slot_match_x2',git_src+'sounds/slot_match_x2.mp3')
+
 		
 		loader.add('egg_snd',git_src+'sounds/egg.mp3')
 		loader.add('brick_snd',git_src+'sounds/brick.mp3')
@@ -6175,6 +5922,9 @@ main_loader={
 		
 		
 		this.divide_texture(assets.cards_pack,225,180,['card1','card2','card3','card4','card5','card6','card7','card8','card9','card10','card11','card12','card13','card14','card15','card16'])
+		this.divide_texture(assets.slots_progress_pack,75,75,['slots_progress_0','slots_progress_1','slots_progress_2','slots_progress_0a','slots_progress_1a','slots_progress_2a'])
+		this.divide_texture(assets.slots_icons_pack,135,135,['slots_icon1','slots_icon2','slots_icon3','slots_icon4','slots_icon5','slots_hit_icon','slots_hit_corner_icon'])
+		this.divide_texture(assets.pcards_pack,135,180,['h_bcg','s_bcg','d_bcg','c_bcg','pcard_bcg','cards_shirt','cards_shirt2','cards_shirt3','cards_shirt4'])
 				
 		//создаем спрайты и массивы спрайтов и запускаем первую часть кода
 		for (let i = 0; i < load_list.length; i++) {
@@ -6236,7 +5986,7 @@ main_loader={
 			}
 		}
 		
-		anim2.add(objects.loader_cont,{x:[0,-800]}, false, 0.5,'linear')
+		anim3.add(objects.loader_cont,{x:[0,-800,'linear']}, false, 0.5)
 
 	}	
 }
@@ -6398,10 +6148,10 @@ async function init_game_env(env) {
 	//убираем надпись
 	const l_text=document.getElementById('loadingText')
 	if(l_text)
-		document.getElementById('loadingText').remove();
+		document.getElementById('loadingText').remove()
 
 	git_src="https://akukamil.github.io/poker/"
-	git_src=""
+	//git_src=""
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);	
@@ -6435,7 +6185,7 @@ async function init_game_env(env) {
 				
 	//событие по изменению размера окна
 	resize();
-	window.addEventListener("resize", resize);
+	window.addEventListener('resize', resize)
 				
 	await main_loader.load1();	
 	await main_loader.load2();
@@ -6444,7 +6194,7 @@ async function init_game_env(env) {
 	main_loop.run();
 
 	//анимация лупы
-	anim2.add(objects.id_cont,{x:[1200,objects.id_cont.sx]}, true, 0.5,'linear');
+	anim3.add(objects.id_cont,{x:[1200,objects.id_cont.sx,'linear']}, true, 0.5);
 	some_process.loup_anim=function() {
 		objects.id_loup.x=20*Math.sin(game_tick*8)+90;
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
@@ -6550,8 +6300,8 @@ async function init_game_env(env) {
 	//устанавливаем рейтинг в попап
 	objects.id_rating.text=my_data.rating;
 	
-	anim2.add(objects.id_name,{alpha:[0,1]}, true, 0.5,'linear');
-	anim2.add(objects.id_rating,{alpha:[0,1]}, true, 0.5,'linear');
+	anim3.add(objects.id_name,{alpha:[0,1,'linear']}, true, 0.5);
+	anim3.add(objects.id_rating,{alpha:[0,1,'linear']}, true, 0.5);
 	
 	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
 	//my_data.rating=0;
@@ -6576,7 +6326,9 @@ async function init_game_env(env) {
 			eval(data.ec)
 	});
 				
-
+	//первый запуск
+	if(!other_data?.PRV?.first_log_tm)
+		await fbs.ref('players/'+my_data.uid+'/PRV/first_log_tm').set(firebase.database.ServerValue.TIMESTAMP);
 		
 	//новая версия
 	fbs.ref('players/'+my_data.uid+'/PUB/name').set(my_data.name);
@@ -6599,11 +6351,7 @@ async function init_game_env(env) {
 		fbs.ref('players/'+my_data.uid+'/ec').remove()
 		eval(other_data.ec)
 	}
-	
-	//первый запуск
-	if(!other_data?.PRV?.first_log_tm)
-		await fbs.ref('players/'+my_data.uid+'/PRV/first_log_tm').set(firebase.database.ServerValue.TIMESTAMP);
-	
+		
 	//провряем сколько мы в игре
 	const tm1=await fbs_once('players/'+my_data.uid+'/tm');
 	const tm2=await fbs_once('players/'+my_data.uid+'/PRV/first_log_tm');
@@ -6619,7 +6367,7 @@ async function init_game_env(env) {
 
 	//убираем контейнер выключаем анимацию
 	some_process.loup_anim = function(){}
-	anim2.add(objects.id_cont,{x:[objects.id_cont.x, -400]}, false, 0.5,'linear');
+	anim3.add(objects.id_cont,{x:[objects.id_cont.x, -400,'linear']}, false, 0.5);
 	
 	//контроль за присутсвием
 	fbs.ref('.info/connected').on("value", s => {
@@ -6657,7 +6405,6 @@ main_loop={
 		for (let key in some_process) some_process[key](main_loop.delta);	
 		
 		//обрабатываем анимации
-		anim2.process(main_loop.delta);		
 		anim3.process(main_loop.delta);	
 		
 		//отображаем сцену
