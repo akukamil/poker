@@ -4780,9 +4780,12 @@ slots={
 			}	
 		}					
 				
+				
+		my_ws.safe_send({cmd:'log',logger:'slots',data:{uid:my_data.uid,name:my_data.name,combo:this.combo,spin_payout:this.tar_payout,bet:this.bet_amount,tm:'TMS'}});
+				
 		anim3.add(objects.slots_start_btn,{scale_xy:[0.666,0.8,'ease2back'],angle:[0,5,'ease2back'],alpha:[0.25,1,'linear']}, true, 0.2);		
 		sound.play('nobonus')
-		this.change_my_balance(this.cur_payout)
+		this.change_my_balance(this.tar_payout)
 		clearInterval(update_text_timer)
 		this.check_on=0;
 		ad.show();
