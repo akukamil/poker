@@ -1141,7 +1141,11 @@ chat={
 		objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Чат доступен игрокам со стажем более 10 дней.\n3. За нарушение правил игрок может попасть в черный список.'
 		if(my_data.blocked) objects.chat_rules.text='Вы не можете писать в чат, так как вы находитесь в черном списке';
 		
-		
+		//вопроизводитим гифки
+		objects.chat_records.forEach(r=>{
+			if(r.visible&&r.gif.texture.baseTexture.resource&&r.gif.visible)
+				r.gif.texture.baseTexture.resource.source.play();
+		})
 	},
 		
 	new_message(data){
