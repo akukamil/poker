@@ -3554,6 +3554,12 @@ ad = {
 			return 0
 		return 1		
 	},
+	
+	reset_time(){
+		
+		this.prv_show = Date.now()
+		
+	},
 		
 	show() {
 		
@@ -4524,6 +4530,9 @@ slots={
 		//инициируем мой баланс
 		this.change_my_balance(0);
 		
+		//сбрасываем рекламу
+		ad.reset_time()
+		
 		//заполняем значение ставки
 		objects.t_slots_bet.text=this.bet_amount;	
 		
@@ -4800,7 +4809,8 @@ slots={
 		clearInterval(update_text_timer)
 		
 		if(ad.is_ready()){
-			this.send_info(['Рекламная пауза!','Commercial break!'][LANG]);
+			this.send_info(['Рекламная пауза!','Commercial break!'][LANG])
+			ad.show()
 			await new Promise(r=>setTimeout(r, 3000))
 		}
 		
