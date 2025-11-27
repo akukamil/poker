@@ -678,8 +678,10 @@ class player_card_class extends PIXI.Container {
 		anim3.add(objects.action_info,{alpha:[0,1,'easeBridge']}, false, 3,false);		
 	
 		if (this.uid!==my_data.uid){
-			if(action==='CHECK'||action==='CALL')
+			if(action==='CHECK')
 				sound.play('check')
+			if(action==='CALL')
+				sound.play('call')			
 			if(action==='BET'||action==='RAISE' )
 				sound.play('raise')	
 			if(action==='FOLD' )
@@ -5895,6 +5897,7 @@ main_loader={
 		loader.add('refill',git_src+'sounds/refill.mp3')
 		loader.add('bet_win',git_src+'sounds/bet_win.mp3')
 		loader.add('total_win',git_src+'sounds/total_win.mp3')
+		loader.add('call',git_src+'sounds/call.mp3')
 		
 		loader.add('slot_match',git_src+'sounds/slot_match.mp3')
 		loader.add('slot_match_x2',git_src+'sounds/slot_match_x2.mp3')
