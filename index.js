@@ -4700,8 +4700,10 @@ slots={
 		const dif=this.tar_payout-this.cur_payout
 		if (dif>0){	
 
-			if (dif>100)
-				this.cur_payout+=20
+			if (dif>500)
+				this.cur_payout+=50
+			else if (dif>100)
+				this.cur_payout++
 			else
 				this.cur_payout++
 			
