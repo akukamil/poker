@@ -3918,7 +3918,7 @@ tables_menu={
 		const cur_data=new Date(SERVER_TM)
 		const msk_hour=+cur_data.toLocaleString('en-US', {timeZone: 'Europe/Moscow',hour:'numeric',hourCycle:'h23'})
 		
-		if (msk_hour>=0&&msk_hour<8)
+		if (msk_hour>=0&&msk_hour<9)
 			objects.slots_btn.alpha=1
 		else
 			objects.slots_btn.alpha=0.25
@@ -4110,7 +4110,7 @@ tables_menu={
 		};
 		
 		if (objects.slots_btn.alpha<0.9){
-			objects.table_menu_info.text=['Слоты работают только с 01:00 до 06:00 (МСК)',' Only open from 01:00 to 06:00 (MSK)'][LANG];
+			objects.table_menu_info.text=['Слоты работают только с 00:00 до 09:00 (МСК)',' Only open from 01:00 to 06:00 (MSK)'][LANG];
 			return;
 		}
 		
