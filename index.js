@@ -2614,7 +2614,8 @@ game={
 
 		const comb=hand_check.check(opened_cards.map(c=>c.card_index));
 		const kickers=comb.data.map(d=>value_num_to_txt[d.value])
-		objects.my_combination.text=comb_to_text[comb.name][LANG]+'\n('+kickers.join('-')+')';	
+		objects.my_comb.text=comb_to_text[comb.name][LANG]
+		objects.my_comb_param.text=kickers.join('-')
 		
 	},
 	
@@ -3905,7 +3906,7 @@ tables_menu={
 		const cur_data=new Date(SERVER_TM)
 		const msk_hour=+cur_data.toLocaleString('en-US', {timeZone: 'Europe/Moscow',hour:'numeric',hourCycle:'h23'})
 		
-		if (msk_hour>=1&&msk_hour<8)
+		if (msk_hour>=0&&msk_hour<8)
 			objects.slots_btn.alpha=1
 		else
 			objects.slots_btn.alpha=0.25
