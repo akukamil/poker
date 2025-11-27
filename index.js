@@ -3903,7 +3903,7 @@ tables_menu={
 		const cur_data=new Date(SERVER_TM)
 		const msk_hour=+cur_data.toLocaleString('en-US', {timeZone: 'Europe/Moscow',hour:'numeric',hourCycle:'h23'})
 		
-		if (msk_hour>1&&msk_hour<6)
+		if (msk_hour>=1&&msk_hour<8)
 			objects.slots_btn.alpha=1
 		else
 			objects.slots_btn.alpha=0.25
