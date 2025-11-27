@@ -4503,7 +4503,7 @@ slots={
 	tar_payout:0,
 	combo:0,
 	bonus2x:1,
-	payout_data:[-999,2,3,5,10,15,1,1],
+	payout_data:[-999,2,3,6,10,15,1,1],
 	bet_win:[0,0,0],
 	slots_progress_postfix:['_0','_0','_0','_1','_0','_0','_0','_2'],
 	
