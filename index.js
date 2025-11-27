@@ -3549,6 +3549,12 @@ ad = {
 	
 	prv_show : -9999,
 		
+	is_ready(){		
+		if ((Date.now() - this.prv_show) < 100000 )
+			return 0
+		return 1		
+	},
+		
 	show() {
 		
 		if ((Date.now() - this.prv_show) < 100000 )
@@ -4737,7 +4743,7 @@ slots={
 	
 	async check_payout(){
 		
-		await new Promise(r => setTimeout(r, 500))	
+		await new Promise(r=>setTimeout(r, 500))	
 		this.combo=0
 		this.bet_win=[0,0,0]
 		
@@ -4792,8 +4798,14 @@ slots={
 		sound.play('nobonus')
 		this.change_my_balance(this.tar_payout)
 		clearInterval(update_text_timer)
+		
+		if(ad.is_ready()){
+			this.send_info(['Рекламная пауза!','Commercial break!'][LANG]);
+			await new Promise(r=>setTimeout(r, 3000))
+		}
+		
 		this.check_on=0;
-		ad.show();
+		
 	},
 	
 	async collect_all(){
