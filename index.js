@@ -6110,7 +6110,7 @@ async function define_platform_and_language(env) {
 		return;
 	}
 	
-	if (s.includes('vk.com')) {
+	if (s.includes('vk.com')||s.includes('vk.ru')||s.includes('vk_app_id')||s.includes('ok.ru')) {
 		game_platform = 'VK';	
 		LANG = 0;	
 		return;
