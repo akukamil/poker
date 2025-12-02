@@ -114,11 +114,11 @@ class table_chat_record_class extends PIXI.Container {
 		
 		super();	
 		this.resolver=0;
-		this.text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize:23,lineSpacing:45}); 
+		this.text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize:21,lineSpacing:52}); 
 		this.text.tint=0x55bbdd;
 		this.text.maxWidth=290;
 		
-		this.name_text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize: 23}); 
+		this.name_text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize: 21}); 
 		this.name_text.tint=0xbbff00;
 		
 		this.visible=false;
@@ -126,13 +126,13 @@ class table_chat_record_class extends PIXI.Container {
 		
 	}
 	
-	async set(name,text,color){
+	async set(name,text){
 		
 		sound.play('inst_msg');
 		name=name.substr(0,7);
 		this.text.text=name+': '+text;
 		this.name_text.text=name+':';
-		this.name_text.tint=color||0xFFFFFF;	
+		//this.name_text.tint=nameToColor(name);
 		this.visible=true;
 	
 	}	
@@ -1068,39 +1068,46 @@ class table_icon_class extends PIXI.Container{
 
 table_chat={
 	
-	bottom:0,
-	cont_total_shift:0,
+	total_bottom:0,
 	
-	add_message(name,text){
+	activate(){		
+		objects.game_msgs_cont.visible=true
+		objects.game_msgs_cont.y=objects.game_msgs_cont.sy
+		objects.game_msgs.forEach(m=>{m.visible=false;m.y=-999})		
+	},
+	
+	add(n,t){
 		
-		const oldest=this.get_old_message();
-		oldest.y=this.bottom;
-		oldest.set(name,text,0xffffff);
-		oldest.visible=true;
-		const message_height=oldest.text.textHeight-6;
-		this.bottom+=message_height;
-		this.cont_total_shift-=message_height;
-		anim3.add(objects.table_chat_cont,{y:[objects.table_chat_cont.y, objects.table_chat_cont.sy+this.cont_total_shift,'linear']}, true, 0.15);
+		if (!objects.game_msgs_cont.ready){
+			setTimeout(()=>{this.add(n,t)},100)
+			return
+		}
+		
+		const free_msg=this.get_last_rec()
+		free_msg.set(n,t)
+		
+		//габарит следующего сообщения
+		const box=free_msg.text.height>25?37:22
+		
+		//ставим новое сообщение вниз
+		free_msg.y=this.total_bottom
+				
+		//край кучи
+		this.total_bottom+=box
+		
+		//двигаем контейнер
+		anim3.add(objects.game_msgs_cont,{y:[objects.game_msgs_cont.y, objects.game_msgs_cont.sy-this.total_bottom,'linear']}, true, 0.25);
 		
 		
 	},
-	
-	reset(){
 		
-		objects.messages.forEach(m=>m.visible=false);
-		objects.chat_cont.y=objects.chat_cont.sy;
-		this.cont_total_shift=0;
-		this.bottom=0;
-	},
-	
-	get_old_message(){
+	get_last_rec(){
 		
-		const res=objects.messages.find(msg => msg.visible===false);
-		if(res) return res;
-		
-		return objects.messages.reduce((oldest, msg) => {
-			return oldest.y < msg.y ? oldest : msg;
-		});		
+		let last_rec=objects.game_msgs[0]
+		for (let i=0;i<objects.game_msgs.length;i++)
+			if (objects.game_msgs[i].y<last_rec.y)
+				last_rec=objects.game_msgs[i]
+		return last_rec
 	}
 		
 	
@@ -1870,15 +1877,14 @@ game={
 		
 		objects.bcg.texture=assets[`bcg_${table_id}`];
 		
-		objects.table_chat_cont.visible=true;
+		objects.game_msgs_cont.visible=true;
 		objects.avatars_cont.visible=true;
 		objects.cen_cards_cont.visible=true;	
-		table_chat.reset();
+		table_chat.activate();
 		
 		fbs.ref(table_id+'/pending/'+my_data.uid).onDisconnect().remove();
 		
-		fbs.ref(table_id+'/events').on('value',function(s){
-						
+		fbs.ref(table_id+'/events').on('value',function(s){					
 			
 			if (game.first_event){
 				game.first_event=0;
@@ -1893,7 +1899,7 @@ game={
 				game.game_start_event(event);			
 			
 			if(event.type==='chat')
-				table_chat.add_message(event.name,event.data);	
+				table_chat.add(event.name,event.data);	
 			
 			if(event.type==='player_action')
 				game.player_action_event(event);	
@@ -2665,7 +2671,7 @@ game={
 		objects.control_buttons_cont.visible=false;
 		objects.table_status_cont.visible=false;
 		objects.avatars_cont.visible=false;
-		objects.table_chat_cont.visible=false;
+		objects.game_msgs_cont.visible=false;
 		objects.cen_cards_cont.visible=false;		
 		objects.exit_game_button.visible=false;
 		objects.stickers_cont.visible=false;
