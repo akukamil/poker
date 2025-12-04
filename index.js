@@ -2208,8 +2208,8 @@ game={
 		objects.game_info.text=[`НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ ${ante}`,`STARTING NEW ROUND, ANTE ${ante}`][LANG];
 		
 		//приветствие от бота
-		if (this.players_in_game.some(p=>p.uid==='BOT'))
-			table_chat.add_message('Victoria',['Привет! Удачной игры!','Hello and good luck'][LANG])
+		//if (this.players_in_game.some(p=>p.uid==='BOT'))
+		//	table_chat.add_message('Victoria',['Привет! Удачной игры!','Hello and good luck'][LANG])
 				
 		this.iam_in_game=1;
 					
