@@ -1888,7 +1888,7 @@ game={
 		}			
 
 		
-		this.watch_mode=this.watch_mode||_watch_mode
+		this.watch_mode=_watch_mode
 				
 		if (this.watch_mode){
 			//objects.info_cont.visible=true
