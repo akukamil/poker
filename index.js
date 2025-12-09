@@ -7,9 +7,14 @@ const value_num_to_txt = ['0','1','2','3','4','5','6','7','8','9','10','J','Q','
 const comb_to_text = {HIGH_CARD : ['СТ.КАРТА','HIGH CARD'],PAIR : ['ПАРА','PAIR'],TWO_PAIRS : ['ДВЕ ПАРЫ','TWO PAIRS'],SET : ['ТРОЙКА (СЕТ)','THREE OF A KIND'],STRAIGHT : ['СТРИТ','STRAIGHT'],FLUSH : ['ФЛЭШ','FLUSH'],FULL_HOUSE : ['ФУЛ-ХАУС','FULL HOUSE'],KARE : ['КАРЕ','FOUR OF A KIND'],STRAIGHT_FLUSH : ['СТРИТ ФЛЭШ','STRAIGHT FLUSH'],ROYAL_FLUSH : ['ФЛЭШ-РОЯЛЬ','ROYAL FLUSH']};
 const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['КОЛЛ','CALL'],FOLD:['ФОЛД','FOLD'],BET:['БЭТ','BET']};
 let table_id='table1';
-let cards_suit_texture=''
+let cards_bcg_texture=''
+let cards_front_texture=''
 const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
 const enter_data={'table1':25000,'table2':50000,'table3':10000,'table4':20000};
+
+const pcards_design={}
+let cur_pcards_design
+
 fbs_once=async function(path){
 	const info=await fbs.ref(path).get();
 	return info.val();	
@@ -84,10 +89,11 @@ class lb_player_card_class extends PIXI.Container{
 		this.place.x=20;
 		this.place.y=22;
 
-		this.avatar=new PIXI.Sprite();
+		this.avatar=new PIXI.Graphics();
 		this.avatar.x=43;
 		this.avatar.y=13;
 		this.avatar.width=this.avatar.height=45;
+		this.avatar.w=this.avatar.h=45;
 
 
 		this.name=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'});
@@ -326,37 +332,42 @@ class playing_cards_class extends PIXI.Container {
 		
 		this.visible = false;
 					
-		this.bcg = new PIXI.Sprite(assets.pcard_bcg);
-		this.bcg.anchor.set(0.5,0.5);	
-		this.bcg.width=90;
-		this.bcg.height=120;
+		this.bcg=new PIXI.Sprite(assets.pcard_front0)
+		this.bcg.anchor.set(0.5,0.5)
+		this.bcg.width=90
+		this.bcg.height=120
 							
-		this.suit_img = new PIXI.Sprite();
-		this.suit_img.anchor.set(0.5,0.5);
-		this.suit_img.width=90;
-		this.suit_img.height=120;
+		this.suit_img = new PIXI.Sprite()
+		this.suit_img.anchor.set(0.5,0.5)
+		this.suit_img.width=63
+		this.suit_img.height=63
+		this.suit_img.y=22
 		
-		this.t_value = new PIXI.BitmapText('', {fontName: 'cards_font',fontSize: 55});
-		this.t_value.anchor.set(0.5,0.5);
-		this.t_value.x=0;
-		this.t_value.y=-22;
-		this.t_value.tint=0x000000;
+		this.val_img = new PIXI.Sprite();
+		this.val_img.width=65
+		this.val_img.height=65
+		this.val_img.anchor.set(0.5,0.5)
+		this.val_img.x=0
+		this.val_img.y=-22
+		this.val_img.tint=0xffffff
 						
 						
-		this.addChild(this.bcg, this.suit_img, this.t_value);
+		this.addChild(this.bcg, this.suit_img, this.val_img);
 	}	
 	
 	set_shirt () {
-		//return
-		this.opened=0;
-		this.t_value.visible = false;
-		this.suit_img.texture = cards_suit_texture;		
+
+		this.opened=0
+		this.val_img.visible=false
+		this.suit_img.visible=false
+		this.bcg.texture=cur_pcards_design.cards_bcg
+		this.bcg.tint=0xffffff
 		
 	}
 		
-	async open (card_index) {
+	async open(card_index) {
 		
-		sound.play('card_open');
+		sound.play('card_open')
 		
 		this.opened=1;
 		this.card_index=card_index;
@@ -368,16 +379,26 @@ class playing_cards_class extends PIXI.Container {
 		this.value_txt = value_num_to_txt[this.value_num];
 		this.suit_txt = suit_num_to_txt[this.suit_num];
 		
-		if (this.suit_txt === 'h' || this.suit_txt === 'd')
-			this.t_value.tint = 0xff0000;
-		else
-			this.t_value.tint = 0x2D3133;
+		if (this.suit_txt === 'h' || this.suit_txt === 'd'){
+			this.val_img.tint = cur_pcards_design.red_tint		
+			this.suit_img.tint = cur_pcards_design.red_tint			
+		} else {
+			this.val_img.tint = cur_pcards_design.black_tint		
+			this.suit_img.tint = cur_pcards_design.black_tint
+		}			
 		
-		this.t_value.text = this.value_txt;	
+		this.suit_img.alpha=cur_pcards_design.alpha
+		this.val_img.alpha=cur_pcards_design.alpha
 				
 		await anim3.add(this,{scale_x:[1,0,'linear']}, false, 0.2);		
-		this.t_value.visible = true;
-		this.suit_img.texture = assets[this.suit_txt + '_bcg'];
+		
+		this.val_img.visible = true
+		this.suit_img.visible = true
+		this.val_img.texture = assets[this.value_txt]
+		this.suit_img.texture = assets[this.suit_txt]
+		this.bcg.texture=cur_pcards_design.cards_front
+		this.bcg.tint=cur_pcards_design.front_tint||0xffffff
+		
 		await anim3.add(this,{scale_x:[0, 1,'linear']}, true, 0.2);	
 		
 	}	
@@ -770,7 +791,7 @@ class player_card_class extends PIXI.Container {
 		if(!player_data||!name||!pic_url||!card_id){
 					
 			player_data=await fbs_once('players/'+this.uid+'/PUB');
-			console.log('загружены данные из фб',this.uid)
+			//console.log('загружены данные из фб',this.uid)
 			if(!player_data) return;			
 			
 			//обновляем кэше
@@ -822,7 +843,7 @@ class player_card_class extends PIXI.Container {
 		
 		stickers.activate(this);		
 		
-		if (game.watch_mode){
+		if (game.watch_mode==='ADMIN_WATCH_MODE'){
 			const player_data=await fbs_once('players/'+this.uid+'/PUB');
 			console.log(this.uid);
 			console.log(player_data);			
@@ -882,31 +903,33 @@ class mini_cards_calss extends PIXI.Container{
 		
 		this.card_index=0;
 		
-		this.bcg=new PIXI.Sprite(assets.mini_card_bcg_closed);
-		this.bcg.height=60;
-		this.bcg.width=50;
-		this.bcg.x=0;
-		this.bcg.y=0;
+		this.bcg=new PIXI.Sprite(assets.mini_card_bcg_closed)
+		this.bcg.height=60
+		this.bcg.width=50
+		this.bcg.x=0
+		this.bcg.y=0
 				
-		this.suit_icon=new PIXI.Sprite(assets.h_mini_bcg);
-		this.suit_icon.height=30;
-		this.suit_icon.width=30;
-		this.suit_icon.anchor.set(0.5,0.5);
-		this.suit_icon.y=38;
-		this.suit_icon.x=25;
-		this.suit_icon.visible=false;
+		this.suit_img=new PIXI.Sprite()
+		this.suit_img.height=25
+		this.suit_img.width=25
+		this.suit_img.anchor.set(0.5,0.5)
+		this.suit_img.y=38
+		this.suit_img.x=25
+		this.suit_img.visible=false
 		
-		this.t_value=new PIXI.BitmapText('9', {fontName: 'mfont', fontSize :25});
-		this.t_value.x=25;
-		this.t_value.y=20
-		this.t_value.anchor.set(0.5,0.5);
-		this.t_value.visible=false;
-		this.t_value.tint=0x333333;
+		this.val_img=new PIXI.Sprite()
+		this.val_img.height=25
+		this.val_img.width=25
+		this.val_img.x=25
+		this.val_img.y=20
+		this.val_img.anchor.set(0.5,0.5)
+		this.val_img.visible=false
+		this.val_img.tint=0x333333
 		
-		this.pivot.x=25;
-		this.pivot.y=30;	
+		this.pivot.x=25
+		this.pivot.y=30;
 		
-		this.addChild(this.bcg,this.suit_icon,this.t_value);
+		this.addChild(this.bcg,this.suit_img,this.val_img);
 	}
 	
 	open(card_index){
@@ -917,30 +940,32 @@ class mini_cards_calss extends PIXI.Container{
 		const value_num = cards_data[this.card_index][2];
 		const suit_num = cards_data[this.card_index][1];
 		
-		//текстовые значения
-		const value_txt = value_num_to_txt[value_num];
-		const suit_txt = suit_num_to_txt[suit_num];		
+		//текстовые значения		
+		const suit_txt = suit_num_to_txt[suit_num]	
+		const value_txt = value_num_to_txt[value_num]
 		
-		/*if (suit_txt === 'h' || suit_txt === 'd')
-			this.t_value.tint = 0xff0000;
-		else
-			this.t_value.tint = 0x000000;*/
+		if (suit_txt === 'h' || suit_txt === 'd'){
+			this.val_img.tint = 0xff0000		
+			this.suit_img.tint = 0xff0000			
+		} else {
+			this.val_img.tint = 0x2D3133		
+			this.suit_img.tint = 0x2D3133
+		}
 		
-		this.bcg.texture=assets.mini_card_bcg_opened;		
+		this.bcg.texture=assets.mini_card_bcg_opened		
 		
-		this.suit_icon.texture=assets[suit_txt+'_mini_bcg'];
-		this.suit_icon.visible=true;
+		this.suit_img.texture=assets['m'+suit_txt]
+		this.suit_img.visible=true
 		
-		this.t_value.text=value_txt;
-		this.t_value.visible=true;
-	
+		this.val_img.texture=assets['m'+value_txt]
+		this.val_img.visible=true	
 		
 	}
 	
 	close(){
 		
-		this.suit_icon.visible=false;
-		this.t_value.visible=false;
+		this.suit_img.visible=false;
+		this.val_img.visible=false;
 		this.bcg.texture=assets.mini_card_bcg_closed;		
 		
 	}
@@ -1841,12 +1866,36 @@ game={
 	my_card:null,
 	recent_msg:[],
 	fold_kick_out_tm:0,
-	watch_mode:0,
+	watch_mode:'',
 	my_balance:0,
 	
-	activate(){
+	activate(table){
+				
 			
+		objects.game_info.text=''	
 		
+		cur_pcards_design=pcards_design[table]
+			
+		//проверка фишек
+		let _watch_mode=''
+		if (!this.watch_mode){			
+			const enter_amount=enter_data[table]
+			if (table==='table1'||table==='table2'){
+				if (my_data.rating>=enter_amount&&!game.watch_mode)
+					_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНе более ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed no more than ${enter_amount} chips for this table.`][LANG]
+			}else{
+				if (my_data.rating<enter_amount&&!game.watch_mode)
+					_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНужно минимум ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed at least ${enter_amount} chips for this table.`][LANG]
+			}			
+		}
+		
+		this.watch_mode=this.watch_mode||_watch_mode
+				
+		if (this.watch_mode){
+			//objects.info_cont.visible=true
+			objects.game_info.text=this.watch_mode			
+		}
+			
 		//текущее состояние стола
 		fbs.ref(table_id).once('value',function(s){			
 			game.analyse_table(s.val());			
@@ -1854,28 +1903,28 @@ game={
 							
 		//keep-alive для стола		
 		game.update_pending();
-		this.pending_timer=setInterval(function(){
-			if(!document.hidden) game.update_pending();
+		this.pending_timer=setInterval(()=>{
+			 game.update_pending();
 		},15000)
 						
 		objects.t_bank.amount=0;
 		
 		//процессинг таймера ходов
-		objects.timer_bar.width=130;
-		this.prv_time=Date.now();
-		some_process.timer_bar=this.process.bind(this);
+		objects.timer_bar.width=130
+		this.prv_time=Date.now()
+		some_process.timer_bar=this.process.bind(this)
 		
 		
 		//это мой баланс в игре
-		this.my_balance=0;
+		this.my_balance=0
 		
 		//скрываем карты посередине
-		objects.cen_cards.forEach(c=>c.visible=false);
+		objects.cen_cards.forEach(c=>c.visible=false)
 		
 		//показываем окошко статуса
 		this.show_status_window();
 		
-		objects.bcg.texture=assets[`bcg_${table_id}`];
+		objects.bcg.texture=cur_pcards_design.bcg
 		
 		objects.game_msgs_cont.visible=true;
 		objects.avatars_cont.visible=true;
@@ -1914,8 +1963,7 @@ game={
 				game.add_sticker(event);	
 
 		});
-		
-		
+			
 				
 	},
 	
@@ -2020,7 +2068,8 @@ game={
 	},
 	
 	update_pending(){
-		if (game.watch_mode) return;
+		if(document.hidden) return
+		if (game.watch_mode) return
 		fbs.ref(table_id+'/pending/'+my_data.uid).set({rating:my_data.rating,tm:firebase.database.ServerValue.TIMESTAMP});
 	},
 		
@@ -2138,10 +2187,10 @@ game={
 		if (objects.bet_dialog_cont.visible) objects.bet_dialog_cont.visible=false;
 		
 		//определяем рубашку		
-		if (table_id==='table1') cards_suit_texture=assets.cards_shirt;
-		if (table_id==='table2') cards_suit_texture=assets.cards_shirt2;
-		if (table_id==='table3') cards_suit_texture=assets.cards_shirt3;
-		if (table_id==='table4') cards_suit_texture=assets.cards_shirt4;
+		if (table_id==='table1') cards_bcg_texture=assets.pcards_bcg0;
+		if (table_id==='table2') cards_bcg_texture=assets.pcards_bcg1;
+		if (table_id==='table3') cards_bcg_texture=assets.pcards_bcg2;
+		if (table_id==='table4') cards_bcg_texture=assets.pcards_bcg3;
 		
 		//Убираем окно статуса
 		this.close_status_window();			
@@ -2171,8 +2220,7 @@ game={
 			i++;
 		})
 		
-		
-		
+			
 		//убираем карты
 		const init_card=objects.cen_cards[0];
 		if (init_card.visible){
@@ -2198,7 +2246,14 @@ game={
 
 		anim3.add(objects.control_buttons_cont,{x:[-150,0,'linear']}, true, 0.2);	
 		
-		//определяем меня
+		//проверка режима просмотра
+		if (this.watch_mode){
+			anim3.add(objects.game_info,{x:[objects.game_info.sx,objects.game_info.sx+10,'shake']}, true, 0.25);	
+			return					
+		}
+
+		
+		//определяем есть ли я
 		this.my_card=this.uid_to_pcards[my_data.uid];
 		if (!this.my_card){
 			objects.game_info.text=['Нет мест! Приоритет игрокам с большим количеством фишек.','No place or you do not have enough chips.'][LANG];
@@ -2206,13 +2261,8 @@ game={
 		}
 		
 		objects.game_info.text=[`НАЧИНАЕМ НОВУЮ ПАРТИЮ, АНТЕ ${ante}`,`STARTING NEW ROUND, ANTE ${ante}`][LANG];
-		
-		//приветствие от бота
-		//if (this.players_in_game.some(p=>p.uid==='BOT'))
-		//	table_chat.add_message('Victoria',['Привет! Удачной игры!','Hello and good luck'][LANG])
-				
-		this.iam_in_game=1;
-					
+						
+		this.iam_in_game=1					
 		
 		//показываем мои большие карты
 		objects.my_cards[0].open(this.my_card.card0.card_index);
@@ -4053,26 +4103,10 @@ tables_menu={
 			return;
 		}
 		
-		
-		//проверка фишек
-		const enter_amount=enter_data[table];
-		if (table==='table1'||table==='table2'){
-			if (my_data.rating>=enter_amount&&!game.watch_mode){
-				objects.table_menu_info.text=[`Нужно не более ${enter_amount} фишек для этого стола.`,`Need no more than ${enter_amount} chips for this table.`][LANG];
-				return;
-			}				
-		}else{
-			if (my_data.rating<enter_amount&&!game.watch_mode){
-				objects.table_menu_info.text=[`Нужно минимум ${enter_amount} фишек для этого стола.`,`Need at least ${enter_amount} chips for this table.`][LANG];
-				return;
-			}	
-		}
-
-
-		
-		table_id=table;
-		game.activate();
-		this.close();
+				
+		table_id=table
+		game.activate(table)
+		this.close()
 		
 	},	
 	
@@ -4193,8 +4227,8 @@ tables_menu={
 		
 		this.my_avatar_clicks++;
 		if (this.my_avatar_clicks%5===0){
-			game.watch_mode=1-game.watch_mode;
-			objects.table_menu_info.text='watch_mode: '+game.watch_mode;
+			game.watch_mode=game.watch_mode?'':'ADMIN_WATCH_MODE'
+			objects.table_menu_info.text=game.watch_mode
 		}
 			
 		
@@ -4224,16 +4258,10 @@ lb={
 
 	activate() {
 
-		objects.bcg.texture=assets.lb_bcg;
-		anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5);
-		
-		anim3.add(objects.lb_1_cont,{x:[-150, objects.lb_1_cont.sx,'easeOutBack']}, true, 0.5);
-		anim3.add(objects.lb_2_cont,{x:[-150, objects.lb_2_cont.sx,'easeOutBack']}, true, 0.5);
-		anim3.add(objects.lb_3_cont,{x:[-150, objects.lb_3_cont.sx,'easeOutBack']}, true, 0.5);
-		anim3.add(objects.lb_cards_cont,{x:[450, 0,'easeOutCubic']}, true, 0.5);
-				
-		objects.lb_cards_cont.visible=true;
-		objects.lb_back_button.visible=true;
+		//objects.bcg.texture=assets.lb_bcg;
+		//anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5);		
+		anim3.add(objects.lb_cont,{x:[-800, 0,'linear']}, true, 0.5)
+		anim3.add(objects.lb_back_btn,{alpha:[0, 1,'linear']}, true, 0.5)	
 
 		for (let i=0;i<7;i++) {
 			objects.lb_cards[i].x=this.cards_pos[i][0];
@@ -4252,12 +4280,7 @@ lb={
 
 	close() {
 
-
-		objects.lb_1_cont.visible=false;
-		objects.lb_2_cont.visible=false;
-		objects.lb_3_cont.visible=false;
-		objects.lb_cards_cont.visible=false;
-		objects.lb_back_button.visible=false;
+		anim3.add(objects.lb_cont,{x:[0, -800,'linear']}, false, 0.5);
 
 	},
 
@@ -4326,7 +4349,7 @@ lb={
 			const target=top[place];
 			const leader=leaders_array[place];
 			await players_cache.update_avatar(leader.uid);			
-			target.avatar.texture=players_cache.players[leader.uid].texture;		
+			target.avatar.set_texture(players_cache.players[leader.uid].texture);		
 		}
 	
 	}
@@ -5095,6 +5118,98 @@ shop={
 	}
 	
 	
+}
+
+snow={
+	
+	on:0,
+	prv_time:0,
+	
+	init(){
+		fbs.ref('snow/on').on('value', d=>snow.snow_event(d.val()))
+	},
+
+	send_start(minutes=3){
+		if(!SERVER_TM){
+			alert('NO SERVER_TM')
+			return
+		}
+		fbs.ref('snow').set({tm:SERVER_TM+minutes*60000,on:1})
+
+	},
+
+	snow_event(on){
+		if(on)
+			this.start()
+		else
+			this.on=0
+	},
+
+	start(){
+		this.on=1
+		objects.snowflakes.forEach(s=>s.visible=false)
+		objects.snow_cont.visible=true
+		some_process.snow=function(){snow.process()}
+	},
+
+	change_dir(snowflake){
+
+		const ang=180+irnd(-20,20);
+		snowflake.dx=Math.sin(ang*0.01745);
+		snowflake.dy=-Math.cos(ang*0.01745);
+
+	},
+
+	process(){
+
+		const cur_time=Date.now();
+		if (cur_time-this.prv_time>300){
+
+			this.prv_time=cur_time
+						
+			if(!this.on){				
+				const any_vis=objects.snowflakes.some(s=>s.visible)
+				if (!any_vis){
+					objects.snow_cont.visible=false
+					some_process.snow=function(){}
+				}				
+				return
+			}
+
+			//пытаемся добавить снежинку
+			const sf=objects.snowflakes.find(s=>!s.visible)
+			if (sf){
+
+				sf.x=irnd(0,800);
+				sf.y=-30;
+				sf.visible=true;
+
+				sf.d_ang=Math.random()*2-1;
+				sf.angle=irnd(0,360);
+				const size=Math.random()*2+1
+				sf.speed=size*0.4;
+				sf.scale_xy=size*0.25;
+				sf.alpha=size/4;
+
+				this.change_dir(sf);
+
+			}
+
+		}
+		
+		//движение снежинок
+		for (let i=0;i<objects.snowflakes.length;i++){
+			const sf=objects.snowflakes[i];
+			if (!sf.visible) continue
+			sf.x+=sf.dx*sf.speed
+			sf.y+=sf.dy*sf.speed;
+			sf.angle+=sf.d_ang;
+			if (sf.y>480)
+				sf.visible=false;
+		}
+
+	}
+
 }
 
 rules = {
@@ -5941,6 +6056,10 @@ main_loader={
 		loader.add('tomato_snd',git_src+'sounds/tomato.mp3')
 				
 		loader.add('cards_pack',git_src+'res/common/cards_pack.png');
+		loader.add('pcards_symbols_pack',git_src+'res/common/pcards_symbols_pack.png');
+		loader.add('mini_pcards_symbols_pack',git_src+'res/common/mini_pcards_symbols_pack.png');
+		loader.add('pcards_pack2',git_src+'res/common/pcards_pack2.png');
+		loader.add('mini_suits_pack',git_src+'res/common/mini_suits_pack.png');
 				
 		//добавляем из листа загрузки
 		const load_list=eval(assets.main_load_list);
@@ -5965,7 +6084,11 @@ main_loader={
 		this.divide_texture(assets.cards_pack,225,180,['card1','card2','card3','card4','card5','card6','card7','card8','card9','card10','card11','card12','card13','card14','card15','card16'])
 		this.divide_texture(assets.slots_progress_pack,75,75,['slots_progress_0','slots_progress_1','slots_progress_2','slots_progress_0a','slots_progress_1a','slots_progress_2a'])
 		this.divide_texture(assets.slots_icons_pack,135,135,['slots_icon1','slots_icon2','slots_icon3','slots_icon4','slots_icon5','slots_hit_icon','slots_hit_corner_icon'])
-		this.divide_texture(assets.pcards_pack,135,180,['h_bcg','s_bcg','d_bcg','c_bcg','pcard_bcg','cards_shirt','cards_shirt2','cards_shirt3','cards_shirt4'])
+		this.divide_texture(assets.pcards_pack2,135,180,['pcards_bcg0','pcards_bcg1','pcards_bcg2','pcards_bcg3','pcards_front0','pcards_front1','pcards_front2','pcards_front3'])
+		this.divide_texture(assets.pcards_symbols_pack,90,90,['2','3','4','5','6','7','8','9','10','J','Q','K','A','c','h','s','d'])
+		this.divide_texture(assets.mini_pcards_symbols_pack,50,50,['m2','m3','m4','m5','m6','m7','m8','m9','m10','mJ','mQ','mK','mA','mc','mh','ms','md'])
+
+				
 				
 		//создаем спрайты и массивы спрайтов и запускаем первую часть кода
 		for (let i = 0; i < load_list.length; i++) {
@@ -6185,7 +6308,6 @@ async function check_admin_info(){
 
 async function init_game_env(env) {			
 
-
 	//убираем надпись
 	const l_text=document.getElementById('loadingText')
 	if(l_text)
@@ -6317,7 +6439,6 @@ async function init_game_env(env) {
 	if (my_data.rating<100) my_data.rating=100;
 	
 	
-	
 	//если новый игрок
 	if (!other_data){
 		my_data.rating=5000;
@@ -6344,9 +6465,9 @@ async function init_game_env(env) {
 	anim3.add(objects.id_name,{alpha:[0,1,'linear']}, true, 0.5);
 	anim3.add(objects.id_rating,{alpha:[0,1,'linear']}, true, 0.5);
 	
-	//my_data.rating={'debug100':1000,'debug99':500,'debug98':100}[my_data.uid];	
-	//my_data.rating=0;
-
+	//новогодняя акция снег
+	snow.init()
+	
 	//мой сервер
 	await my_ws.init()
 	
@@ -6405,7 +6526,16 @@ async function init_game_env(env) {
 	//ждем одну секунду
 	await new Promise((resolve, reject) => {setTimeout(resolve, 1000);});
 	
-
+	
+	pcards_design.table1={bcg:assets.bcg_table1,cards_bcg:assets['pcards_bcg0'],cards_front:assets['pcards_front0'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
+	pcards_design.table2={bcg:assets.bcg_table2,cards_bcg:assets['pcards_bcg1'],cards_front:assets['pcards_front1'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
+	pcards_design.table3={bcg:assets.bcg_table3,cards_bcg:assets['pcards_bcg2'],cards_front:assets['pcards_front2'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
+	pcards_design.table4={bcg:assets.bcg_table4,cards_bcg:assets['pcards_bcg3'],cards_front:assets['pcards_front3'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
+	
+	
+	cur_pcards_design=pcards_design.table1
+	
+	
 	//убираем контейнер выключаем анимацию
 	some_process.loup_anim = function(){}
 	anim3.add(objects.id_cont,{x:[objects.id_cont.x, -400,'linear']}, false, 0.5);
