@@ -1871,30 +1871,30 @@ game={
 	
 	activate(table){
 				
-			
-		objects.game_info.text=''	
-		
+						
 		cur_pcards_design=pcards_design[table]
 			
-		//проверка фишек
-		let _watch_mode=''		
-		const enter_amount=enter_data[table]
-		if (table==='table1'||table==='table2'){
-			if (my_data.rating>=enter_amount)
-				_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНе более ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed no more than ${enter_amount} chips for this table.`][LANG]
-		}else{
-			if (my_data.rating<enter_amount)
-				_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНужно минимум ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed at least ${enter_amount} chips for this table.`][LANG]
-		}			
+		//проверка доступа к столу
+		if (this.watch_mode!=='ADMIN_WATCH_MODE'){
+			this.watch_mode=''		
+			const enter_amount=enter_data[table]
+			if (table==='table1'||table==='table2'){
+				if (my_data.rating>=enter_amount)
+					this.watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНе более ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed no more than ${enter_amount} chips for this table.`][LANG]
+			}else{
+				if (my_data.rating<enter_amount)
+					this.watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНужно минимум ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed at least ${enter_amount} chips for this table.`][LANG]
+			}			
+		}				
+		objects.game_info.text=this.watch_mode			
 
+		//скрываем пока
+		objects.my_cards[0].visible=false
+		objects.my_cards[1].visible=false
+		objects.my_balance_info.text=''
+		objects.my_comb.text=''
+		objects.my_comb_param.text=''
 		
-		this.watch_mode=_watch_mode
-				
-		if (this.watch_mode){
-			//objects.info_cont.visible=true
-			objects.game_info.text=this.watch_mode			
-		}
-			
 		//текущее состояние стола
 		fbs.ref(table_id).once('value',function(s){			
 			game.analyse_table(s.val());			
@@ -2220,7 +2220,7 @@ game={
 			sound.play('card');
 			for (const card of objects.cen_cards)
 				anim3.add(card,{x:[card.x, 850,'linear']}, false, 0.25);		
-			await new Promise((resolve, reject) => {setTimeout(resolve, 250);});			
+			await new Promise(r=> {setTimeout(r, 250)});			
 		}
 
 		
@@ -2229,7 +2229,7 @@ game={
 				
 		sound.play('card');
 		await anim3.add(init_card,{angle:[-90,0,'linear'],x:[-200, init_card.sx,'linear'],y:[450, init_card.sy,'linear']}, true, 0.5);	
-		await new Promise((resolve, reject) => {setTimeout(resolve, 200);});
+		await new Promise(r=> {setTimeout(r, 200)});
 		sound.play('card');
 		for (let i=1;i<5;i++){
 			const card=objects.cen_cards[i];
