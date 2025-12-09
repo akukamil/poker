@@ -1877,17 +1877,16 @@ game={
 		cur_pcards_design=pcards_design[table]
 			
 		//проверка фишек
-		let _watch_mode=''
-		if (!this.watch_mode){			
-			const enter_amount=enter_data[table]
-			if (table==='table1'||table==='table2'){
-				if (my_data.rating>=enter_amount&&!game.watch_mode)
-					_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНе более ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed no more than ${enter_amount} chips for this table.`][LANG]
-			}else{
-				if (my_data.rating<enter_amount&&!game.watch_mode)
-					_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНужно минимум ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed at least ${enter_amount} chips for this table.`][LANG]
-			}			
-		}
+		let _watch_mode=''		
+		const enter_amount=enter_data[table]
+		if (table==='table1'||table==='table2'){
+			if (my_data.rating>=enter_amount&&!game.watch_mode)
+				_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНе более ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed no more than ${enter_amount} chips for this table.`][LANG]
+		}else{
+			if (my_data.rating<enter_amount&&!game.watch_mode)
+				_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНужно минимум ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed at least ${enter_amount} chips for this table.`][LANG]
+		}			
+
 		
 		this.watch_mode=this.watch_mode||_watch_mode
 				
