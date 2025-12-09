@@ -1880,10 +1880,10 @@ game={
 		let _watch_mode=''		
 		const enter_amount=enter_data[table]
 		if (table==='table1'||table==='table2'){
-			if (my_data.rating>=enter_amount&&!game.watch_mode)
+			if (my_data.rating>=enter_amount)
 				_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНе более ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed no more than ${enter_amount} chips for this table.`][LANG]
 		}else{
-			if (my_data.rating<enter_amount&&!game.watch_mode)
+			if (my_data.rating<enter_amount)
 				_watch_mode=[`РЕЖИМ ПРОСМОТРА!\nНужно минимум ${enter_amount} фишек для игры за этим столом.`,`Watch mode!\nNeed at least ${enter_amount} chips for this table.`][LANG]
 		}			
 
@@ -2184,13 +2184,7 @@ game={
 				
 		//убираем диалог если 
 		if (objects.bet_dialog_cont.visible) objects.bet_dialog_cont.visible=false;
-		
-		//определяем рубашку		
-		if (table_id==='table1') cards_bcg_texture=assets.pcards_bcg0;
-		if (table_id==='table2') cards_bcg_texture=assets.pcards_bcg1;
-		if (table_id==='table3') cards_bcg_texture=assets.pcards_bcg2;
-		if (table_id==='table4') cards_bcg_texture=assets.pcards_bcg3;
-		
+				
 		//Убираем окно статуса
 		this.close_status_window();			
 		
