@@ -6059,7 +6059,6 @@ main_loader={
 		loader.add('pcards_symbols_pack',git_src+'res/common/pcards_symbols_pack.png');
 		loader.add('mini_pcards_symbols_pack',git_src+'res/common/mini_pcards_symbols_pack.png');
 		loader.add('pcards_pack2',git_src+'res/common/pcards_pack2.png');
-		loader.add('mini_suits_pack',git_src+'res/common/mini_suits_pack.png');
 				
 		//добавляем из листа загрузки
 		const load_list=eval(assets.main_load_list);
