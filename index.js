@@ -6546,7 +6546,7 @@ async function init_game_env(env) {
 	pcards_design.table1={bcg:assets.bcg_table1,cards_bcg:assets['pcards_bcg0'],cards_front:assets['pcards_front0'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
 	pcards_design.table2={bcg:assets.bcg_table2,cards_bcg:assets['pcards_bcg1'],cards_front:assets['pcards_front1'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
 	pcards_design.table3={bcg:assets.bcg_table3,cards_bcg:assets['pcards_bcg2'],cards_front:assets['pcards_front2'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
-	pcards_design.table4={bcg:assets.bcg_table4,cards_bcg:assets['pcards_bcg3'],cards_front:assets['pcards_front3'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
+	pcards_design.table4={bcg:assets.bcg_table4,cards_bcg:assets['pcards_bcg3'],cards_front:assets['pcards_front3'],red_tint:0xAA0000,black_tint: 0x000000,alpha:0.85}
 	
 	
 	cur_pcards_design=pcards_design.table1
