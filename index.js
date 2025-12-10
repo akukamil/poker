@@ -11,7 +11,7 @@ let cards_bcg_texture=''
 let cards_front_texture=''
 const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
 const enter_data={'table1':25000,'table2':50000,'table3':10000,'table4':20000};
-
+const BCG_SHIFT_STEP=30
 const pcards_design={}
 let cur_pcards_design
 
@@ -1160,6 +1160,7 @@ chat={
 		
 	activate() {	
 
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)	
 		anim3.add(objects.chat_cont,{x:[-800, 0,'linear']}, true, 0.5);
 		//objects.bcg.texture=assets.lobby_bcg;
 		objects.chat_enter_button.visible=true;
@@ -1517,6 +1518,7 @@ chat={
 		
 	close() {
 		
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
 		anim3.add(objects.chat_cont,{x:[0, -800,'linear']}, false, 0.5);
 		if (objects.chat_keyboard_cont.visible)
 			keyboard.close();
@@ -1922,7 +1924,11 @@ game={
 		
 		//показываем окошко статуса
 		this.show_status_window();
-		
+			
+		//главный фон
+		objects.bcg.width=M_WIDTH
+		objects.bcg.height=M_HEIGHT
+		objects.bcg.x=0
 		objects.bcg.texture=cur_pcards_design.bcg
 		
 		objects.game_msgs_cont.visible=true;
@@ -2707,6 +2713,14 @@ game={
 	},
 	
 	close(){
+		
+		//главный фон
+		objects.bcg.width=M_WIDTH+BCG_SHIFT_STEP*2
+		objects.bcg.x=-BCG_SHIFT_STEP*2
+		objects.bcg.height=M_HEIGHT
+		objects.bcg.texture=assets.main_bcg		
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
+
 		game.first_event=1;
 		this.iam_in_game=0;
 		
@@ -3922,8 +3936,8 @@ tables_menu={
 		anim3.add(objects.table_buttons_cont,{x:[800,0,'linear']}, true, 0.5)
 		
 		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25)
-		anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5)
-		objects.bcg.texture = assets.bcg;
+		//anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5)
+		//objects.bcg.texture = assets.bcg;
 		
 		//обновляем серверное время		
 		this.update_server_tm()
@@ -4255,6 +4269,7 @@ lb={
 		//anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5);		
 		anim3.add(objects.lb_cont,{x:[-800, 0,'linear']}, true, 0.5)
 		anim3.add(objects.lb_back_btn,{alpha:[0, 1,'linear']}, true, 0.5)	
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)	
 
 		for (let i=0;i<7;i++) {
 			objects.lb_cards[i].x=this.cards_pos[i][0];
@@ -4273,11 +4288,12 @@ lb={
 
 	close() {
 
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
 		anim3.add(objects.lb_cont,{x:[0, -800,'linear']}, false, 0.5);
 
 	},
 
-	back_button_down() {
+	back_btn_down() {
 
 		if (anim3.any_on()===true) {
 			sound.play('locked');
@@ -4383,8 +4399,9 @@ dr={
 			card.t_reward.text=reward_data.reward;
 		}	
 		
-		anim3.add(objects.dr_cont,{y:[-450,objects.dr_cont.sy,'linear']}, true, 0.25);	
-		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25);
+		anim3.add(objects.dr_cont,{x:[-800,0,'linear']}, true, 0.5)	
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)	
+		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25)
 	},
 		
 	round_tm_to_day(d){
@@ -4513,7 +4530,8 @@ dr={
 	
 	close(){
 		
-		anim3.add(objects.dr_cont,{y:[objects.dr_cont.sy, -450,'linear']}, false, 0.25);	
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
+		anim3.add(objects.dr_cont,{x:[0, -800,'linear']}, false, 0.5)
 		
 	},
 	
@@ -4550,8 +4568,9 @@ slots={
 	
 	activate(){	
 		
-		this.roll_process();	
-		anim3.add(objects.slots_cont,{x:[-800,0,'linear']}, true, 0.5);	
+		this.roll_process()
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)
+		anim3.add(objects.slots_cont,{x:[-800,0,'linear']}, true, 0.5)
 		
 		//инициируем мой баланс
 		this.change_my_balance(0);
@@ -4983,6 +5002,7 @@ slots={
 	},
 		
 	close(){	
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
 		anim3.add(objects.slots_cont,{x:[0,-800,'linear']}, false, 0.5);		
 	}
 	
@@ -5003,8 +5023,9 @@ shop={
 	payments:0,
 	
 	activate(){
-		anim3.add(objects.shop_cont,{x:[-800,0,'linear']}, true, 0.5);	
-		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25);
+		anim3.add(objects.shop_cont,{x:[-800,0,'linear']}, true, 0.5)
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)		
+		anim3.add(objects.my_data_cont,{alpha:[0,1,'linear']}, true, 0.25)
 	},
 		
 	close_button_down(){
@@ -5020,7 +5041,7 @@ shop={
 	close(){
 		
 		anim3.add(objects.shop_cont,{x:[0, -800,'linear']}, false, 0.5);	
-		
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
 	},
 	
 	button_down(e){		
@@ -5205,27 +5226,21 @@ snow={
 
 }
 
-rules = {
-	
-	active : 0,
-	
+rules={	
+
 	activate() {
 		
-		this.active = 1;
-		anim3.add(objects.bcg,{alpha:[0,0.5,'linear']}, true, 0.6);	
-		anim3.add(objects.rules_back_button,{x:[800, objects.rules_back_button.sx,'easeOutCubic']}, true, 0.5);
-		anim3.add(objects.rules_text,{alpha:[0, 1,'linear']}, true, 1);
-				
+		anim3.add(objects.rules_cont,{x:[-800, 0,'linear']}, true, 0.5)
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)				
 		objects.rules_text.text = ['Добро пожаловать в карточную игру Джет Покер Онлайн!\n\nВ игре участвуют до 6 игроков. Цель игры - составить лучшую пятикарточную покерную комбинацию из своих и общих карт. В игре несколько раундов, в течении которых игроки делают ставки. После каждого раунда открывается одна или три (на префлопе) карты. Когда все карты открыты, объявляется победитель - тот, у кого сложилась более сильная комбинация карт, и он забирает банк. Также можно выиграть банк, если соперники откажутся продолжать партию (скинут карты). Выиграть можно также вводя соперников в заблуждение величиной ставок (блеф) и тем самым заставляя их скидывать карты.\n\nУдачной игры!','Welcome to the Jet Poker Online game!\n\n The game involves up to 6 players. The goal of the game is to make the best five-card poker combination of your own and community cards. There are several rounds in the game, during which players place bets. After each round, one or three (preflop) cards are opened. When all the cards are open, the winner is announced - the one who has a stronger combination of cards, and he takes the pot. You can also win the pot if the opponent refuses to continue the game (throws off the cards). You can also win by misleading your opponent with the amount of bets (bluff) and thereby forcing him to fold his cards.\n\nHave a good game!'][LANG];
 	},
 	
-	async back_button_down() {
+	async back_btn_down() {
 		
-		if (anim3.any_on()===true) {
+		if (anim3.any_on()) {
 			sound.play('locked');
 			return
-		};
-		
+		}		
 		
 		sound.play('click');
 		await this.close();
@@ -5235,10 +5250,8 @@ rules = {
 	
 	async close() {
 		
-		this.active = 0;
-		anim3.add(objects.rules_text,{alpha:[1, 0,'linear']}, false, 0.5);
-		anim3.add(objects.bcg,{alpha:[1,0,'linear']}, true, 0.5);
-		await anim3.add(objects.rules_back_button,{x:[objects.rules_back_button.x, 800,'easeInCubic']}, false, 0.5);
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
+		anim3.add(objects.rules_cont,{x:[0, -800,'linear']}, false, 0.5)		
 		
 	}	
 	
@@ -5264,7 +5277,7 @@ pref={
 		
 		
 		anim3.add(objects.pref_cont,{x:[-800,0,'linear']}, true, 0.5);
-		
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)		
 
 		//заполняем имя и аватар
 		//objects.pref_name.set2(my_data.name,260);
@@ -5620,6 +5633,7 @@ pref={
 	
 	close(){
 		
+		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
 		anim3.add(objects.pref_cont,{x:[0,-800,'linear']}, false, 0.5);	
 		
 	},
@@ -5945,7 +5959,7 @@ main_loader={
 		const lang_pack = ['RUS','ENG'][LANG];	
 		
 		//добавляем фон отдельно
-		loader.add('bcg',git_src+'res/common/bcg.jpg');
+		loader.add('main_bcg',git_src+'res/common/main_bcg.jpg');
 		loader.add('game_title_img',git_src+`res/common/game_title_${lang_pack}.png`);	
 		loader.add('loader_bcg_img',git_src+'res/common/loader_bcg_img.png');
 		loader.add('loader_front_img',git_src+'res/common/loader_front_img.png');
@@ -5964,35 +5978,46 @@ main_loader={
 		
 		
 		//элементы загрузки
-		objects.loader_cont=new PIXI.Container();
+		objects.loader_cont=new PIXI.Container()
+				
+		objects.bcg=new PIXI.Sprite(assets.main_bcg)
+		objects.bcg.width=M_WIDTH+BCG_SHIFT_STEP*2
+		objects.bcg.height=M_HEIGHT
+		objects.bcg.x=0
+		objects.bcg.y=0
+		
+		objects.title=new PIXI.Sprite(assets.game_title_img)
+		objects.title.x=400
+		objects.title.y=220
+		objects.title.anchor.set(0.5,0.5)
+		objects.title.width=780
+		objects.title.height=420
+		
+		objects.loader_bcg=new PIXI.Sprite(assets.loader_bcg_img)
+		objects.loader_bcg.x=220
+		objects.loader_bcg.y=380
+		objects.loader_bcg.width=360
+		objects.loader_bcg.height=50
 		
 		
-		objects.bcg=new PIXI.Sprite(assets.bcg);
-		objects.bcg.width=820;
-		objects.bcg.height=470;
-		objects.bcg.x=-10;
-		objects.bcg.y=-10;
+		objects.loader_progress_mask=new PIXI.Graphics()
+		objects.loader_progress_mask.beginFill(0xff0000)
+		objects.loader_progress_mask.drawRect(0,0,340,30)
+		objects.loader_progress_mask.x=230
+		objects.loader_progress_mask.y=390
+		objects.loader_progress_mask.width=1
+		objects.loader_progress_mask.base_width=340		
 		
-		objects.title=new PIXI.Sprite(assets.game_title_img);
-		objects.title.x=400;
-		objects.title.y=220;
-		objects.title.anchor.set(0.5,0.5);
-		objects.title.width=780;
-		objects.title.height=420;
+		objects.loader_front=new PIXI.Sprite(assets.loader_front_img)
+		objects.loader_front.x=230
+		objects.loader_front.y=390
+		objects.loader_front.width=340
+		objects.loader_front.height=30
+		objects.loader_front.mask=objects.loader_progress_mask
 		
-		objects.loader_bcg=new PIXI.Sprite(assets.loader_bcg_img);
-		objects.loader_bcg.x=220;
-		objects.loader_bcg.y=380;
-		objects.loader_bcg.width=360;
-		objects.loader_bcg.height=50;
+
 		
-		objects.loader_front=new PIXI.NineSlicePlane(assets.loader_front_img,20,20,20,20);
-		objects.loader_front.x=230;
-		objects.loader_front.y=390;
-		objects.loader_front.width=10;
-		objects.loader_front.height=30;
-		
-		objects.loader_cont.addChild(objects.title,objects.loader_bcg,objects.loader_front);
+		objects.loader_cont.addChild(objects.title,objects.loader_bcg,objects.loader_front,objects.loader_progress_mask);
 		app.stage.addChild(objects.bcg,objects.loader_cont);
 		
 		
@@ -6060,11 +6085,11 @@ main_loader={
 				loader.add(load_list[i].name, git_src+'res/'+lang_pack + '/' + load_list[i].name + "." +  load_list[i].image_format);
 
 		loader.onProgress.add(l=>{
-			objects.loader_front.width =  340*loader.progress*0.01;
+			objects.loader_progress_mask.width=objects.loader_progress_mask.base_width*l.progress*0.01
 		})
 		
 		await new Promise(resolve=> loader.load(resolve))
-				
+	
 		//переносим все в ассеты
 		await new Promise(res=>loader.load(res))
 		for (const res_name in loader.resources){
@@ -6079,8 +6104,7 @@ main_loader={
 		this.divide_texture(assets.pcards_pack2,135,180,['pcards_bcg0','pcards_bcg1','pcards_bcg2','pcards_bcg3','pcards_front0','pcards_front1','pcards_front2','pcards_front3'])
 		this.divide_texture(assets.pcards_symbols_pack,90,90,['2','3','4','5','6','7','8','9','10','J','Q','K','A','c','h','s','d'])
 		this.divide_texture(assets.mini_pcards_symbols_pack,50,50,['m2','m3','m4','m5','m6','m7','m8','m9','m10','mJ','mQ','mK','mA','mc','mh','ms','md'])
-
-				
+			
 				
 		//создаем спрайты и массивы спрайтов и запускаем первую часть кода
 		for (let i = 0; i < load_list.length; i++) {
@@ -6143,7 +6167,7 @@ main_loader={
 		}
 		
 		anim3.add(objects.loader_cont,{x:[0,-800,'linear']}, false, 0.5)
-
+		anim3.add(objects.bcg,{x:[0, -BCG_SHIFT_STEP,'linear']}, true, 0.5)	
 	}	
 }
 
@@ -6542,6 +6566,7 @@ async function init_game_env(env) {
 	});
 
 	//показыаем основное меню
+	anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
 	tables_menu.activate(1);	
 	
 	//проверка ежедневных бонусов
