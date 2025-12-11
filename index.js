@@ -2518,7 +2518,7 @@ game={
 			
 	street_fin_event(event){
 						
-		console.log(event);
+		//console.log(event);
 		
 		objects.timer_bar.width=130;
 		objects.control_buttons_cont.visible=false;
@@ -4243,16 +4243,17 @@ tables_menu={
 	
 	close(){		
 		
-		anim3.add(objects.table_buttons_cont,{x:[0,800,'linear']}, false, 0.5);
+		anim3.add(objects.table_buttons_cont,{x:[0,800,'linear']}, false, 0.5)
 		
-		clearInterval(this.srv_timer);
+		clearInterval(this.srv_timer)
+		this.srv_timer=0
 		
-		clearTimeout(this.table_stat_updater[1].timer);
-		clearTimeout(this.table_stat_updater[2].timer);
-		clearTimeout(this.table_stat_updater[3].timer);
-		clearTimeout(this.table_stat_updater[4].timer);
+		clearTimeout(this.table_stat_updater[1].timer)
+		clearTimeout(this.table_stat_updater[2].timer)
+		clearTimeout(this.table_stat_updater[3].timer)
+		clearTimeout(this.table_stat_updater[4].timer)
 		
-		some_process.table=function(){};
+		some_process.table=function(){}
 
 	}
 	
