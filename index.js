@@ -342,12 +342,13 @@ class playing_cards_class extends PIXI.Container {
 		this.suit_img.width=63
 		this.suit_img.height=63
 		this.suit_img.y=22
+		this.suit_img.x=-1
 		
 		this.val_img = new PIXI.Sprite();
 		this.val_img.width=65
 		this.val_img.height=65
 		this.val_img.anchor.set(0.5,0.5)
-		this.val_img.x=0
+		this.val_img.x=-1
 		this.val_img.y=-22
 		this.val_img.tint=0xffffff
 						
@@ -379,13 +380,10 @@ class playing_cards_class extends PIXI.Container {
 		this.value_txt = value_num_to_txt[this.value_num];
 		this.suit_txt = suit_num_to_txt[this.suit_num];
 		
-		if (this.suit_txt === 'h' || this.suit_txt === 'd'){
-			this.val_img.tint = cur_pcards_design.red_tint		
-			this.suit_img.tint = cur_pcards_design.red_tint			
-		} else {
-			this.val_img.tint = cur_pcards_design.black_tint		
-			this.suit_img.tint = cur_pcards_design.black_tint
-		}			
+		//цвета
+		this.val_img.tint = cur_pcards_design.tint[this.suit_txt]		
+		this.suit_img.tint = cur_pcards_design.tint[this.suit_txt]		
+
 		
 		this.suit_img.alpha=cur_pcards_design.alpha
 		this.val_img.alpha=cur_pcards_design.alpha
@@ -6542,10 +6540,10 @@ async function init_game_env(env) {
 	await new Promise((resolve, reject) => {setTimeout(resolve, 1000);});
 	
 	
-	pcards_design.table1={bcg:assets.bcg_table1,cards_bcg:assets['pcards_bcg0'],cards_front:assets['pcards_front0'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
-	pcards_design.table2={bcg:assets.bcg_table2,cards_bcg:assets['pcards_bcg1'],cards_front:assets['pcards_front1'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
-	pcards_design.table3={bcg:assets.bcg_table3,cards_bcg:assets['pcards_bcg2'],cards_front:assets['pcards_front2'],red_tint:0xFF0000,black_tint: 0x000000,alpha:0.85}
-	pcards_design.table4={bcg:assets.bcg_table4,cards_bcg:assets['pcards_bcg3'],cards_front:assets['pcards_front3'],red_tint:0xAA0000,black_tint: 0x000000,alpha:0.85}
+	pcards_design.table1={bcg:assets.bcg_table1,cards_bcg:assets['pcards_bcg0'],cards_front:assets['pcards_front0'],tint:{h:0xFF0000,d:0xFF0000,s:0x000000,c:0x000000},alpha:0.85}
+	pcards_design.table2={bcg:assets.bcg_table2,cards_bcg:assets['pcards_bcg1'],cards_front:assets['pcards_front1'],tint:{h:0xFF0000,d:0xFF0000,s:0x000000,c:0x000000},alpha:0.85}
+	pcards_design.table3={bcg:assets.bcg_table3,cards_bcg:assets['pcards_bcg2'],cards_front:assets['pcards_front2'],tint:{h:0xFF0000,d:0xFF0000,s:0x000000,c:0x000000},alpha:0.85}
+	pcards_design.table4={bcg:assets.bcg_table4,cards_bcg:assets['pcards_bcg3'],cards_front:assets['pcards_front3'],tint:{h:0xFF0000,d:0xAA0000,s:0x000000,c:0x000044},alpha:0.85}
 	
 	
 	cur_pcards_design=pcards_design.table1
