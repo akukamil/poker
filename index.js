@@ -4563,7 +4563,7 @@ slots={
 	tar_payout:0,
 	combo:0,
 	bonus2x:1,
-	payout_data:[-999,2,3,6,10,15,1,1],
+	payout_data:[-999,3,4,5,10,12,1,1],
 	bet_win:[0,0,0],
 	slots_progress_postfix:['_0','_0','_0','_1','_0','_0','_0','_2'],
 	
@@ -4973,17 +4973,15 @@ slots={
 		matched_area.sort((a, b) => b.dist - a.dist);
 		
 		
-		//Сколько получим с каждого символа
-		const payout=Math.round(this.bonus2x*this.payout_data[matched_area[0].id]*0.01*this.bet_amount)
-		
+		//Сколько получим с каждого символа					
 		for (const icon of matched_area){
 			icon.picked=1
 			this.hl_cell(icon)
 			const tar_ang=irnd(0,360)
-			 
+			const symb_payout=Math.round(this.bonus2x*this.payout_data[icon.id]*0.01*this.bet_amount)
 			this.bonus2x===1?sound.play('slot_match'):sound.play('slot_match_x2')
 			anim3.add(icon,{scale_xy:[0.51851,0.3,'easeInBack'],angle:[0,tar_ang,'linear'],alpha:[1,0.5,'linear'],x:[icon.x,tar_x,'linear'],y:[icon.y,tar_y,'easeInCubic']}, false, 0.45).then(()=>{
-				this.tar_payout+=payout
+				this.tar_payout+=symb_payout
 			})
 			await new Promise(r => setTimeout(r, 100))	
 		}
