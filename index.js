@@ -5788,10 +5788,16 @@ auth2 = {
 				
 		if (game_platform === 'PG') {			
 						
-			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('PG_');
-			my_data.name = this.get_random_name(my_data.uid);
-			my_data.orig_pic_url = 'mavatar'+my_data.uid;	
+
 			try {await this.load_script('https://bridge.playgama.com/v1/stable/playgama-bridge.js')} catch (e) {alert(e)};	
+						
+			try {
+				await bridge.initialize()			
+			} catch (e) { alert(e)};
+			
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('PG_');
+			my_data.name = bridge.player.name||this.get_random_name(my_data.uid);
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;				
 			
 		}
 
