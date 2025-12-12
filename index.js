@@ -5786,7 +5786,16 @@ auth2 = {
 			
 		}
 				
-				
+		if (game_platform === 'PG') {			
+						
+			my_data.uid = this.search_in_local_storage() || this.get_random_uid_for_local('PG_');
+			my_data.name = this.get_random_name(my_data.uid);
+			my_data.orig_pic_url = 'mavatar'+my_data.uid;	
+			try {await this.load_script('https://bridge.playgama.com/v1/stable/playgama-bridge.js')} catch (e) {alert(e)};	
+			
+		}
+
+		
 		if (game_platform === 'YANDEX') {			
 		
 			try {await this.load_script('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
@@ -5905,8 +5914,7 @@ auth2 = {
 			my_data.orig_pic_url = 'mavatar'+my_data.uid;	
 			return;
 		}
-		
-		
+				
 		if (game_platform === 'UNKNOWN') {
 			
 			//если не нашли платформу
@@ -6237,6 +6245,13 @@ async function define_platform_and_language(env) {
 	if (s.includes('game_jolt')) {
 				
 		game_platform = 'GJ';
+		LANG = 1;
+		return;
+	}
+	
+	if (s.includes('playgama')) {
+				
+		game_platform = 'PG';
 		LANG = 1;
 		return;
 	}
