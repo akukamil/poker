@@ -5787,10 +5787,26 @@ auth2 = {
 		}
 				
 		if (game_platform === 'PG') {			
-						
+				
+			async function initSDK() {
+				try {
+					await new Promise((resolve, reject) => {
+						var s = document.createElement('script');
+						s.src = "https://bridge.playgama.com/v1/stable/playgama-bridge.js";
+						s.async = true;
+						s.onload = resolve;
+						s.onerror = reject;
+						document.body.appendChild(s);
+					});
+					console.log("SDK loaded successfully");
+				} catch (error) {
+					console.error("Failed to load SDK:", error);
+				}
+			}
 
-			try {await this.load_script('https://bridge.playgama.com/v1/stable/playgama-bridge.js')} catch (e) {alert(e)};	
-						
+			await initSDK();
+
+				
 			try {
 				await bridge.initialize()			
 			} catch (e) { alert(e)};
