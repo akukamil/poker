@@ -408,7 +408,7 @@ class action_info_class extends PIXI.Container{
 	constructor() {
 		
 		super();
-		this.bcg=new PIXI.NineSlicePlane(assets.action_bcg,50,35,50,35);
+		this.bcg=new PIXI.NineSlicePlane(assets.action_bcg,60,46,60,46);
 		this.bcg.width=140;		
 		this.bcg.height=50;
 		this.bcg.x=-this.bcg.width*0.5
