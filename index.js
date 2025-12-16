@@ -408,16 +408,39 @@ class action_info_class extends PIXI.Container{
 	constructor() {
 		
 		super();
-		this.bcg=new PIXI.Sprite(assets.action_bcg);
+		this.bcg=new PIXI.NineSlicePlane(assets.action_bcg,50,35,50,35);
 		this.bcg.width=140;		
 		this.bcg.height=50;
-		this.bcg.anchor.set(0.5,0.5);
+		this.bcg.x=-this.bcg.width*0.5
+		this.bcg.y=-this.bcg.height*0.5
 		
-		this.t_info=new PIXI.BitmapText('9', {fontName: 'mfont', fontSize :25});
+		this.t_info=new PIXI.BitmapText('9', {fontName: 'mfont2', fontSize :23});
 		this.t_info.anchor.set(0.5,0.5);
-		this.t_info.tint=0x333333;		
+		this.t_info.x=2
+		this.t_info.y=-1
+		this.t_info.tint=0xffffff;		
 		this.addChild(this.bcg,this.t_info);
 	}	
+	
+	set(a,money){		
+		
+		const a_to_tint={
+			CHECK:{bcg:0x8E8E8E,t:0xffffff},
+			RAISE:{bcg:0xFF0000,t:0xffffff},
+			CALL:{bcg:0x4E95D9,t:0xffffff},
+			FOLD:{bcg:0x747474,t:0xffffff},
+			BET:{bcg:0x459329,t:0xffffff}
+		};
+		
+		this.t_info.tint=a_to_tint[a].t
+		this.bcg.tint=a_to_tint[a].bcg
+		
+		this.t_info.text=transl_action[a][LANG]
+		if (money) this.t_info.text=this.t_info.text+' '+money
+		this.bcg.width=Math.max(this.t_info.width+50,100)
+		this.bcg.x=-this.bcg.width*0.5
+		anim3.add(this,{alpha:[0,1,'easeBridge']}, false, 3,false);
+	}
 	
 }
 
@@ -683,19 +706,18 @@ class player_card_class extends PIXI.Container {
 			objects.action_info.y=this.y+157;
 		else
 			objects.action_info.y=this.y+130;
-		objects.action_info.t_info.text=transl_action[event.data][LANG];
+
 				
 		let in_money=event.chips||event.bet_raise;
 		if (event.bet_raise!=null)
 			in_money=event.bet_raise;		
 		if (event.chips!=null)
 			in_money=event.chips;
-		
+				
 		if(action==='FOLD') in_money=0;
-		
-		if (in_money) objects.action_info.t_info.text+=' '+in_money;			
-		anim3.add(objects.action_info,{alpha:[0,1,'easeBridge']}, false, 3,false);		
-	
+			
+		objects.action_info.set(event.data,in_money)				
+			
 		if (this.uid!==my_data.uid){
 			if(action==='CHECK')
 				sound.play('check')
@@ -5787,26 +5809,7 @@ auth2 = {
 		}
 				
 		if (game_platform === 'PG') {			
-				
-			async function initSDK() {
-				try {
-					await new Promise((resolve, reject) => {
-						var s = document.createElement('script');
-						s.src = "https://bridge.playgama.com/v1/stable/playgama-bridge.js";
-						s.async = true;
-						s.onload = resolve;
-						s.onerror = reject;
-						document.body.appendChild(s);
-					});
-					console.log("SDK loaded successfully");
-				} catch (error) {
-					console.error("Failed to load SDK:", error);
-				}
-			}
-
-			await initSDK();
-
-				
+								
 			try {
 				await bridge.initialize()			
 			} catch (e) { alert(e)};
@@ -5816,7 +5819,6 @@ auth2 = {
 			my_data.orig_pic_url = 'mavatar'+my_data.uid;				
 			
 		}
-
 		
 		if (game_platform === 'YANDEX') {			
 		
@@ -6064,8 +6066,8 @@ main_loader={
 		loader.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
 		loader.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
 		
-		loader.add("m2_font", git_src+"fonts/Bahnschrift/font.fnt");
-		loader.add("m3_font", git_src+"fonts/Cards_font/font.fnt");
+		loader.add("m2_font", git_src+"fonts/Bahnschrift_s/font.fnt");
+		loader.add("m3_font", git_src+"fonts/Bahnschrift/font.fnt");
 
 		loader.add('check',git_src+'sounds/check.mp3')
 		loader.add('raise',git_src+'sounds/raise.mp3')
@@ -6364,7 +6366,7 @@ async function init_game_env(env) {
 		document.getElementById('loadingText').remove()
 
 	git_src="https://akukamil.github.io/poker/"
-	//git_src=""
+	git_src=""
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);	
