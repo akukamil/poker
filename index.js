@@ -701,7 +701,7 @@ class player_card_class extends PIXI.Container {
 		
 		const action=event.data;
 				
-		objects.action_info.x=this.x+70;
+		objects.action_info.x=this.x+73;
 		if (this.t_comb.visible)
 			objects.action_info.y=this.y+157;
 		else
@@ -3682,6 +3682,10 @@ ad = {
 		
 		if (game_platform==='GM') {
 			sdk.showBanner();
+		}
+		
+		if (game_platform==='PG') {
+			bridge.advertisement.showInterstitial()
 		}
 	
 		if (game_platform==='GOOGLE_PLAY') {
