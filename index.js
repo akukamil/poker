@@ -437,7 +437,7 @@ class action_info_class extends PIXI.Container{
 		
 		this.t_info.text=transl_action[a][LANG]
 		if (money) this.t_info.text=this.t_info.text+' '+money
-		this.bcg.width=Math.max(this.t_info.width+50,100)
+		this.bcg.width=Math.max(this.t_info.width+50,110)
 		this.bcg.x=-this.bcg.width*0.5
 		anim3.add(this,{alpha:[0,1,'easeBridge']}, false, 3,false);
 	}
