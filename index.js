@@ -6583,7 +6583,7 @@ async function init_game_env(env) {
 	await new Promise((resolve, reject) => {setTimeout(resolve, 1000);});
 	
 	
-	pcards_design.table1={bcg:assets.bcg_table1,cards_bcg:assets['pcards_bcg0'],cards_front:assets['pcards_front0'],tint:{h:0xFF0000,d:0xFF0000,s:0x000000,c:0x000000},alpha:0.85}
+	pcards_design.table1={bcg:assets.bcg_table1,cards_bcg:assets['pcards_bcg0'],cards_front:assets['pcards_front0'],tint:{h:0xFF0000,d:0xFF0000,s:0x000000,c:0x000000},alpha:0.8}
 	pcards_design.table2={bcg:assets.bcg_table2,cards_bcg:assets['pcards_bcg1'],cards_front:assets['pcards_front1'],tint:{h:0xFF0000,d:0xFF0000,s:0x000000,c:0x000000},alpha:0.85}
 	pcards_design.table3={bcg:assets.bcg_table3,cards_bcg:assets['pcards_bcg2'],cards_front:assets['pcards_front2'],tint:{h:0xFF0000,d:0xFF0000,s:0x000000,c:0x000000},alpha:0.85}
 	pcards_design.table4={bcg:assets.bcg_table4,cards_bcg:assets['pcards_bcg3'],cards_front:assets['pcards_front3'],tint:{h:0xFF0000,d:0xAA0000,s:0x000000,c:0x000044},alpha:0.85}
