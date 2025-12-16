@@ -6366,7 +6366,7 @@ async function init_game_env(env) {
 		document.getElementById('loadingText').remove()
 
 	git_src="https://akukamil.github.io/poker/"
-	git_src=""
+	//git_src=""
 			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);	
