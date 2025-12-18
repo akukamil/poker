@@ -5860,12 +5860,15 @@ auth2 = {
 					res(gp);
 					
 				}
+				
+				var s = document.createElement('script');
+				s.src = "https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit";
+				s.async = true;
+				document.body.appendChild(s);
+				
+				
 			})
 			 
-			var s = document.createElement('script');
-			s.src = "https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit";
-			s.async = true;
-			document.body.appendChild(s);
 
 
 		}
