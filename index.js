@@ -6340,7 +6340,7 @@ async function define_platform_and_language(env) {
 	if (s.includes('pikabu')) {
 				
 		game_platform = 'PIKABU';
-		LANG = 1;
+		LANG = await lang_dlg.show();
 		return;
 	}
 	
