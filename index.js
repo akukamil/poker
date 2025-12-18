@@ -5828,9 +5828,22 @@ auth2 = {
 		}
 		
 		if (game_platform === 'PIKABU') {			
-								
-			try {await this.load_script('https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit')} catch (e) {alert(e)};				
-			
+						
+
+			try {
+				await new Promise((resolve, reject) => {
+					var s = document.createElement('script');
+					s.src = "https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit";
+					s.async = true;
+					s.onload = resolve;
+					s.onerror = reject;
+					document.body.appendChild(s);
+				});
+				console.log("SDK loaded successfully");
+			} catch (error) {
+				console.error("Failed to load SDK:", error);
+			}						
+
 			window.gp=await new Promise(res => {				
 				window.onGPInit = function(_gp) {
 					res(_gp)
