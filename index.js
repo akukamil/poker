@@ -5843,6 +5843,10 @@ auth2 = {
 					gp.gameplayStart()
 					gp.gameStart()
 					
+					
+					gp.player.set('tm',Date.now());
+					gp.player.get('tm');
+					
 					gp.sounds.on('mute', () => {
 						sound.on=0
 					});
@@ -5865,12 +5869,9 @@ auth2 = {
 				var s = document.createElement('script');
 				s.src = "https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit";
 				s.async = true;
-				document.body.appendChild(s);
-				
+				document.body.appendChild(s);				
 				
 			})
-			 
-
 
 		}
 		
