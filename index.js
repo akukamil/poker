@@ -5831,7 +5831,7 @@ auth2 = {
 			
 
 			window.gp=await new Promise(res => {				
-				window.onGPInit = function(gp) {
+				window.onGPInit = async(gp) {
 					
 					window.gp = gp;
 					await gp.player.ready
