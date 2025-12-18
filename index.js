@@ -5840,6 +5840,10 @@ auth2 = {
 			
 			await gp.player.ready
 			await gp.ads.showPreloader()
+			
+			my_data.uid = 'PKB_'+gp.player.id
+			my_data.name = gp.player.name||this.get_random_name(my_data.uid);
+			my_data.orig_pic_url = gp.player.avatar;	
 			gp.ads.showSticky()
 
 		}
