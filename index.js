@@ -3697,45 +3697,7 @@ ad = {
 			}			
 		}
 	
-	},
-	
-	async show2() {
-		
-		
-		if (game_platform ==="YANDEX") {
-			
-			let res = await new Promise(function(resolve, reject){				
-				window.ysdk.adv.showRewardedVideo({
-						callbacks: {
-						  onOpen: () => {},
-						  onRewarded: () => {resolve('ok')},
-						  onClose: () => {resolve('err')}, 
-						  onError: (e) => {resolve('err')}
-					}
-				})
-			
-			})
-			return res;
-		}
-		
-		if (game_platform === "VK") {	
-
-			let res = '';
-			try {
-				res = await vkBridge.send("VKWebAppShowNativeAds", { ad_format: "reward" })
-			}
-			catch(error) {
-				res ='err';
-			}
-			
-			return res;				
-			
-		}	
-		
-		return 'err';
-		
 	}
-
 }
 
 confirm_dialog = {
@@ -5229,7 +5191,7 @@ snow={
 				const size=Math.random()*2+1
 				sf.speed=size*0.4;
 				sf.scale_xy=size*0.25;
-				sf.alpha=size/4;
+				sf.alpha=size/8;
 
 				this.change_dir(sf);
 
