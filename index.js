@@ -1862,13 +1862,12 @@ sound={
 	switch(){
 		
 		if (this.on){
-			this.on=0;
-				
-			pref.send_info(['Звуки отключены','Sounds is off'][LANG]);
+			this.on=0				
+			pref.send_info(['Звуки отключены','Sounds is off'][LANG])
 			
 		} else{
 			this.on=1;
-			pref.send_info(['Звуки включены','Sounds is on'][LANG]);
+			pref.send_info(['Звуки включены','Sounds is on'][LANG])
 		}
 	
 	}
@@ -5842,9 +5841,26 @@ auth2 = {
 			await gp.ads.showPreloader()
 			
 			my_data.uid = 'PKB_'+gp.player.id
-			my_data.name = gp.player.name||this.get_random_name(my_data.uid);
-			my_data.orig_pic_url = gp.player.avatar;	
-			gp.ads.showSticky()
+			my_data.name = gp.player.name||this.get_random_name(my_data.uid)
+			my_data.orig_pic_url = gp.player.avatar
+			gp.gameplayStart()
+			gp.gameStart()
+			
+			gp.sounds.on('mute', () => {
+				sound.on=0
+			});
+			
+			gp.sounds.on('mute:sfx', () => {
+				sound.on=0
+			});
+
+			gp.sounds.on('unmute', () => {
+				sound.on=1
+			});
+
+			gp.sounds.on('unmute:sfx', () => {
+				sound.on=1
+			});
 
 		}
 		
