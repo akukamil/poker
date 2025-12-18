@@ -5828,52 +5828,44 @@ auth2 = {
 		}
 		
 		if (game_platform === 'PIKABU') {			
-						
-
-			try {
-				await new Promise((resolve, reject) => {
-					var s = document.createElement('script');
-					s.src = "https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit";
-					s.async = true;
-					s.onload = resolve;
-					s.onerror = reject;
-					document.body.appendChild(s);
-				});
-				console.log("SDK loaded successfully");
-			} catch (error) {
-				console.error("Failed to load SDK:", error);
-			}						
+			
 
 			window.gp=await new Promise(res => {				
-				window.onGPInit = function(_gp) {
-					res(_gp)
+				window.onGPInit = function(gp) {
+					
+					window.gp = gp;
+					await gp.player.ready
+					await gp.ads.showPreloader()					
+					my_data.uid = 'PKB_'+gp.player.id
+					my_data.name = gp.player.name||this.get_random_name(my_data.uid)
+					my_data.orig_pic_url = gp.player.avatar
+					gp.gameplayStart()
+					gp.gameStart()
+					
+					gp.sounds.on('mute', () => {
+						sound.on=0
+					});
+					
+					gp.sounds.on('mute:sfx', () => {
+						sound.on=0
+					});
+
+					gp.sounds.on('unmute', () => {
+						sound.on=1
+					});
+
+					gp.sounds.on('unmute:sfx', () => {
+						sound.on=1
+					});				
+					
 				}
 			})
-			
-			await gp.player.ready
-			await gp.ads.showPreloader()
-			
-			my_data.uid = 'PKB_'+gp.player.id
-			my_data.name = gp.player.name||this.get_random_name(my_data.uid)
-			my_data.orig_pic_url = gp.player.avatar
-			gp.gameplayStart()
-			gp.gameStart()
-			
-			gp.sounds.on('mute', () => {
-				sound.on=0
-			});
-			
-			gp.sounds.on('mute:sfx', () => {
-				sound.on=0
-			});
+			 
+			var s = document.createElement('script');
+			s.src = "https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit";
+			s.async = true;
+			document.body.appendChild(s);
 
-			gp.sounds.on('unmute', () => {
-				sound.on=1
-			});
-
-			gp.sounds.on('unmute:sfx', () => {
-				sound.on=1
-			});
 
 		}
 		
