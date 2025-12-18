@@ -3687,6 +3687,10 @@ ad = {
 		if (game_platform==='PG') {
 			bridge.advertisement.showInterstitial()
 		}
+		
+		if (game_platform==='PIKABU') {
+			window.gp.ads.showFullscreen({ showCountdownOverlay: true });
+		}
 	
 		if (game_platform==='GOOGLE_PLAY') {
 			if (typeof Android !== 'undefined') {
@@ -5824,6 +5828,22 @@ auth2 = {
 			
 		}
 		
+		if (game_platform === 'PIKABU') {			
+								
+			try {await this.load_script('https://gamepush.com/sdk/gamepush.js?projectId=25448&publicToken=eiMXM4vNgaFD8XkpSHPB7BxWSFKVHNXD&callback=onGPInit')} catch (e) {alert(e)};				
+			
+			window.gp=await new Promise(res => {				
+				window.onGPInit = function(_gp) {
+					res(_gp)
+				}
+			})
+			
+			await gp.player.ready
+			await gp.ads.showPreloader()
+			gp.ads.showSticky()
+
+		}
+		
 		if (game_platform === 'YANDEX') {			
 		
 			try {await this.load_script('https://yandex.ru/games/sdk/v2')} catch (e) {alert(e)};										
@@ -6243,6 +6263,7 @@ function vis_change() {
 lang_dlg = {
 	
 	p_resolve : {},
+	
 	show () {
 		document.getElementById('language-popup').style.display='flex'
 		return new Promise(function(resolve, reject){
@@ -6280,6 +6301,13 @@ async function define_platform_and_language(env) {
 	if (s.includes('playgama')) {
 				
 		game_platform = 'PG';
+		LANG = 1;
+		return;
+	}
+	
+	if (s.includes('pikabu')) {
+				
+		game_platform = 'PIKABU';
 		LANG = 1;
 		return;
 	}
