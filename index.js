@@ -5856,7 +5856,8 @@ auth2 = {
 
 					gp.sounds.on('unmute:sfx', () => {
 						sound.on=1
-					});				
+					});			
+					res(gp);
 					
 				}
 			})
