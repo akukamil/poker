@@ -5834,6 +5834,7 @@ auth2 = {
 				window.onGPInit = async(gp)=>{
 					
 					window.gp = gp;
+					gp.player.on('ready', () => {console.log('player ready')});
 					await gp.player.ready
 					await gp.ads.showPreloader()					
 					my_data.uid = 'PKB_'+gp.player.id
