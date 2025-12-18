@@ -5846,6 +5846,7 @@ auth2 = {
 					
 					gp.player.set('tm',Date.now());
 					gp.player.get('tm');
+					gp.player.sync();
 					
 					gp.sounds.on('mute', () => {
 						sound.on=0
