@@ -5165,7 +5165,7 @@ snow={
 	process(){
 
 		const cur_time=Date.now();
-		if (cur_time-this.prv_time>300){
+		if (cur_time-this.prv_time>600){
 
 			this.prv_time=cur_time
 						
