@@ -5805,6 +5805,8 @@ auth2 = {
 					gp.gameplayStart()
 					gp.gameStart()
 					
+					LANG = gp.language==='ru'?0:1;
+					
 					
 					gp.player.set('tm',Date.now());
 					gp.player.get('tm');
@@ -6302,7 +6304,7 @@ async function define_platform_and_language(env) {
 	if (s.includes('pikabu')) {
 				
 		game_platform = 'PIKABU';
-		LANG = await lang_dlg.show();
+		LANG = 0;
 		return;
 	}
 	
@@ -6386,16 +6388,21 @@ async function check_admin_info(){
 
 async function init_game_env(env) {			
 
-	//убираем надпись
-	const l_text=document.getElementById('loadingText')
-	if(l_text)
-		document.getElementById('loadingText').remove()
+
 
 	git_src="https://akukamil.github.io/poker/"
 	//git_src=""
 			
+			
 	await define_platform_and_language(env);
 	console.log(game_platform, LANG);	
+	
+	await auth2.init();	
+	
+	//убираем надпись
+	const l_text=document.getElementById('loadingText')
+	if(l_text)
+		document.getElementById('loadingText').remove()
 	
 	//инициируем файербейс
 	if (firebase.apps.length===0) {
@@ -6426,7 +6433,7 @@ async function init_game_env(env) {
 				
 	//событие по изменению размера окна
 	resize();
-	window.addEventListener('resize', resize)
+	window.addEventListener('resize', resize)				
 				
 	await main_loader.load1();	
 	await main_loader.load2();
@@ -6441,8 +6448,6 @@ async function init_game_env(env) {
 		objects.id_loup.y=20*Math.cos(game_tick*8)+150;
 	}	
 	
-	
-	await auth2.init();		
 	
 	//доп функция для текста битмап
 	PIXI.BitmapText.prototype.set2=function(text,w){
