@@ -5803,7 +5803,7 @@ auth2 = {
 					my_data.name = gp.player.name||this.get_random_name(my_data.uid)
 					my_data.orig_pic_url = gp.player.avatar
 					gp.gameplayStart()
-					gp.gameStart()
+					
 					
 					LANG = gp.language==='ru'?0:1;
 					
@@ -6635,6 +6635,9 @@ async function init_game_env(env) {
 	//показыаем основное меню
 	anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)	
 	tables_menu.activate(1);	
+	
+	//для пикабу
+	if(game_platform==='PB') gp.gameStart()
 	
 	//проверка ежедневных бонусов
 	dr.update()
