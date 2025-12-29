@@ -6637,7 +6637,7 @@ async function init_game_env(env) {
 	tables_menu.activate(1);	
 	
 	//для пикабу
-	if(game_platform==='PB') gp.gameStart()
+	if(game_platform==='PIKABU') gp.gameStart()
 	
 	//проверка ежедневных бонусов
 	dr.update()
