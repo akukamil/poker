@@ -3910,6 +3910,8 @@ tables_menu={
 		this.table_stat_updater[3].timer=setTimeout(()=>this.update_table_stat(3),2000)
 		this.table_stat_updater[4].timer=setTimeout(()=>this.update_table_stat(4),3000)
 
+		if (game_platform==='PIKABU')
+			objects.shop_button.visible=false
 
 		objects.table_menu_info.text=''
 
