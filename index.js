@@ -5371,7 +5371,8 @@ pref={
 		}
 		
 		//меняем имя
-		this.change_name(name)
+		if (game_platform==='PIKABU'){
+			this.change_name(name)
 	
 		
 	},
