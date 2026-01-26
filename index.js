@@ -1857,20 +1857,8 @@ sound={
 		
 		assets[snd_res].play({loop:is_loop||false,volume:volume||1});	
 		
-	},
-	
-	switch(){
-		
-		if (this.on){
-			this.on=0				
-			pref.send_info(['Звуки отключены','Sounds is off'][LANG])
-			
-		} else{
-			this.on=1;
-			pref.send_info(['Звуки включены','Sounds is on'][LANG])
-		}
-	
-	}
+	}	
+
 	
 }
 
@@ -5289,7 +5277,7 @@ pref={
 		SERVER_TM=await my_ws.get_tms()||SERVER_TM;
 		
 		if (!SERVER_TM){
-			this.send_info('Ошибка получения серверного времени(((');
+			this.send_info(['Ошибка получения серверного времени(((','Server Time Error'][LANG]);
 			this.update_buttons();
 			return;
 		}
@@ -5456,7 +5444,7 @@ pref={
 	async reset_avatar(){
 		
 		if (!SERVER_TM){
-			this.send_info('Ошибка получения серверного времени(((');
+			this.send_info(['Ошибка получения серверного времени(((','Server Time Error'][LANG]);
 			sound.play('locked');
 			return;
 		}
@@ -5468,7 +5456,7 @@ pref={
 			
 		//провряем можно ли менять фото
 		if(this.hours_to_photo_change>0){
-			this.send_info(`Фото можно поменять через ${this.hours_to_photo_change}  ${this.getHoursEnding(this.hours_to_photo_change)}.`);
+			this.send_info([`Фото можно поменять через ${this.hours_to_photo_change}  ${this.getHoursEnding(this.hours_to_photo_change)}.`,`Wait ${this.hours_to_photo_change} hours`][LANG]);
 			sound.play('locked');
 			return;
 		} 		
@@ -5485,7 +5473,7 @@ pref={
 	async change_avatar(dir){
 		
 		if (!SERVER_TM){
-			this.send_info('Ошибка получения серверного времени(((');
+			this.send_info(['Ошибка получения серверного времени(((','Server Time Error'][LANG]);
 			sound.play('locked');
 			return;
 		}
@@ -5497,7 +5485,7 @@ pref={
 				
 		//провряем можно ли менять фото
 		if(this.hours_to_photo_change>0){
-			this.send_info(`Фото можно поменять через ${this.hours_to_photo_change} ${this.getHoursEnding(this.hours_to_photo_change)}.`);
+			this.send_info([`Фото можно поменять через ${this.hours_to_photo_change} ${this.getHoursEnding(this.hours_to_photo_change)}.`,`Wait ${this.hours_to_photo_change} hours`][LANG]);
 			sound.play('locked');
 			return;
 		} 	
@@ -5548,14 +5536,26 @@ pref={
 		},timeout||3000);	
 	},
 	
-	snd_switch(){
+	snd_switch(on){
 		
 		const pos=[511,541]
 		
-		sound.switch()
+		if (on!==undefined){
+			sound.on=on
+		}else{
+			
+			if (sound.on){
+				sound.on=0
+				pref.send_info(['Звуки отключены','Sounds is off'][LANG])
+			} else{
+				sound.on=1
+				pref.send_info(['Звуки включены','Sounds is on'][LANG])
+			}			
+		}
+			
 		sound.play('click')
 		const tar_x=pos[sound.on]
-		anim3.add(objects.pref_snd_slider,{x:[objects.pref_snd_slider.x,tar_x,'linear']}, true, 0.1)
+		anim3.add(objects.pref_snd_slider,{x:[objects.pref_snd_slider.x,tar_x,'linear']}, true, 0.1)		
 		
 	},
 	
@@ -5599,9 +5599,9 @@ pref={
 		this.show_fold=1-this.show_fold
 		
 		if (this.show_fold)
-			this.send_info('Ваши карты будут открыты при сбросе(((')
+			this.send_info(['Ваши карты будут открыты при сбросе(((','Your cards are open on fold'][LANG])
 		else
-			this.send_info('Ваши карты будут скрыты при сбросе(((')
+			this.send_info(['Ваши карты будут скрыты при сбросе(((','Your cards are hidden on fold'][LANG])
 		
 		const tar_x=pos[this.show_fold]
 		sound.play('click')
