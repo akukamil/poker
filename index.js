@@ -2341,25 +2341,7 @@ game={
 		tables_menu.activate();
 		
 	},
-	
-	sound_switch_down(val){		
-		
-		if (val!==undefined)
-			sound.on=val
-		else
-			sound.on=1-sound.on
-		
-		sound.play('click')
-		
-		if (sound.on){			
-			objects.sound_switch_button.texture=assets.sound_switch_button;			
-		}else{
-			PIXI.sound.stopAll();
-			objects.sound_switch_button.texture=assets.no_sound_icon;			
-		}
-
-	},
-			
+				
 	async send_message_down(){		
 		
 		if(anim3.any_on()||!this.iam_in_game){
@@ -5263,7 +5245,6 @@ pref={
 	
 	activate(){
 		
-		
 		anim3.add(objects.pref_cont,{x:[-800,0,'linear']}, true, 0.5);
 		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)		
 
@@ -5274,30 +5255,28 @@ pref={
 		//objects.pref_games.text='Игры: '+my_data.games;
 
 		//кнопки сохранения пока не видно
-		objects.pref_conf_card_btn.visible=false;
-		objects.pref_conf_photo_btn.visible=false;
-		objects.pref_change_card_icon.visible=false;
+		objects.pref_conf_card_btn.visible=false
+		objects.pref_conf_photo_btn.visible=false
+		objects.pref_change_card_icon.visible=false
 		
-		this.update_available_actions();
+		this.update_available_actions()
 		
 		//текущие айди карточки
-		this.cur_card_id=my_data.card_id;
+		this.cur_card_id=my_data.card_id
 		this.change_card(0)
-		objects.card_pic.uid=my_data.uid;
-		objects.card_pic.update_data();
+		objects.card_pic.uid=my_data.uid
+		objects.card_pic.update_data()
 		
 		//можно ли поменять имя
 		if (game_platform==='YANDEX'||game_platform==='VK'){
-			objects.pref_change_name_icon.texture=game_platform==='YANDEX'?assets.yan_icon:assets.vk_icon;
+			objects.pref_change_name_icon.texture=game_platform==='YANDEX'?assets.yan_icon:assets.vk_icon
 		}else{
-			objects.pref_change_name_icon.alpha=0.5;
+			objects.pref_change_name_icon.alpha=0.5
 		}
-			
 		
 		//положение ползунка
 		this.show_fold=my_data.show_fold;
-		objects.pref_show_fold_slider.x=this.show_fold?215 :184;		
-	
+		this.show_fold_switch(this.show_fold)
 		this.avatar_switch_center=this.avatar_swtich_cur=irnd(9999,999999);
 		
 	},
@@ -5350,20 +5329,19 @@ pref={
 
 	async try_change_name(){
 		
-		if (game_platform!=='YANDEX'&&game_platform!=='VK'){
-			this.send_info(['Только для Яндекса и Вконтакте(((','Only for Yandex and VK((('][LANG]);
+		if (game_platform!=='YANDEX'&&game_platform!=='VK'&&game_platform!=='PIKABU'){
+			this.send_info(['Только для Яндекса и Вконтакте(((','Only for Yandex, VK, PIKABU((('][LANG]);
 			sound.play('locked');
 			return;
 		}
 		
 		
 		//получаем новое имя
-		const name=await keyboard.read(15);
+		const name=await keyboard.read(15)
 		
-		if (!name)		
-			return;		
+		if (!name) return
 		
-		if (name&&name.replace(/\s/g, '').length<3){			
+		if (name&&name.replace(/\s/g, '').length<3){
 			this.send_info(['Неправильное имя(((','Invalid name'][LANG]);	
 			sound.play('locked');
 			return;
@@ -5385,27 +5363,27 @@ pref={
 			
 			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item:'change_name'}).then(data =>{
 				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_name'}});
-				this.change_name(name);				
+				this.change_name(name)
 			}).catch((err) => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
 			});			
 			
 		}
+		
+		//меняем имя
+		this.change_name(name)
 	
 		
 	},
 	
-	change_name(name){
-	
+	change_name(name){	
 	
 		//проверяем покупку
-		my_data.name=name;				
+		my_data.name=name
 	
 		//обновляем данные о времени
-		fbs.ref(`players/${my_data.uid}/PRV/nick_tm`).set(my_data.nick_tm);
-		fbs.ref(`players/${my_data.uid}/PUB/name`).set(my_data.name);	
-		
-			
+		fbs.ref(`players/${my_data.uid}/PRV/nick_tm`).set(my_data.nick_tm)
+		fbs.ref(`players/${my_data.uid}/PUB/name`).set(my_data.name)		
 		
 		tables_menu.update_my_data();
 		
@@ -5434,6 +5412,10 @@ pref={
 				this.send_info(['Ошибка при покупке!','Error!'][LANG]);
 			});	
 		}
+		
+		if (game_platform==='PIKABU'){
+				this.send_info(['Недоступно!','Error!'][LANG]);
+		}
 
 	},
 	
@@ -5452,7 +5434,7 @@ pref={
 			
 	change_card(dir){
 				
-		if (game_platform!=='YANDEX'&&game_platform!=='VK'){
+		if (game_platform!=='YANDEX'&&game_platform!=='VK'&&game_platform!=='PIKABU'){
 			this.send_info(['Только для Яндекса и Вконтакте(((','Only for Yandex and VK((('][LANG]);
 			sound.play('locked');
 			return;
@@ -5565,36 +5547,64 @@ pref={
 		},timeout||3000);	
 	},
 	
-	sound_switch(){
+	snd_switch(){
 		
-		if(anim3.any_on()){
-			sound.play('locked');
-			return;			
-		}
-		sound.switch();
-		sound.play('click');
-		const tar_x=sound.on?538:514; //-24
-		anim3.add(objects.pref_sound_slider,{x:[objects.pref_sound_slider.x,tar_x,'linear']}, true, 0.1);	
+		const pos=[511,541]
+		
+		sound.switch()
+		sound.play('click')
+		const tar_x=pos[sound.on]
+		anim3.add(objects.pref_snd_slider,{x:[objects.pref_snd_slider.x,tar_x,'linear']}, true, 0.1)
 		
 	},
 	
-	show_fold_switch(){
+	some_btns_down(e){
 		
 		if(anim3.any_on()){
-			sound.play('locked');
-			return;			
+			sound.play('locked')
+			return
 		}
 		
-		this.show_fold=1-this.show_fold;		
+		const my=e.data.global.y/app.stage.scale.y
+		const mx=e.data.global.x/app.stage.scale.x
+		
+		//показываеть карты при сбросе
+		if (mx>120&&mx<280&&my>300&&my<360){
+			this.show_fold_switch()
+		}
+		
+		//показываеть карты при сбросе
+		if (mx>313&&mx<440&&my>300&&my<360){
+			this.try_change_name()
+		}
+		
+		//показываеть карты при сбросе
+		if (mx>473&&mx<600&&my>300&&my<360){
+			this.snd_switch()
+		}
+		
+	},
+	
+	show_fold_switch(show_fold){		
+		
+		const pos=[196,225]
+		
+		if (show_fold!==undefined){
+			this.show_fold=show_fold
+			objects.pref_fold_slider.x=pos[show_fold]
+			return
+		}
+		
+		this.show_fold=1-this.show_fold
 		
 		if (this.show_fold)
-			this.send_info('Ваши карты будут открыты при сбросе(((');
+			this.send_info('Ваши карты будут открыты при сбросе(((')
 		else
-			this.send_info('Ваши карты будут скрыты при сбросе(((');
+			this.send_info('Ваши карты будут скрыты при сбросе(((')
 		
-		const tar_x=this.show_fold?215 :184; //-31
-		sound.play('click');
-		anim3.add(objects.pref_show_fold_slider,{x:[objects.pref_show_fold_slider.x,tar_x,'linear']}, true, 0.1);	
+		const tar_x=pos[this.show_fold]
+		sound.play('click')
+		anim3.add(objects.pref_fold_slider,{x:[objects.pref_fold_slider.x,tar_x,'linear']}, true, 0.1)
 		
 	},
 	
@@ -6388,8 +6398,6 @@ async function check_admin_info(){
 
 async function init_game_env(env) {			
 
-
-
 	git_src="https://akukamil.github.io/poker/"
 	//git_src=""
 			
@@ -6540,13 +6548,13 @@ async function init_game_env(env) {
 	
 	//устанавливаем фотки в попап
 	objects.id_avatar.set_texture(players_cache.players[my_data.uid].texture);
-	objects.id_name.set2(my_data.name,150);	
+	objects.id_name.set2(my_data.name,150)
 	
 	//устанавливаем рейтинг в попап
-	objects.id_rating.text=my_data.rating;
+	objects.id_rating.text=my_data.rating
 	
-	anim3.add(objects.id_name,{alpha:[0,1,'linear']}, true, 0.5);
-	anim3.add(objects.id_rating,{alpha:[0,1,'linear']}, true, 0.5);
+	anim3.add(objects.id_name,{alpha:[0,1,'linear']}, true, 0.5)
+	anim3.add(objects.id_rating,{alpha:[0,1,'linear']}, true, 0.5)
 	
 	//новогодняя акция снег
 	snow.init()
