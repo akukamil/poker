@@ -127,7 +127,7 @@ class table_chat_record_class extends PIXI.Container {
 
 		super();
 		this.resolver=0;
-		this.text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48',fontSize:21,lineSpacing:52});
+		this.text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48',fontSize:21,lineSpacing:40});
 		this.text.tint=0x55bbdd;
 		this.text.maxWidth=290;
 
@@ -3573,11 +3573,11 @@ players_cache={
 		
 		//сразу загружаем все
 		let pdata=0
-		if (!pdata.pic_url){
+		if (!pdata.country){
 			pdata= await fbs_once('players/'+uid+'/PUB')
-			Object.assign(player, pdata);			
+			Object.assign(player, pdata);	
+			if (!pdata.country) pdata.country='xx'
 		}
-
 
 		//загружаем имя если нет данных
 		if (!player.name) {
@@ -4441,7 +4441,7 @@ lb={
 		for (let place in top){
 			const target=top[place];
 			const leader=leaders_array[place];
-			players_cache.update_params(leader.uid,leader);
+			//players_cache.update_params(leader.uid,leader);
 			target.t_name.set2(leader.name,place>2?190:130);
 			target.t_rating.text=formatNumber(leader.rating);
 		}	
