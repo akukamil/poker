@@ -9,7 +9,7 @@ const transl_action={CHECK:['ЧЕК','CHECK'],RAISE:['РЕЙЗ','RAISE'],CALL:['
 let table_id='table1';
 let cards_bcg_texture=''
 let cards_front_texture=''
-const ante_data={'table1':20,'table2':30,'table3':40,'table4':50};
+const ante_data={'table1':20,'table2':20,'table3':40,'table4':40};
 const enter_data={'table1':25000,'table2':50000,'table3':10000,'table4':20000};
 const BCG_SHIFT_STEP=30
 const pcards_design={}
@@ -1936,7 +1936,7 @@ game={
 		objects.bcg.width=M_WIDTH
 		objects.bcg.height=M_HEIGHT
 		objects.bcg.x=0
-		objects.bcg.texture=cur_pcards_design.bcg
+		objects.bcg.texture=assets.bcg_table_new
 
 		objects.game_msgs_cont.visible=true;
 		objects.avatars_cont.visible=true;
@@ -3919,10 +3919,9 @@ tables_menu={
 		const tm=Date.now()
 		if (init||(tm>this.next_admin_info_check)) this.check_admin_info()
 
-		if (my_data.days_in_game>30){
-			objects.free_chips_button.visible=false;
-			objects.table_dr_button.visible=false;
-
+		if (my_data.days_in_game>60){
+			objects.free_chips_button.visible=false
+			objects.table_dr_button.visible=false
 		}else{
 			if (!this.free_chips_timer)
 				this.restart_free_chips_count();
@@ -5539,13 +5538,13 @@ pref={
 	},
 
 	snd_switch(on){
-
-		const pos=[511,541]
+		
+		if(on===sound.on) return
+		
 
 		if (on!==undefined){
 			sound.on=on
 		}else{
-
 			if (sound.on){
 				sound.on=0
 				pref.send_info(['Звуки отключены','Sounds is off'][LANG])
@@ -5556,6 +5555,7 @@ pref={
 		}
 
 		sound.play('click')
+		const pos=[511,541]
 		const tar_x=pos[sound.on]
 		anim3.add(objects.pref_snd_slider,{x:[objects.pref_snd_slider.x,tar_x,'linear']}, true, 0.1)
 
@@ -5581,7 +5581,7 @@ pref={
 			this.try_change_name()
 		}
 
-		//показываеть карты при сбросе
+		//звуки
 		if (mx>473&&mx<600&&my>300&&my<360){
 			this.snd_switch()
 		}
@@ -5825,17 +5825,11 @@ auth2 = {
 					gp.player.get('tm');
 					gp.player.sync();
 
-					gp.sounds.on('mute', () => {
-						pref.snd_switch(0)
-					});
 
 					gp.sounds.on('mute:sfx', () => {
 						pref.snd_switch(0)
 					});
 
-					gp.sounds.on('unmute', () => {
-						pref.snd_switch(1)
-					});
 
 					gp.sounds.on('unmute:sfx', () => {
 						pref.snd_switch(1)
@@ -6094,10 +6088,11 @@ main_loader={
 		const lang_pack = ['RUS','ENG'][LANG];
 
 		//добавляем фон отдельно
-		loader.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
-		loader.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
-		loader.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
-		loader.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
+		//loader.add('bcg_table1',git_src+'res/common/bcg_table1.jpg');
+		//loader.add('bcg_table2',git_src+'res/common/bcg_table2.jpg');
+		//loader.add('bcg_table3',git_src+'res/common/bcg_table3.jpg');
+		//loader.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
+		loader.add('bcg_table_new',git_src+'res/common/bcg_new.jpg');
 
 		loader.add("m2_font", git_src+"fonts/Bahnschrift_s/font.fnt");
 		loader.add("m3_font", git_src+"fonts/Bahnschrift/font.fnt");
@@ -6255,14 +6250,13 @@ function vis_change() {
 
 	if (document.hidden === true){
 
-		game.sound_switch_down(0);
+		PIXI.sound.muteAll()
 		hidden_state_start = Date.now();
 		fbs.ref(table_id+'/pending/'+my_data.uid).remove();
 	}
 
 	if (document.hidden === false){
-
-		game.sound_switch_down(1);
+		PIXI.sound.unmuteAll()
 		hidden_state_start = Date.now();
 	}
 
