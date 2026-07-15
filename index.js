@@ -14,6 +14,8 @@ const enter_data={'table1':25000,'table2':50000,'table3':10000,'table4':20000};
 const BCG_SHIFT_STEP=30
 const pcards_design={}
 let cur_pcards_design
+const COM_URL='https://akukamil.github.io/com'
+
 
 fbs_once=async function(path){
 	const info=await fbs.ref(path).get();
@@ -77,38 +79,43 @@ class lb_player_card_class extends PIXI.Container{
 	constructor(x,y,place) {
 		super();
 
-		this.bcg=new PIXI.Sprite(assets.lb_player_card_bcg);
-		this.bcg.interactive=true;
-		this.bcg.pointerover=function(){this.tint=0x55ffff};
-		this.bcg.pointerout=function(){this.tint=0xffffff};
-		this.bcg.width = 370;
-		this.bcg.height = 70;
+		this.bcgFrame=new PIXI.Sprite(assets.lbCardFrame)
+		this.bcgFrame.interactive=true
+		this.bcgFrame.pointerover=function(){this.tint=0x55ffff}
+		this.bcgFrame.pointerout=function(){this.tint=0xffffff}
+		const t=this
+		this.bcgFrame.pointerdown=()=>{
+			anim3.add(t,{x:[t.x, t.x+5,'shake']},true,0.15);
+		}
+		this.bcgFrame.width = 390
+		this.bcgFrame.height = 80
 
-		this.place=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'});
-		this.place.tint=0xffff00;
-		this.place.x=20;
-		this.place.y=22;
+		this.place=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 25,align: 'center'})
+		this.place.tint=0xffffff
+		this.place.x=38
+		this.place.y=40
+		this.place.anchor.set(0.5,0.5)
 
-		this.avatar=new PIXI.Graphics();
-		this.avatar.x=43;
-		this.avatar.y=13;
-		this.avatar.width=this.avatar.height=45;
-		this.avatar.w=this.avatar.h=45;
+		this.avatar=new PIXI.Graphics()
+		this.avatar.x=50
+		this.avatar.y=14
+		this.avatar.w=this.avatar.h=54
+		this.avatar.width=this.avatar.height=54	
+		
 
+		this.name=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 22,align: 'center'})
+		this.name.tint=0xccffff
+		this.name.x=115
+		this.name.y=30
 
-		this.name=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'});
-		this.name.tint=0x55ffaa;
-		this.name.x=105;
-		this.name.y=22;
+		this.rating=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 26,align: 'center'})
+		this.rating.x=315
+		this.rating.tint=0xFFFF00
+		this.rating.y=25
+		
+		this.alpha=0.8
 
-
-		this.rating=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'});
-		this.rating.x=350;
-		this.rating.anchor.set(1,0);
-		this.rating.tint=0xffff55;
-		this.rating.y=22;
-
-		this.addChild(this.bcg,this.place, this.avatar, this.name, this.rating);
+		this.addChild(this.avatar, this.bcgFrame,this.place, this.name, this.rating)
 	}
 
 
@@ -120,11 +127,11 @@ class table_chat_record_class extends PIXI.Container {
 
 		super();
 		this.resolver=0;
-		this.text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize:21,lineSpacing:52});
+		this.text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48',fontSize:21,lineSpacing:52});
 		this.text.tint=0x55bbdd;
 		this.text.maxWidth=290;
 
-		this.name_text=new PIXI.BitmapText('***', {fontName: 'mfont',fontSize: 21});
+		this.name_text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48',fontSize: 21});
 		this.name_text.tint=0xbbff00;
 
 		this.visible=false;
@@ -158,7 +165,6 @@ class chat_record_class extends PIXI.Container {
 		super();
 
 		this.tm=0;
-		this.index=0;
 		this.uid='';
 
 
@@ -183,7 +189,7 @@ class chat_record_class extends PIXI.Container {
 		this.avatar_frame.x=this.avatar.x-10;
 		this.avatar_frame.y=this.avatar.y-10;
 
-		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 17});
+		this.name = new PIXI.BitmapText('Имя Фамил', {fontName: 'bahnschrift48',fontSize: 17});
 		this.name.anchor.set(0,0.5);
 		this.name.x=this.avatar.x+72;
 		this.name.y=this.avatar.y-1;
@@ -209,14 +215,14 @@ class chat_record_class extends PIXI.Container {
 		this.msg_bcg.x=this.avatar.x+45;
 		this.msg_bcg.y=this.avatar.y+2;
 
-		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'mfont',fontSize: 19,lineSpacing:55,align: 'left'});
+		this.msg = new PIXI.BitmapText('Имя Фамил', {fontName: 'bahnschrift48',fontSize: 19,lineSpacing:48,align: 'left'});
 		this.msg.x=this.avatar.x+75;
 		this.msg.y=this.avatar.y+30;
 		this.msg.maxWidth=450;
 		this.msg.anchor.set(0,0.5);
 		this.msg.tint = 0xffffff;
 
-		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'mfont',fontSize: 15});
+		this.msg_tm = new PIXI.BitmapText('28.11.22 12:31', {fontName: 'bahnschrift48',fontSize: 15});
 		this.msg_tm.tint=0x999999;
 		this.msg_tm.anchor.set(1,0);
 
@@ -225,12 +231,43 @@ class chat_record_class extends PIXI.Container {
 
 	}
 
-	async update_avatar(uid, tar_sprite) {
+	nameToColor(name) {
+		  // Create a hash from the name
+		  let hash = hf.hash(name)
+
+		  // Generate a color from the hash
+		  let color = ((hash >> 24) & 0xFF).toString(16) +
+					  ((hash >> 16) & 0xFF).toString(16) +
+					  ((hash >> 8) & 0xFF).toString(16) +
+					  (hash & 0xFF).toString(16);
+
+		  // Ensure the color is 6 characters long
+		  color = ('000000' + color).slice(-6);
+
+		  // Convert the hex color to an RGB value
+		  let r = parseInt(color.slice(0, 2), 16);
+		  let g = parseInt(color.slice(2, 4), 16);
+		  let b = parseInt(color.slice(4, 6), 16);
+
+		  // Ensure the color is bright enough for a black background
+		  // by normalizing the brightness.
+		  if ((r * 0.299 + g * 0.587 + b * 0.114) < 128) {
+			r = Math.min(r + 128, 255);
+			g = Math.min(g + 128, 255);
+			b = Math.min(b + 128, 255);
+		  }
+
+		  return (r << 16) + (g << 8) + b;
+	}
+
+	update_avatar(uid, tar_sprite) {
 
 		//определяем pic_url
-		await players_cache.update(uid);
-		await players_cache.update_avatar(uid);
-		tar_sprite.set_texture(players_cache.players[uid].texture);
+		const pdata=players_cache.get_pdata(uid)
+		if(pdata)
+			tar_sprite.set_texture(pdata.texture)
+		else
+			players_cache.update(uid,{source:'chat'})
 	}
 
 	async set(msg_data) {
@@ -240,54 +277,51 @@ class chat_record_class extends PIXI.Container {
 
 		if (msg_data.uid==='admin'){
 			this.msg_bcg.tint=0x55ff55;
-			await this.update_avatar('BOT', this.avatar);
+			this.avatar.set_texture(assets.pc_icon);
 		}else{
 			this.msg_bcg.tint=0xffffff;
-			await this.update_avatar(msg_data.uid, this.avatar);
+			this.update_avatar(msg_data.uid, this.avatar);
 		}
 
 		this.uid=msg_data.uid;
-		this.tm = msg_data.tm;
-		this.index = msg_data.index;
+		this.tm=msg_data.tm;
 
 		this.name.set2(msg_data.name,150);
-		this.name.tint=nameToColor(msg_data.name);
+		this.name.tint=this.nameToColor(msg_data.name);
 		this.msg_tm.text = new Date(msg_data.tm).toLocaleString();
-		this.msg.text=msg_data.msg;
+		
 		this.visible = true;
 
-		if (msg_data.msg.startsWith('GIF')){
+		if (msg_data.gif_id){
 
-			const mp4BaseT=await new Promise((resolve, reject)=>{
-				const baseTexture = PIXI.BaseTexture.from('https://akukamil.github.io/common/gifs/'+msg_data.msg+'.mp4');
-				if (baseTexture.width>1) resolve(baseTexture);
-				baseTexture.on('loaded', () => resolve(baseTexture));
-				baseTexture.on('error', (error) => resolve(null));
-			});
+			const base_t=await gif_sel.load_gif(`${COM_URL}/gifs/${msg_data.gif_id}.mp4`)
 
-			if (!mp4BaseT) {
+			if (!base_t) {
+				console.log(`Не получилось загрузить гифку ${msg_data.gif_id}`)
 				this.visible=false;
 				return 0;
 			}
 
-			mp4BaseT.resource.source.play();
-			mp4BaseT.resource.source.loop=true;
+			base_t.resource.source.play()
+			base_t.resource.source.loop=true
+			
+			this.msg.text=''
 
-			this.gif.texture=PIXI.Texture.from(mp4BaseT);
-			this.gif.visible=true;
-			const aspect_ratio=mp4BaseT.width/mp4BaseT.height;
-			this.gif.height=90;
-			this.gif.width=this.gif.height*aspect_ratio;
-			this.msg_bcg.visible=false;
-			this.msg.visible=false;
-			this.msg_tm.anchor.set(0,0);
-			this.msg_tm.y=this.gif.height+9;
-			this.msg_tm.x=this.gif.width+102;
+			this.gif.texture=PIXI.Texture.from(base_t)
+			this.gif.visible=true
+			const aspect_ratio=base_t.width/base_t.height
+			this.gif.height=90
+			this.gif.width=this.gif.height*aspect_ratio
+			this.msg_bcg.visible=false
+			this.msg.visible=false
+			this.msg_tm.anchor.set(0,0)
+			this.msg_tm.y=this.gif.height+9
+			this.msg_tm.x=this.gif.width+102
 
-			this.gif_bcg.visible=true;
-			this.gif_bcg.height=this.gif.height;
-			this.gif_bcg.width=	this.gif.width;
-			return this.gif.height+30;
+			this.gif_bcg.visible=true
+			this.gif_bcg.height=this.gif.height
+			this.gif_bcg.width=	this.gif.width
+			return this.gif.height+30
 
 		}else{
 
@@ -296,6 +330,8 @@ class chat_record_class extends PIXI.Container {
 			this.msg_bcg.visible=true;
 			this.msg.visible=true;
 
+			this.msg.text=msg_data.msg;
+			
 			//бэкграунд сообщения в зависимости от длины
 			const msg_bcg_width=Math.max(this.msg.width,100)+100;
 			this.msg_bcg.width=msg_bcg_width*1.5;
@@ -414,7 +450,7 @@ class action_info_class extends PIXI.Container{
 		this.bcg.x=-this.bcg.width*0.5
 		this.bcg.y=-this.bcg.height*0.5
 
-		this.t_info=new PIXI.BitmapText('9', {fontName: 'mfont2', fontSize :23});
+		this.t_info=new PIXI.BitmapText('9', {fontName: 'bahnschrift48', fontSize :23});
 		this.t_info.anchor.set(0.5,0.5);
 		this.t_info.x=2
 		this.t_info.y=-1
@@ -479,7 +515,7 @@ class player_card_class extends PIXI.Container {
 		this.avatar_frame.x=5;
 		this.avatar_frame.y=25;
 
-		this.name=new PIXI.BitmapText('13525', {fontName: 'mfont', fontSize :22});
+		this.name=new PIXI.BitmapText('13525', {fontName: 'bahnschrift48', fontSize :22});
 		this.name.anchor.set(0.5,0.5);
 		this.name.x=70;
 		this.name.y=23;
@@ -492,13 +528,13 @@ class player_card_class extends PIXI.Container {
 		this.chip_icon.height=25;
 		this.chip_icon.anchor.set(0.5,0.5);
 
-		this.t_rating=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :24});
+		this.t_rating=new PIXI.BitmapText('---', {fontName: 'bahnschrift48', fontSize :24});
 		this.t_rating.x=120;
 		this.t_rating.y=95;
 		this.t_rating.tint=0xffffff;
 		this.t_rating.anchor.set(1,0.5);
 
-		this.t_country=new PIXI.BitmapText('---', {fontName: 'mfont', fontSize :20});
+		this.t_country=new PIXI.BitmapText('---', {fontName: 'bahnschrift48', fontSize :20});
 		this.t_country.x=20;
 		this.t_country.y=95;
 		this.t_country.tint=0x88ccff;
@@ -520,7 +556,7 @@ class player_card_class extends PIXI.Container {
 		this.card1.y=60;
 		this.card1.angle=0;
 
-		this.t_comb=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :20,align:'center',lineSpacing:45});
+		this.t_comb=new PIXI.BitmapText('', {fontName: 'bahnschrift48', fontSize :20,align:'center',lineSpacing:40});
 		this.t_comb.x=75;
 		this.t_comb.y=110;
 		this.t_comb.tint=0xFFD966;
@@ -528,7 +564,7 @@ class player_card_class extends PIXI.Container {
 		this.t_comb.maxWidth=160
 		this.t_comb.visible=false;
 
-		this.t_won=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :28,align:'center'});
+		this.t_won=new PIXI.BitmapText('', {fontName: 'bahnschrift48', fontSize :28,align:'center'});
 		this.t_won.x=75;
 		this.t_won.y=this.t_won.sy=155;
 		this.t_won.tint=0xffffff;
@@ -795,51 +831,25 @@ class player_card_class extends PIXI.Container {
 		});
 	}
 
-	async update_data(){
+	async cache_updated(){
 
-		let player_data=players_cache.players?.[this.uid];
-		const name=players_cache.players?.[this.uid]?.name;
-		const pic_url=players_cache.players?.[this.uid]?.pic_url;
-		const card_id=players_cache.players?.[this.uid]?.card_id;
+		const pdata=players_cache[this.uid];
+		this.set_rating(pdata.rating||9999);
 
-		//рейтинг всегда обновляем
-		const rating=await fbs_once('players/'+this.uid+'/PUB/rating');
-
-		this.set_rating(rating);
-
-		//console.log('Текущие данные',this.uid,player_data,name,pic_url,card_id)
-		if(!player_data||!name||!pic_url||!card_id){
-
-			player_data=await fbs_once('players/'+this.uid+'/PUB');
-			//console.log('загружены данные из фб',this.uid)
-			if(!player_data) return;
-
-			//обновляем кэше
-			if (!players_cache.players[this.uid]) players_cache.players[this.uid]={};
-			players_cache.players[this.uid].name=player_data.name;
-			players_cache.players[this.uid].pic_url=player_data.pic_url;
-			players_cache.players[this.uid].card_id=player_data.card_id||1;
-			players_cache.players[this.uid].country=player_data.country||'';
-			players_cache.players[this.uid].show_fold=player_data.show_fold||0;
-
-		}
-
-		const cached_player_data=players_cache.players[this.uid];
 
 		//устанавливаем данные карточки
-		this.t_country.text=cached_player_data.country||'';
-		this.name.set2(cached_player_data.name,110);
-		this.name.tint=nameToColor(cached_player_data.name);
-		this.card_id=cached_player_data.card_id||1;
-
-		game.load_avatar({uid:this.uid,tar_obj:this.avatar})
+		this.t_country.text=pdata.country||'';
+		this.name.set2(pdata.name,110);
+		this.name.tint=nameToColor(pdata.name);
+		this.card_id=pdata.card_id||1;
 
 		//устанавливаем карточку
 		this.bcg.texture=assets['card'+this.card_id];
+		
+		this.avatar.set_texture(pdata.texture)
 
 		//обновляем статус открытия карты после фолда
-		const show_fold=await fbs_once('players/'+this.uid+'/PUB/show_fold');
-		this.show_fold=show_fold??1;
+		this.show_fold=pdata.show_fold??1;
 
 	}
 
@@ -1005,7 +1015,7 @@ class daily_reward_class extends PIXI.Container{
 		this.bcg.buttonMode=true;
 		this.bcg.pointerdown=dr.card_down.bind(this);
 
-		this.t_day=new PIXI.BitmapText('День N', {fontName: 'mfont', fontSize :22});
+		this.t_day=new PIXI.BitmapText('День N', {fontName: 'bahnschrift48', fontSize :22});
 		this.t_day.x=50;
 		this.t_day.y=10;
 		this.t_day.anchor.set(0.5,0);
@@ -1014,7 +1024,7 @@ class daily_reward_class extends PIXI.Container{
 		this.claimed_icon.width=100;
 		this.claimed_icon.height=120;
 
-		this.t_reward=new PIXI.BitmapText('1000', {fontName: 'mfont', fontSize :24});
+		this.t_reward=new PIXI.BitmapText('1000', {fontName: 'bahnschrift48', fontSize :24});
 		this.t_reward.x=50;
 		this.t_reward.y=83;
 		this.t_reward.anchor.set(0.5,0);
@@ -1066,14 +1076,14 @@ class table_icon_class extends PIXI.Container{
 		this.table_icon.buttonMode=true;
 		this.table_icon.pointerdown=function(){tables_menu.table_down(table_id)};
 
-		this.t_table=new PIXI.BitmapText('СТОЛ №1', {fontName: 'mfont', fontSize :26});
+		this.t_table=new PIXI.BitmapText('СТОЛ №1', {fontName: 'bahnschrift48', fontSize :26});
 		this.t_table.x=96;
 		this.t_table.y=0;
 		this.t_table.tint=0xffff00;
 		this.t_table.text=['СТОЛ №','ROOM №'][LANG]+id;
 		this.t_table.anchor.set(0.5,0.5);
 
-		this.t_players=new PIXI.BitmapText('', {fontName: 'mfont', fontSize :22});
+		this.t_players=new PIXI.BitmapText('', {fontName: 'bahnschrift48', fontSize :22});
 		this.t_players.x=96;
 		this.t_players.y=84;
 		this.t_players.anchor.set(0.5,0.5);
@@ -1086,7 +1096,7 @@ class table_icon_class extends PIXI.Container{
 		this.chip_icon.height=30;
 
 
-		this.t_enter_amount=new PIXI.BitmapText('>30k', {fontName: 'mfont', fontSize :22});
+		this.t_enter_amount=new PIXI.BitmapText('>30k', {fontName: 'bahnschrift48', fontSize :22});
 		this.t_enter_amount.x=50;
 		this.t_enter_amount.y=110;
 		this.t_enter_amount.anchor.set(0,0.5);
@@ -1097,7 +1107,7 @@ class table_icon_class extends PIXI.Container{
 		else
 			this.t_enter_amount.text='>'+formatNumber(enter_data[this.table_id]);
 
-		this.t_ante=new PIXI.BitmapText('Анте: 30', {fontName: 'mfont', fontSize :22});
+		this.t_ante=new PIXI.BitmapText('Анте: 30', {fontName: 'bahnschrift48', fontSize :22});
 		this.t_ante.anchor.set(0,0.5);
 		this.t_ante.x=100;
 		this.t_ante.y=110;
@@ -1160,6 +1170,7 @@ table_chat={
 
 chat={
 
+	on:0,
 	last_record_end : 0,
 	drag : false,
 	data:[],
@@ -1173,32 +1184,40 @@ chat={
 	kill_next_click:0,
 	delete_message_mode:0,
 	games_to_chat:200,
+	games_to_gif:1000,
 	payments:0,
 	processing:0,
-	remote_socket:0,
-	ss:[],
 
 	activate() {
 
+		this.on=1;
 		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)
 		anim3.add(objects.chat_cont,{x:[-800, 0,'linear']}, true, 0.5);
-		//objects.bcg.texture=assets.lobby_bcg;
-		objects.chat_enter_button.visible=true;
+		//anim3.add(objects.chat_cont, {alpha: [0, 1, 'linear']}, true, 0.1);
+		
+		objects.chat_enter_btn.visible=true;
 
+		objects.bcg.interactive=true;
+		objects.bcg.pointermove=this.pointer_move.bind(this);
+		objects.bcg.pointerdown=this.pointer_down.bind(this);
+		objects.bcg.pointerup=this.pointer_up.bind(this);
+		objects.bcg.pointerupoutside=this.pointer_up.bind(this);
 
 		if(my_data.blocked)
-			objects.chat_enter_button.texture=assets.chat_blocked_img;
+			objects.chat_enter_btn.texture=assets.chat_blocked_img;
 		else
-			objects.chat_enter_button.texture=assets.chat_enter_button;
+			objects.chat_enter_btn.texture=assets.chat_enter_btn;
 
-		objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Чат доступен игрокам со стажем более 10 дней.\n3. За нарушение правил игрок может попасть в черный список.'
+		objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Отправлять сообщения в чат могут игроки сыгравшие более 200 онлайн партий.\n3. За нарушение правил игрок может попасть в черный список.'
 		if(my_data.blocked) objects.chat_rules.text='Вы не можете писать в чат, так как вы находитесь в черном списке';
 
 		//вопроизводитим гифки
 		objects.chat_records.forEach(r=>{
-			if(r.visible&&r.gif.texture.baseTexture.resource&&r.gif.visible)
+			if(r.visible&&r.gif.visible)
 				r.gif.texture.baseTexture.resource.source.play();
 		})
+
+		this.shift(-2000);
 	},
 
 	new_message(data){
@@ -1211,11 +1230,6 @@ chat={
 
 		this.last_record_end = 0;
 		objects.chat_msg_cont.y = objects.chat_msg_cont.sy;
-		objects.bcg.interactive=true;
-		objects.bcg.pointermove=this.pointer_move.bind(this);
-		objects.bcg.pointerdown=this.pointer_down.bind(this);
-		objects.bcg.pointerup=this.pointer_up.bind(this);
-		objects.bcg.pointerupoutside=this.pointer_up.bind(this);
 
 		for(let rec of objects.chat_records) {
 			rec.visible = false;
@@ -1223,10 +1237,10 @@ chat={
 			rec.tm=0;
 		}
 
-		this.init_yandex_payments();
+		this.init_yandex_payments()
 
 		//загружаем чат
-		const chat_data=await my_ws.get('chat',25);
+		const chat_data=await my_ws.get('chat',25)
 
 		await this.chat_load(chat_data);
 
@@ -1246,6 +1260,26 @@ chat={
 			chat.payments = _payments;
 		}).catch(err => {})
 
+	},
+
+	gif_btn_down(){
+		
+		if (anim3.any_on()) {
+			sound.play('locked');
+			return
+		}
+		
+		if (my_data.games<this.games_to_gif){
+			const left_to_play=this.games_to_gif-my_data.games
+			pmsg.add({t:`Только для игроков сыгравших более ${this.games_to_gif} игр.\nОсталось сыграть: ${left_to_play}`,snd:'locked'})
+			return
+		}
+		
+		if (!SERVER_TM) {
+			pmsg.add({t:'Недотупно',snd:'locked'})
+			return
+		}
+		gif_sel.activate()
 	},
 
 	get_oldest_index () {
@@ -1278,12 +1312,12 @@ chat={
 
 		fbs.ref('blocked/'+uid).set(Date.now());
 		fbs.ref('inbox/'+uid).set({message:'CHAT_BLOCK',tm:Date.now()});
-		const name=await fbs_once(`players/${uid}/PUB/name`);
+		const name=await fbs_once(`players/${uid}/name`);
 		const msg=`Игрок ${name} занесен в черный список.`;
 		my_ws.socket.send(JSON.stringify({cmd:'push',path:'chat',val:{uid:'admin',name:'Админ',msg,tm:'TMS'}}));
 
 		//увеличиваем количество блокировок
-		fbs.ref('players/'+uid+'/PRV/block_num').transaction(val=> {return (val || 0) + 1});
+		fbs.ref('players/'+uid+'/block_num').transaction(val=> {return (val || 0) + 1});
 
 	},
 
@@ -1305,7 +1339,7 @@ chat={
 	async chat_updated(data, first_load) {
 
 		//console.log('chat_updated:',JSON.stringify(data).length);
-		if(data===undefined||!data.msg||!data.name||!data.uid) return;
+		if(data===undefined||!data.name||!data.uid) return
 
 		//ждем пока процессинг пройдет
 		for (let i=0;i<10;i++){
@@ -1325,9 +1359,10 @@ chat={
 
 		this.last_record_end += y_shift;
 
+
 		//смещаем на одно сообщение (если чат не видим то без твина)
 		if (objects.chat_cont.visible)
-			await anim3.add(objects.chat_msg_cont,{y:[objects.chat_msg_cont.y,objects.chat_msg_cont.y-y_shift,'linear']},true, 0.05);
+			await anim3.add(objects.chat_msg_cont, {y: [objects.chat_msg_cont.y, objects.chat_msg_cont.y-y_shift, 'linear']}, true, 0.05);
 		else
 			objects.chat_msg_cont.y-=y_shift
 
@@ -1335,7 +1370,18 @@ chat={
 
 	},
 
+	cache_updated(uid,pdata){
+
+		//if (!this.on) return
+		for(let rec of objects.chat_records)
+			if (rec.visible&&rec.uid===uid)
+				rec.avatar.set_texture(pdata.texture)
+	},
+
 	avatar_down(player_data){
+
+		if (player_data.uid==='admin')
+			return;
 
 		if (this.moderation_mode){
 			console.log(player_data.index,player_data.uid,player_data.name.text,player_data.msg.text);
@@ -1351,7 +1397,7 @@ chat={
 		}
 
 		if (this.kill_next_click){
-			fbs.ref('inbox/'+player_data.uid).set({message:'CLIEND_ID',tm:Date.now(),client_id:999999});
+			fbs.ref('inbox/'+player_data.uid).set({message:'client_id',tm:Date.now(),client_id:999999});
 			console.log('Игрок убит: ',player_data.uid);
 			this.kill_next_click=0;
 		}
@@ -1361,6 +1407,9 @@ chat={
 
 		if (objects.chat_keyboard_cont.visible)
 			keyboard.response_message(player_data.uid,player_data.name.text);
+		else
+			lobby.show_invite_dlg_from_chat(player_data.uid);
+
 
 	},
 
@@ -1381,7 +1430,7 @@ chat={
 
 	},
 
-	back_button_down(){
+	back_btn_down(){
 
 		if (anim3.any_on()===true) {
 			sound.play('locked');
@@ -1451,16 +1500,7 @@ chat={
 
 	},
 
-	make_hash() {
-	  let hash = '';
-	  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	  for (let i = 0; i < 6; i++) {
-		hash += characters.charAt(Math.floor(Math.random() * characters.length));
-	  }
-	  return hash;
-	},
-
-	async write_button_down(){
+	async write_btn_down(){
 
 		if (anim3.any_on()===true) {
 			sound.play('locked');
@@ -1524,15 +1564,14 @@ chat={
 			my_ws.socket.send(JSON.stringify({cmd:'push',path:'chat',val:{uid:my_data.uid,name:my_data.name,msg,tm:'TMS'}}))
 			//fbs.ref(chat_path+'/'+index).set({uid:my_data.uid,name:my_data.name,msg, tm:firebase.database.ServerValue.TIMESTAMP,index});
 		}
-
 	},
 
 	unblock_chat(){
 		objects.chat_rules.text='Правила чата!\n1. Будьте вежливы: Общайтесь с другими игроками с уважением. Избегайте угроз, грубых выражений, оскорблений, конфликтов.\n2. Отправлять сообщения в чат могут игроки сыгравшие более 200 онлайн партий.\n3. За нарушение правил игрок может попасть в черный список.'
-		objects.chat_enter_button.texture=assets.chat_enter_img;
+		objects.chat_enter_btn.texture=assets.chat_enter_btn;
 		fbs.ref('blocked/'+my_data.uid).remove();
 		my_data.blocked=0;
-		message.add('Вы разблокировали чат');
+		pmsg.add({t:'Вы разблокировали чат'});
 		sound.play('mini_dialog');
 	},
 
@@ -1542,6 +1581,7 @@ chat={
 		anim3.add(objects.chat_cont,{x:[0, -800,'linear']}, false, 0.5);
 		if (objects.chat_keyboard_cont.visible)
 			keyboard.close();
+
 	}
 
 }
@@ -2124,7 +2164,7 @@ game={
 
 		if (data.state==='off'){
 			//сначала убираем все карточки
-			objects.pcards.forEach(c=>{c.visible=false;c.uid='xxx'});
+			objects.pcards.forEach(c=>{c.visible=false;c.uid=''});
 
 			objects.t_table_status0.text=['Ждем игроков...','Waiting other players...'][LANG]
 		}
@@ -2140,7 +2180,7 @@ game={
 		if(!players) return;
 
 		//сначала убираем все карточки
-		objects.pcards.forEach(c=>{c.visible=false;c.uid='xxx';c.clear_anim()});
+		objects.pcards.forEach(c=>{c.visible=false;c.uid='';c.clear_anim()});
 
 		this.uid_to_pcards={};
 
@@ -2158,8 +2198,8 @@ game={
 			pcard.my_card_icon.visible=player.uid===my_data.uid;
 			pcard.hand_value=0;
 			pcard.set_cards(player.cards)
+			players_cache.update(player.uid,{source:'table',rating:1})
 			this.uid_to_pcards[player.uid]=pcard;
-			pcard.update_data();
 			i++;
 		}
 
@@ -2178,7 +2218,7 @@ game={
 	async load_avatar (params = {uid : 0, tar_obj : 0}) {
 
 		await players_cache.update_avatar(params.uid);
-		params.tar_obj.set_texture(players_cache.players[params.uid].texture);
+		params.tar_obj.set_texture(players_cache[params.uid].texture);
 
 	},
 
@@ -2405,6 +2445,14 @@ game={
 		//включаем карточку
 		this.uid_to_pcards[uid].set_on_turn(true);
 
+	},
+
+	cache_updated(uid,pdata){
+				
+		const pcard=this.uid_to_pcards[uid]		
+		if(pcard) pcard.cache_updated()
+
+		
 	},
 
 	new_round_event(event){
@@ -2760,7 +2808,7 @@ stickers={
 		anim3.add(objects.stickers_cont,{y:[-450, objects.stickers_cont.sy,'linear']}, true, 0.25);
 
 		this.cur_card=card;
-		const p_data=players_cache.players[card.uid];
+		const p_data=players_cache[card.uid];
 
 		objects.stickers_avatar.set_texture(p_data.texture);
 		objects.t_stickers_name.text=p_data.name;
@@ -3504,67 +3552,139 @@ message={
 
 players_cache={
 
-	players:{},
-
-	async my_texture_from(pic_url){
-
-		//если это мультиаватар
-		if(pic_url.includes('mavatar')) pic_url=multiavatar(pic_url);
-
-		try{
-			const texture = await PIXI.Texture.fromURL(pic_url);
-			return texture;
-		}catch(er){
-			return PIXI.Texture.WHITE;
-		}
-
-	},
+	on:0,
+	loading:{},
 
 	async update(uid,params={}){
 
-		//если игрока нет в кэше то создаем его
-		if (!this.players[uid]) this.players[uid]={}
-
 		//ссылка на игрока
-		const player=this.players[uid];
+		this[uid]||={}
+		const player=this[uid]
 
-		//заполняем параметры которые дали
-		for (let param in params) player[param]=params[param];
+		if (this.loading[uid]) return
 
-		if (!player.name) player.name=await fbs_once('players/'+uid+'/PUB/name');
-		if (!player.rating) player.rating=await fbs_once('players/'+uid+'/PUB/rating');
-
-		//извлекаем страну если она есть в отдельную категорию и из имени убираем
-		const country =auth2.get_country_from_name(player.name);
-		if (country){
-			player.country=country;
-			player.name=player.name.slice(0, -4);
+		while(Object.keys(this.loading).length>6){
+			console.log('Много загрузок, ждем...')
+			await new Promise(r => setTimeout(r, hf.randIntInc(400,800)));
 		}
 
+		this.loading[uid]=1
+		
+		
+		//сразу загружаем все
+		let pdata=0
+		if (!pdata.pic_url){
+			pdata= await fbs_once('players/'+uid+'/PUB')
+			Object.assign(player, pdata);			
+		}
+
+
+		//загружаем имя если нет данных
+		if (!player.name) {
+			console.log(`загружаем name для ${uid}, заявитель ${params.source}`)
+			player.name=await fbs_once('players/'+uid+'/PUB/name')
+		}
+
+		//загружаем картинку если нет данных
+		if (!player.pic_url) {
+			console.log(`загружаем pic_url для ${uid} ${player.name}, заявитель ${params.source}`)
+			player.pic_url=await fbs_once('players/'+uid+'/PUB/pic_url')
+		}
+		
+		//загружаем стиль карточки
+		if (!player.card_id) {
+			console.log(`загружаем card_id для ${uid} ${player.name}, заявитель ${params.source}`)
+			player.card_id=await fbs_once('players/'+uid+'/PUB/card_id')
+		}
+
+		//загружаем рейтинг если нет данных
+		if (!player.rating||params.rating) {
+			console.log(`загружаем rating для ${uid} ${player.name}, заявитель ${params.source}`)
+			player.rating=await fbs_once('players/'+uid+'/PUB/rating')
+		}
+
+		//загружаем аватар если нет данных
+		if (!player.texture) {
+			console.log(`загружаем texture для ${uid} ${player.name}, заявитель ${params.source}`)
+			player.texture=await this.my_texture_from(player.pic_url)
+		}
+
+		//переносим в req_dialog
+		//req_dialog.cache_updated(uid,player)
+
+		//переносим в чат
+		chat.cache_updated(uid,player)
+
+		//переносим в игру
+		game.cache_updated(uid,player)
+		
+		//в турнир
+		//trnm.cache_updated(uid,player)
+
+		//в игру
+		//game.cache_updated(uid,player)
+
+		delete this.loading[uid]
+
 	},
 
-	async update_avatar(uid){
+	get_pdata(uid){
 
-		const player=this.players[uid];
-		if(!player) alert('Не загружены базовые параметры '+uid);
-
-		//если текстура уже есть
-		if (player.texture) return;
-
-		//если нет URL
-		if (!player.pic_url) player.pic_url=await fbs_once('players/'+uid+'/PUB/pic_url');
-
-		if(player.pic_url==='https://vk.com/images/camera_100.png')
-			player.pic_url='https://akukamil.github.io/domino/vk_icon.png';
-
-		//загружаем и записываем текстуру
-		if (player.pic_url) player.texture=await this.my_texture_from(player.pic_url);
-
+		if (!this[uid]) return 0
+		if (!this[uid].texture) return 0
+		return this[uid]
 	},
 
+	update_params(uid,params){
+
+		//ссылка на игрока
+		this[uid]||={}
+		const player=this[uid]
+
+		//загружаем картинку если нет данных
+		if (params.pic_url) player.pic_url=params.pic_url
+
+		//загружаем имя если нет данных
+		if (params.name) player.name=params.name
+
+		//загружаем рейтинг если нет данных
+		if (params.rating) player.rating=params.rating
+		
+		//загружаем рейтинг если нет данных
+		if (params.icon) player.icon=params.icon
+	},
+
+	my_texture_from(pic_url){
+
+		const white_tex = PIXI.Texture.WHITE;
+
+		if (!pic_url) return white_tex
+		
+		// Handle multiavatar
+		if (pic_url.includes('mavatar')) pic_url = multiavatar(pic_url)
+		
+		return new Promise(res => {
+			const timeout = setTimeout(() => {
+			console.log('Timeout to load: ', pic_url);
+			res(white_tex);
+		}, 3000);
+
+		PIXI.Texture.fromURL(pic_url).then(t => {
+				clearTimeout(timeout);
+				res(t||white_tex);
+			})
+			.catch((error) => {
+				clearTimeout(timeout);
+				console.error('Failed to load texture:', error);
+				res(white_tex);
+			});
+		});
+
+	},
+	
 	async update_avatar_forced(uid, pic_url){
 
-		const player=this.players[uid];
+		const player=this[uid];
 		if(!player) alert('Не загружены базовые параметры '+uid);
 
 		if(pic_url==='https://vk.com/images/camera_100.png')
@@ -4109,7 +4229,7 @@ tables_menu={
 
 		sound.play('click');
 		this.close();
-		lb.activate();
+		lb.show();
 
 	},
 
@@ -4179,14 +4299,14 @@ tables_menu={
 		objects.player_name.set2(my_data.name,130);
 		objects.player_chips.text=my_data.rating;
 		objects.player_stickers.text=my_data.stickers_num;
-		objects.player_avatar.set_texture(players_cache.players[my_data.uid].texture);
+		objects.player_avatar.set_texture(players_cache[my_data.uid].texture);
 		objects.card_pic.name.set2(my_data.name,110);
 		objects.card_pic.name.tint=nameToColor(my_data.name);
 
 		objects.card_pic.set_rating(my_data.rating);
 
-		players_cache.players[my_data.uid].name=my_data.name
-		players_cache.players[my_data.uid].card_id=my_data.card_id
+		players_cache[my_data.uid].name=my_data.name
+		players_cache[my_data.uid].card_id=my_data.card_id
 
 	},
 
@@ -4224,19 +4344,36 @@ lb={
 	cards_pos: [[370,10],[380,70],[390,130],[380,190],[360,250],[330,310],[290,370]],
 	last_update:0,
 
-	activate() {
+	getRandomBrightTint(minBrightness = 200) {
+		const range = 255 - minBrightness;
+		const r = Math.floor(Math.random() * range) + minBrightness;
+		const g = Math.floor(Math.random() * range) + minBrightness;
+		const b = Math.floor(Math.random() * range) + minBrightness;
+		
+		return (r << 16) | (g << 8) | b;
+	},
+
+	show() {
 
 		//objects.bcg.texture=assets.lb_bcg;
-		//anim3.add(objects.bcg,{alpha:[0,1,'linear']}, true, 0.5);
-		anim3.add(objects.lb_cont,{x:[-800, 0,'linear']}, true, 0.5)
-		anim3.add(objects.lb_back_btn,{alpha:[0, 1,'linear']}, true, 0.5)
+		anim3.add(objects.lbCont,{x:[-800, 0,'linear']}, true, 0.5)
 		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP*2, -BCG_SHIFT_STEP,'linear']}, true, 0.5)
+
+		//anim3.add(objects.lb_1_cont,{x:[-150, objects.lb_1_cont.sx,'easeOutBack']}, true, 0.5);
+		//anim3.add(objects.lb_2_cont,{x:[-150, objects.lb_2_cont.sx,'easeOutBack']}, true, 0.5);
+		//anim3.add(objects.lb_3_cont,{x:[-150, objects.lb_3_cont.sx,'easeOutBack']}, true, 0.5);
+		//anim3.add(objects.lb_cards_cont,{x:[450, 0,'easeOutCubic']}, true, 0.5);
+
+		//objects.lb_cards_cont.visible=true;
+		//objects.lb_back_btn.visible=true;
 
 		for (let i=0;i<7;i++) {
 			objects.lb_cards[i].x=this.cards_pos[i][0];
-			objects.lb_cards[i].y=this.cards_pos[i][1];
-			objects.lb_cards[i].place.text=(i+4)+".";
-
+			objects.lb_cards[i].y=i*62-3;
+			objects.lb_cards[i].place.text=(i+4);
+			const randTint=this.getRandomBrightTint(180)
+			objects.lb_cards[i].bcgFrame.tint=randTint
+			objects.lb_cards[i].name.tint=0xffffcc
 		}
 
 		if (Date.now()-this.last_update>120000){
@@ -4250,7 +4387,7 @@ lb={
 	close() {
 
 		anim3.add(objects.bcg,{x:[-BCG_SHIFT_STEP, -BCG_SHIFT_STEP*2,'linear']}, true, 0.5)
-		anim3.add(objects.lb_cont,{x:[0, -800,'linear']}, false, 0.5);
+		anim3.add(objects.lbCont,{x:[0, -800,'linear']}, false, 0.5);
 
 	},
 
@@ -4280,46 +4417,41 @@ lb={
 		}
 
 		for (let i=0;i<7;i++){
-			top[i+3]={};
-			top[i+3].t_name=objects.lb_cards[i].name;
-			top[i+3].t_rating=objects.lb_cards[i].rating;
-			top[i+3].avatar=objects.lb_cards[i].avatar;
+			top[i+3]={}
+			top[i+3].t_name=objects.lb_cards[i].name
+			top[i+3].t_rating=objects.lb_cards[i].rating
+			top[i+3].avatar=objects.lb_cards[i].avatar
 		}
 
 		//создаем сортированный массив лидеров
 		const leaders_array=[];
-		Object.keys(leaders).forEach(uid => {
+		for (const uid in leaders){
 
-			const leader_data=leaders[uid];
-			const leader_params={uid,name:leader_data.PUB.name, rating:leader_data.PUB.rating, pic_url:leader_data.PUB.pic_url};
-			if (leader_params.name&&leader_params.rating&&leader_params.pic_url){
-				leaders_array.push(leader_params);
-
-				//добавляем в кэш
-				players_cache.update(uid,leader_params);
-
-			}
-
-		});
+			const leader_data=leaders[uid].PUB;
+			const leader_params={uid,name:leader_data.name, rating:leader_data.rating, pic_url:leader_data.pic_url};
+			leaders_array.push(leader_params);
+		};
+		
 
 		//сортируем....
 		leaders_array.sort(function(a,b) {return b.rating - a.rating});
 
+		
 		//заполняем имя и рейтинг
 		for (let place in top){
 			const target=top[place];
 			const leader=leaders_array[place];
-			target.t_name.set2(leader.name,place>2?180:130);
+			players_cache.update_params(leader.uid,leader);
+			target.t_name.set2(leader.name,place>2?190:130);
 			target.t_rating.text=formatNumber(leader.rating);
-
-		}
-
-		//заполняем аватар
-		for (let place in top){
-			const target=top[place];
-			const leader=leaders_array[place];
-			await players_cache.update_avatar(leader.uid);
-			target.avatar.set_texture(players_cache.players[leader.uid].texture);
+		}	
+		
+		//заполняем аватар		
+		for (let i=0;i<10;i++){
+			const leader=leaders_array[i];
+			await players_cache.update(leader.uid,{source:'lb'});
+			const target=top[i];
+			target.avatar.set_texture(players_cache[leader.uid].texture)
 		}
 
 	}
@@ -5254,7 +5386,7 @@ pref={
 		this.cur_card_id=my_data.card_id
 		this.change_card(0)
 		objects.card_pic.uid=my_data.uid
-		objects.card_pic.update_data()
+		objects.card_pic.cache_updated()
 
 		//можно ли поменять имя
 		if (game_platform==='YANDEX'||game_platform==='VK'){
@@ -5414,7 +5546,7 @@ pref={
 		//меняем карту после покупки
 		my_data.card_id = this.cur_card_id;
 		fbs.ref('players/'+my_data.uid+'/PUB/card_id').set(my_data.card_id);
-		players_cache.players[my_data.uid].card_id=my_data.card_id;
+		players_cache[my_data.uid].card_id=my_data.card_id;
 		objects.pref_conf_card_btn.visible=false;
 		objects.pref_change_card_icon.visible=false;
 		this.send_info(['Вы изменили дизайн карточки)))','You have changed card design!'][LANG]);
@@ -5494,7 +5626,7 @@ pref={
 		//перелистываем аватары
 		this.avatar_swtich_cur+=dir;
 		if (this.avatar_swtich_cur===this.avatar_switch_center){
-			this.cur_pic_url=players_cache.players[my_data.uid].pic_url
+			this.cur_pic_url=players_cache[my_data.uid].pic_url
 		}else{
 			this.cur_pic_url='mavatar'+this.avatar_swtich_cur;
 		}
@@ -5509,7 +5641,7 @@ pref={
 
 	conf_photo_down(){
 
-		players_cache.players[my_data.uid].pic_url=this.cur_pic_url;
+		players_cache[my_data.uid].pic_url=this.cur_pic_url;
 		fbs.ref(`players/${my_data.uid}/PUB/pic_url`).set(this.cur_pic_url);
 
 		my_data.avatar_tm=SERVER_TM;
@@ -6055,7 +6187,6 @@ main_loader={
 		objects.loader_bcg.width=360
 		objects.loader_bcg.height=50
 
-
 		objects.loader_progress_mask=new PIXI.Graphics()
 		objects.loader_progress_mask.beginFill(0xff0000)
 		objects.loader_progress_mask.drawRect(0,0,340,30)
@@ -6071,11 +6202,8 @@ main_loader={
 		objects.loader_front.height=30
 		objects.loader_front.mask=objects.loader_progress_mask
 
-
-
 		objects.loader_cont.addChild(objects.title,objects.loader_bcg,objects.loader_front,objects.loader_progress_mask);
 		app.stage.addChild(objects.bcg,objects.loader_cont);
-
 
 	},
 
@@ -6094,8 +6222,8 @@ main_loader={
 		//loader.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
 		loader.add('bcg_table_new',git_src+'res/common/bcg_new.jpg');
 
-		loader.add("m2_font", git_src+"fonts/Bahnschrift_s/font.fnt");
-		loader.add("m3_font", git_src+"fonts/Bahnschrift/font.fnt");
+		loader.add("m2_font", COM_URL+"/fonts/bahnschrift48/f.fnt");
+		loader.add("m3_font", COM_URL+"/fonts/bahnschrift48s/f.fnt");
 
 		loader.add('check',git_src+'sounds/check.mp3')
 		loader.add('raise',git_src+'sounds/raise.mp3')
@@ -6490,13 +6618,13 @@ async function init_game_env(env) {
 	}
 
 	//также сразу включаем его в кэш
-	if(!players_cache.players.BOT){
-		players_cache.players.BOT={};
-		players_cache.players.BOT.name='Victoria';
-		players_cache.players.BOT.rating=100;
-		players_cache.players.BOT.country='XX';
-		players_cache.players.BOT.card_id=irnd(1,10);
-		players_cache.players.BOT.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
+	if(!players_cache.BOT){
+		players_cache.BOT={};
+		players_cache.BOT.name='Victoria';
+		players_cache.BOT.rating=100;
+		players_cache.BOT.country='XX';
+		players_cache.BOT.card_id=irnd(1,10);
+		players_cache.BOT.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
 	}
 
 	//событие ролика мыши в карточном меню и нажатие кнопки
@@ -6526,7 +6654,6 @@ async function init_game_env(env) {
 	//если маленький рейтинг
 	if (my_data.rating<100) my_data.rating=100;
 
-
 	//если новый игрок
 	if (!other_data){
 		my_data.rating=5000;
@@ -6540,11 +6667,11 @@ async function init_game_env(env) {
 		my_data.pic_url=my_data.orig_pic_url
 
 	//загружаем мои данные в кэш
-	await players_cache.update(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
-	await players_cache.update_avatar(my_data.uid);
+	players_cache.update_params(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
+	await players_cache.update(my_data.uid);
 
 	//устанавливаем фотки в попап
-	objects.id_avatar.set_texture(players_cache.players[my_data.uid].texture);
+	objects.id_avatar.set_texture(players_cache[my_data.uid].texture);
 	objects.id_name.set2(my_data.name,150)
 
 	//устанавливаем рейтинг в попап
@@ -6560,10 +6687,7 @@ async function init_game_env(env) {
 	await my_ws.init()
 
 	//ждем загрузки чата
-	await Promise.race([
-		chat.init(),
-		new Promise(resolve=> setTimeout(() => {console.log('chat is not loaded!');resolve()}, 5000))
-	]);
+	await chat.init()
 
 	//сообщение для дубликатов
 	client_id = irnd(10,999999);
