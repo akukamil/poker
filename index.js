@@ -556,7 +556,7 @@ class player_card_class extends PIXI.Container {
 		this.card1.y=60;
 		this.card1.angle=0;
 
-		this.t_comb=new PIXI.BitmapText('', {fontName: 'bahnschrift48', fontSize :20,align:'center',lineSpacing:40});
+		this.t_comb=new PIXI.BitmapText('', {fontName: 'bahnschrift48', fontSize :20,align:'center',lineSpacing:38});
 		this.t_comb.x=75;
 		this.t_comb.y=110;
 		this.t_comb.tint=0xFFD966;
