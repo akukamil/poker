@@ -3572,12 +3572,10 @@ players_cache={
 		
 		
 		//сразу загружаем все
-		let pdata={}
-		
-		if (!pdata.country){
+		if (!player.country){
 			pdata= await fbs_once('players/'+uid+'/PUB')
 			Object.assign(player, pdata);	
-			if (!pdata.country) pdata.country='xx'
+			if (!player.country) player.country='xx'
 		}
 
 		//загружаем имя если нет данных
