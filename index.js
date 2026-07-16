@@ -141,11 +141,11 @@ class table_chat_record_class extends PIXI.Container {
 
 		super();
 		this.resolver=0;
-		this.text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48',fontSize:21,lineSpacing:40});
+		this.text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48s',fontSize:21,lineSpacing:40});
 		this.text.tint=0x55bbdd;
 		this.text.maxWidth=290;
 
-		this.name_text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48',fontSize: 21});
+		this.name_text=new PIXI.BitmapText('***', {fontName: 'bahnschrift48s',fontSize: 21});
 		this.name_text.tint=0xbbff00;
 
 		this.visible=false;
