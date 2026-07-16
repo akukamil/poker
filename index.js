@@ -3572,7 +3572,8 @@ players_cache={
 		
 		
 		//сразу загружаем все
-		let pdata=0
+		let pdata={}
+		
 		if (!pdata.country){
 			pdata= await fbs_once('players/'+uid+'/PUB')
 			Object.assign(player, pdata);	
@@ -3640,18 +3641,12 @@ players_cache={
 		//ссылка на игрока
 		this[uid]||={}
 		const player=this[uid]
-
-		//загружаем картинку если нет данных
-		if (params.pic_url) player.pic_url=params.pic_url
-
-		//загружаем имя если нет данных
-		if (params.name) player.name=params.name
-
-		//загружаем рейтинг если нет данных
-		if (params.rating) player.rating=params.rating
 		
-		//загружаем рейтинг если нет данных
-		if (params.icon) player.icon=params.icon
+		
+		Object.assign(player,params)
+
+		
+		
 	},
 
 	my_texture_from(pic_url){
