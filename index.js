@@ -6637,7 +6637,7 @@ async function init_game_env(env) {
 	my_data.rating = other_data?.PUB?.rating || 100;
 	my_data.name=other_data?.PUB?.name || my_data.name||'---';
 	my_data.blocked=await fbs_once('blocked/'+my_data.uid);
-	my_data.country = other_data?.PUB?.country || await auth2.get_country_code() || await auth2.get_country_code2()
+	my_data.country = other_data?.PUB?.country || await auth2.get_country_code() || await auth2.get_country_code2()||'xx'
 	my_data.nick_tm = other_data?.PRV?.nick_tm || 0;
 	my_data.avatar_tm = other_data?.PRV?.avatar_tm || 0;
 	my_data.block_num = other_data?.PRV?.block_num || 0;
