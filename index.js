@@ -18,8 +18,22 @@ const COM_URL='https://akukamil.github.io/com'
 
 
 fbs_once=async function(path){
-	const info=await fbs.ref(path).get();
-	return info.val();
+		
+    let timeoutId;
+    
+    const infoPromise = fbs.ref(path).get();
+    const timeoutPromise = new Promise(r => {
+        timeoutId = setTimeout(() => {
+            console.warn('Firebase request timeout');
+            r(null); // Return null on timeout
+        }, 5000);
+    });
+    
+    const snapshot = await Promise.race([infoPromise, timeoutPromise]);
+    clearTimeout(timeoutId); // Clear timeout since race is done
+    
+    return snapshot ? snapshot.val() : null;
+
 }
 
 irnd = function(min,max) {
@@ -3563,17 +3577,17 @@ players_cache={
 
 		if (this.loading[uid]) return
 		this.loading[uid]=1
-		
-		
+	
 		while(Object.keys(this.loading).length>6){
 			console.log('Много загрузок, ждем...')
 			await new Promise(r => setTimeout(r, hf.randIntInc(400,800)));
-		}	
+		}
+	
 		
 		//сразу загружаем все
 		if (!player.country){
 			console.log(`загружаем все данные для ${uid} ${player.name}, заявитель ${params.source}`)
-			pdata= await fbs_once('players/'+uid+'/PUB')
+			const pdata= await fbs_once('players/'+uid+'/PUB')
 			Object.assign(player, pdata);	
 			if (!player.country) player.country='xx'
 		}
