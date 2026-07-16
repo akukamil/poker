@@ -3562,14 +3562,13 @@ players_cache={
 		const player=this[uid]
 
 		if (this.loading[uid]) return
-
+		this.loading[uid]=1
+		
+		
 		while(Object.keys(this.loading).length>6){
 			console.log('Много загрузок, ждем...')
 			await new Promise(r => setTimeout(r, hf.randIntInc(400,800)));
-		}
-
-		this.loading[uid]=1
-		
+		}	
 		
 		//сразу загружаем все
 		if (!player.country){
