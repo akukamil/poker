@@ -6573,6 +6573,9 @@ async function init_game_env(env) {
 
 	//запускаем главный цикл
 	main_loop.run();
+	
+	if (game_platform==='YANDEX')
+		window.ysdk.features.LoadingAPI?.ready()
 
 	//анимация лупы
 	anim3.add(objects.id_cont,{x:[1200,objects.id_cont.sx,'linear']}, true, 0.5);
