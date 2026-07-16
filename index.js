@@ -3573,6 +3573,7 @@ players_cache={
 		
 		//сразу загружаем все
 		if (!player.country){
+			console.log(`загружаем все данные для ${uid} ${player.name}, заявитель ${params.source}`)
 			pdata= await fbs_once('players/'+uid+'/PUB')
 			Object.assign(player, pdata);	
 			if (!player.country) player.country='xx'
