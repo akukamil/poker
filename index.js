@@ -3656,12 +3656,9 @@ players_cache={
 
 		//ссылка на игрока
 		this[uid]||={}
-		const player=this[uid]
+		const player=this[uid]	
 		
-		
-		Object.assign(player,params)
-
-		
+		Object.assign(player,params)	
 		
 	},
 
@@ -6681,7 +6678,7 @@ async function init_game_env(env) {
 		my_data.pic_url=my_data.orig_pic_url
 
 	//загружаем мои данные в кэш
-	players_cache.update_params(my_data.uid,{card_id:my_data.card_id,pic_url:my_data.pic_url,country:my_data.country,name:my_data.name,rating:my_data.rating});
+	players_cache.update_params(my_data.uid,my_data);
 	await players_cache.update(my_data.uid);
 
 	//устанавливаем фотки в попап
