@@ -1326,12 +1326,12 @@ chat={
 
 		fbs.ref('blocked/'+uid).set(Date.now());
 		fbs.ref('inbox/'+uid).set({message:'CHAT_BLOCK',tm:Date.now()});
-		const name=await fbs_once(`players/${uid}/name`);
+		const name=await fbs_once(`players/${uid}/PUB/name`);
 		const msg=`Игрок ${name} занесен в черный список.`;
 		my_ws.socket.send(JSON.stringify({cmd:'push',path:'chat',val:{uid:'admin',name:'Админ',msg,tm:'TMS'}}));
 
 		//увеличиваем количество блокировок
-		fbs.ref('players/'+uid+'/block_num').transaction(val=> {return (val || 0) + 1});
+		//fbs.ref('players/'+uid+'/block_num').transaction(val=> {return (val || 0) + 1});
 
 	},
 
@@ -2623,7 +2623,7 @@ game={
 			let any_found=0;
 			for (let p=start_player;p<players_num;p++){
 
-				player=players[p];
+				const player=players[p];
 
 				if(player.hand_value===hand_value){
 					any_found=1
@@ -3524,7 +3524,7 @@ bet_dialog = {
 
 		objects.bet_amount.text = this.bet_amount;
 
-		frac_pos_x=(this.bet_amount - this.min_max_vals[0])/(this.min_max_vals[1] - this.min_max_vals[0]);
+		const frac_pos_x=(this.bet_amount - this.min_max_vals[0])/(this.min_max_vals[1] - this.min_max_vals[0]);
 		objects.slider_button.x=this.slider_min_max_x[0]+frac_pos_x*(this.slider_min_max_x[1] - this.slider_min_max_x[0]);
 
 
@@ -5160,7 +5160,7 @@ shop={
 
 		objects.shop_sel_hl.x=item.x-30;
 		objects.shop_sel_hl.y=item.y-30;
-		anim3.add(objects.shop_sel_hl,{alpha:[1, 05,'linear']}, true, 0.);
+		anim3.add(objects.shop_sel_hl,{alpha:[1, 0.5,'linear']}, true, 0.);
 
 		if (game_platform==='YANDEX') {
 
