@@ -17,7 +17,7 @@ let cur_pcards_design
 const COM_URL='https://akukamil.github.io/com'
 
 
-fbs_once=async function(path){
+fbs_once=async function(path,timeout=5000){
 		
     let timeoutId;
     
@@ -26,7 +26,7 @@ fbs_once=async function(path){
         timeoutId = setTimeout(() => {
             console.warn('Firebase request timeout');
             r(null); // Return null on timeout
-        }, 5000);
+        }, timeout);
     });
     
     const snapshot = await Promise.race([infoPromise, timeoutPromise]);
@@ -6644,7 +6644,7 @@ async function init_game_env(env) {
 	document.addEventListener("visibilitychange", vis_change);
 
 	//загружаем остальные данные из файербейса
-	const other_data = await fbs_once("players/" + my_data.uid);
+	const other_data = await fbs_once("players/" + my_data.uid,999999);
 
 	//определяем базовые параметры
 	my_data.rating = other_data?.PUB?.rating || 100;
