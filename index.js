@@ -5185,7 +5185,7 @@ shop={
 				}
 
 				//отправляем на сервер
-				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:item.id}});
+				my_ws.safe_send({cmd:'logToFile',file:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:item.id}});
 
 				sound.play('confirm_dialog');
 
@@ -5481,7 +5481,7 @@ pref={
 			yndx_payments.purchase({id:'change_name'}).then(purchase => {
 				//отправляем на сервер
 				yndx_payments.consumePurchase(purchase.purchaseToken);
-				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_name'}});
+				my_ws.safe_send({cmd:'logToFile',file:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_name'}});
 				this.change_name(name);
 			}).catch(err => {
 				this.send_info(['Ошибка при покупке!','Error!'][LANG]);
@@ -5491,7 +5491,7 @@ pref={
 		if (game_platform==='VK'){
 
 			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item:'change_name'}).then(data =>{
-				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_name'}});
+				my_ws.safe_send({cmd:'logToFile',file:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_name'}});
 				this.change_name(name)
 			}).catch((err) => {
 				objects.shop_info.text=['Ошибка при покупке!','Error!'][LANG];
@@ -5528,7 +5528,7 @@ pref={
 			yndx_payments.purchase({id:'change_card'}).then(purchase => {
 				this.conf_change_card();
 				yndx_payments.consumePurchase(purchase.purchaseToken);
-				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_card'}});
+				my_ws.safe_send({cmd:'logToFile',file:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_card'}});
 			}).catch(err => {
 				this.send_info(['Ошибка при покупке!','Error!'][LANG]);
 			})
@@ -5536,7 +5536,7 @@ pref={
 
 		if (game_platform==='VK'){
 			vkBridge.send('VKWebAppShowOrderBox', { type: 'item', item:'change_card'}).then(data =>{
-				my_ws.safe_send({cmd:'log_inst',logger:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_card'}});
+				my_ws.safe_send({cmd:'logToFile',file:'payments',data:{game_name,uid:my_data.uid,name:my_data.name,item_id:'change_card'}});
 				this.conf_change_card();
 			}).catch((err) => {
 				this.send_info(['Ошибка при покупке!','Error!'][LANG]);
