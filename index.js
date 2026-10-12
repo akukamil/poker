@@ -291,7 +291,7 @@ class chat_record_class extends PIXI.Container {
 
 		if (msg_data.uid==='admin'){
 			this.msg_bcg.tint=0x55ff55;
-			this.avatar.set_texture(assets.pc_icon);
+			this.avatar.set_texture(assets.adminImg);
 		}else{
 			this.msg_bcg.tint=0xffffff;
 			this.update_avatar(msg_data.uid, this.avatar);
@@ -6270,6 +6270,7 @@ main_loader={
 		loader.add('pcards_symbols_pack',git_src+'res/common/pcards_symbols_pack.png');
 		loader.add('mini_pcards_symbols_pack',git_src+'res/common/mini_pcards_symbols_pack.png');
 		loader.add('pcards_pack2',git_src+'res/common/pcards_pack2.png');
+		loader.add('adminImg',git_src+'res/girl_pic.jpg');
 
 		//добавляем из листа загрузки
 		const load_list=eval(assets.main_load_list);
@@ -6635,6 +6636,7 @@ async function init_game_env(env) {
 		players_cache.BOT.rating=100;
 		players_cache.BOT.country='XX';
 		players_cache.BOT.card_id=irnd(1,10);
+		players_cache.BOT.texture=assets.adminImg
 		players_cache.BOT.pic_url='https://akukamil.github.io/poker/res/girl_pic.jpg';
 	}
 
