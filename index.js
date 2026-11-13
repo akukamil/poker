@@ -6230,7 +6230,7 @@ main_loader={
 		//loader.add('bcg_table4',git_src+'res/common/bcg_table4.jpg');
 		loader.add('bcg_table_new',git_src+'res/common/bcg_new.jpg');
 
-		loader.add("m2_font", COM_URL+"/fonts/bahnschrift48s/f.fnt");
+		loader.add("m2_font", COM_URL+"/fonts/bahnschrift48/f.fnt");
 		loader.add("m3_font", COM_URL+"/fonts/bahnschrift48s/f.fnt");
 
 		loader.add('check',git_src+'sounds/check.mp3')
